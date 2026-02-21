@@ -7,7 +7,7 @@ import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.warehouse.security.utils.JwtAuthFilter;
 import com.boljevac.warehouse.warehouse.security.utils.JwtUtil;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;

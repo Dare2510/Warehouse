@@ -11,7 +11,6 @@ import com.boljevac.warehouse.warehouse.product.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
 import com.boljevac.warehouse.warehouse.product.ProductRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

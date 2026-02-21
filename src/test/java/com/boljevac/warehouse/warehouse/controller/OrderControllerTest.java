@@ -8,22 +8,17 @@ import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.processor.ProcessorService;
-import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
-import com.boljevac.warehouse.warehouse.product.ProductEntity;
-import com.boljevac.warehouse.warehouse.product.ProductService;
 import com.boljevac.warehouse.warehouse.security.utils.JwtAuthFilter;
 import com.boljevac.warehouse.warehouse.security.utils.JwtUtil;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.math.BigDecimal;
 

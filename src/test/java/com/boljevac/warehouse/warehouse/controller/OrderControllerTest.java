@@ -1,15 +1,15 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.order.OrderController;
-import com.boljevac.warehouse.warehouse.order.OrderService;
-import com.boljevac.warehouse.warehouse.order.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.controller.OrderController;
+import com.boljevac.warehouse.warehouse.order.service.OrderService;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
-import com.boljevac.warehouse.warehouse.processor.ProcessorService;
-import com.boljevac.warehouse.warehouse.security.utils.JwtAuthFilter;
-import com.boljevac.warehouse.warehouse.security.utils.JwtUtil;
+import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
+import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
+import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,8 @@ public class OrderControllerTest {
 
 	@Autowired MockMvc mockMvc;
 
-	@MockitoBean JwtUtil  jwtUtil;
+	@MockitoBean
+	JwtToken jwtToken;
 
 	@MockitoBean JwtAuthFilter  jwtAuthFilter;
 

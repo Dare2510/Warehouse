@@ -1,4 +1,4 @@
-package com.boljevac.warehouse.warehouse.order;
+package com.boljevac.warehouse.warehouse.order.entity;
 
 public enum OrderStatus {
 		ORDER_PLACED,

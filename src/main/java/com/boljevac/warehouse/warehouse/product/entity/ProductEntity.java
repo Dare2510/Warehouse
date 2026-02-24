@@ -1,4 +1,4 @@
-package com.boljevac.warehouse.warehouse.product;
+package com.boljevac.warehouse.warehouse.product.entity;
 
 import jakarta.persistence.*;
 

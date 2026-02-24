@@ -1,7 +1,7 @@
 package com.boljevac.warehouse.warehouse.processor.dto;
 
 
-import com.boljevac.warehouse.warehouse.order.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 
 public class ProcessorRequest {
 

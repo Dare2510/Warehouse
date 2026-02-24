@@ -1,5 +1,7 @@
-package com.boljevac.warehouse.warehouse.order;
+package com.boljevac.warehouse.warehouse.order.service;
 
+import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
@@ -7,9 +9,9 @@ import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockExcepti
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
-import com.boljevac.warehouse.warehouse.product.ProductEntity;
+import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
-import com.boljevac.warehouse.warehouse.product.ProductRepository;
+import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

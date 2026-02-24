@@ -1,10 +1,10 @@
 package com.boljevac.warehouse.warehouse.service;
 
-import com.boljevac.warehouse.warehouse.order.OrderRepository;
-import com.boljevac.warehouse.warehouse.order.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
-import com.boljevac.warehouse.warehouse.processor.ProcessorService;
+import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

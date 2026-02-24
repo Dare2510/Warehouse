@@ -1,7 +1,8 @@
-package com.boljevac.warehouse.warehouse.order;
+package com.boljevac.warehouse.warehouse.order.controller;
 
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
+import com.boljevac.warehouse.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

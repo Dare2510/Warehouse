@@ -1,9 +1,9 @@
 package com.boljevac.warehouse.warehouse.service;
 
 
-import com.boljevac.warehouse.warehouse.product.ProductEntity;
-import com.boljevac.warehouse.warehouse.product.ProductRepository;
-import com.boljevac.warehouse.warehouse.product.ProductService;
+import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
+import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import org.junit.jupiter.api.Test;

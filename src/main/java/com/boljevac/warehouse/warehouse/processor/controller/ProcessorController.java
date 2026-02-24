@@ -1,8 +1,9 @@
-package com.boljevac.warehouse.warehouse.processor;
+package com.boljevac.warehouse.warehouse.processor.controller;
 
-import com.boljevac.warehouse.warehouse.order.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
+import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

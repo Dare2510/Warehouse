@@ -1,5 +1,6 @@
-package com.boljevac.warehouse.warehouse.product;
+package com.boljevac.warehouse.warehouse.product.controller;
 
+import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import jakarta.validation.Valid;

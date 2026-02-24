@@ -1,4 +1,4 @@
-package com.boljevac.warehouse.warehouse.security.utils;
+package com.boljevac.warehouse.warehouse.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -12,13 +12,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 @Component
-public class JwtUtil {
+public class JwtToken {
 
 	private final Key key;
 	private final long duration;
 
-	public JwtUtil(@Value("${app.jwt.secret}") String secret,
-				   @Value("${app.jwt.expiration-ms}") long duration) {
+	public JwtToken(@Value("${app.jwt.secret}") String secret,
+					@Value("${app.jwt.expiration-ms}") long duration) {
 		this.duration = duration;
 		this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}

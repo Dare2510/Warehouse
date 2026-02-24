@@ -1,6 +1,6 @@
 package com.boljevac.warehouse.warehouse.order.dto;
 
-import com.boljevac.warehouse.warehouse.order.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 
 import java.math.BigDecimal;
 

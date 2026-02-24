@@ -1,15 +1,15 @@
 package com.boljevac.warehouse.warehouse.service;
 
-import com.boljevac.warehouse.warehouse.order.OrderRepository;
-import com.boljevac.warehouse.warehouse.order.OrderService;
-import com.boljevac.warehouse.warehouse.order.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
+import com.boljevac.warehouse.warehouse.order.service.OrderService;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
-import com.boljevac.warehouse.warehouse.product.ProductEntity;
-import com.boljevac.warehouse.warehouse.product.ProductRepository;
+import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

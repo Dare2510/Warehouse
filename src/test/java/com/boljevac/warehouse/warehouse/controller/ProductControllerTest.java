@@ -1,11 +1,11 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.product.ProductController;
-import com.boljevac.warehouse.warehouse.product.ProductService;
+import com.boljevac.warehouse.warehouse.product.controller.ProductController;
+import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
-import com.boljevac.warehouse.warehouse.security.utils.JwtAuthFilter;
-import com.boljevac.warehouse.warehouse.security.utils.JwtUtil;
+import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
+import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,8 @@ public class ProductControllerTest {
 
 	//Mocked JWT
 	@MockitoBean ProductService  productService;
-	@MockitoBean JwtUtil  jwtUtil;
+	@MockitoBean
+	JwtToken jwtToken;
 	@MockitoBean JwtAuthFilter  jwtAuthFilter;
 	@MockitoBean UserDetailsService  userDetailsService;
 

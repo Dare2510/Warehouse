@@ -1,5 +1,7 @@
-package com.boljevac.warehouse.warehouse.product;
+package com.boljevac.warehouse.warehouse.product.service;
 
+import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;

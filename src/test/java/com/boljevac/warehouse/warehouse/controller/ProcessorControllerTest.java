@@ -1,14 +1,14 @@
 package com.boljevac.warehouse.warehouse.controller;
 ;
-import com.boljevac.warehouse.warehouse.order.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
-import com.boljevac.warehouse.warehouse.processor.ProcessorController;
-import com.boljevac.warehouse.warehouse.processor.ProcessorService;
+import com.boljevac.warehouse.warehouse.processor.controller.ProcessorController;
+import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
-import com.boljevac.warehouse.warehouse.security.utils.JwtAuthFilter;
-import com.boljevac.warehouse.warehouse.security.utils.JwtUtil;
+import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
+import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,8 @@ public class ProcessorControllerTest {
 
 	@MockitoBean ProcessorService processorService;
 
-	@MockitoBean JwtUtil  jwtUtil;
+	@MockitoBean
+	JwtToken jwtToken;
 
 	@MockitoBean JwtAuthFilter  jwtAuthFilter;
 

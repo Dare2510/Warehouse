@@ -1,6 +1,6 @@
 package com.boljevac.warehouse.warehouse.security.config;
 
-import com.boljevac.warehouse.warehouse.security.utils.SecurityUtil;
+import com.boljevac.warehouse.warehouse.security.service.PasswordService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.User;
@@ -11,28 +11,28 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @Configuration
 public class AppUserConfig {
 
-	SecurityUtil securityUtil;
+	PasswordService passwordService;
 
-	public AppUserConfig(SecurityUtil securityUtil) {
-		this.securityUtil = securityUtil;
+	public AppUserConfig(PasswordService passwordService) {
+		this.passwordService = passwordService;
 	}
 	@Bean
 	public UserDetailsService userDetailsService() {
 		UserDetails user = User
 				.withUsername("user")
-				.password(securityUtil.getPasswordEncoder().encode("UserPassword"))
+				.password(passwordService.getPasswordEncoder().encode("UserPassword"))
 				.roles("USER")
 				.build();
 
 		UserDetails clerk = User
 				.withUsername("clerk")
-				.password(securityUtil.getPasswordEncoder().encode("ClerkPassword"))
+				.password(passwordService.getPasswordEncoder().encode("ClerkPassword"))
 				.roles("CLERK")
 				.build();
 
 		UserDetails admin = User
 				.withUsername("admin")
-				.password(securityUtil.getPasswordEncoder().encode("AdminPassword"))
+				.password(passwordService.getPasswordEncoder().encode("AdminPassword"))
 				.roles("ADMIN")
 				.build();
 

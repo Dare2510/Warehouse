@@ -2,7 +2,7 @@ package com.boljevac.warehouse.warehouse.security.config;
 
 import com.boljevac.warehouse.warehouse.security.handler.RestAuthFailedHandler;
 import com.boljevac.warehouse.warehouse.security.handler.RestAccessDeniedHandler;
-import com.boljevac.warehouse.warehouse.security.utils.JwtAuthFilter;
+import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

@@ -1,6 +1,6 @@
 package com.boljevac.warehouse.warehouse.security;
 
-import com.boljevac.warehouse.warehouse.order.OrderService;
+import com.boljevac.warehouse.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;

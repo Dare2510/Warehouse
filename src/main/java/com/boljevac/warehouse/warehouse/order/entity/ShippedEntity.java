@@ -1,6 +1,5 @@
 package com.boljevac.warehouse.warehouse.order.entity;
 
-import com.boljevac.warehouse.warehouse.order.OrderStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;

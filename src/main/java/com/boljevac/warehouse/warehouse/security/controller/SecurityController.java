@@ -1,8 +1,8 @@
-package com.boljevac.warehouse.warehouse.security;
+package com.boljevac.warehouse.warehouse.security.controller;
 
 import com.boljevac.warehouse.warehouse.security.dto.AuthRequest;
 import com.boljevac.warehouse.warehouse.security.dto.AuthResponse;
-import com.boljevac.warehouse.warehouse.security.utils.JwtUtil;
+import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SecurityController {
 
 	public final AuthenticationManager authenticationManager;
-	public final JwtUtil jwtUtil;
+	public final JwtToken jwtToken;
 
-	public SecurityController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+	public SecurityController(AuthenticationManager authenticationManager, JwtToken jwtToken) {
 		this.authenticationManager = authenticationManager;
-		this.jwtUtil = jwtUtil;
+		this.jwtToken = jwtToken;
 	}
 
 	@PostMapping("/login")
@@ -31,7 +31,7 @@ public class SecurityController {
 						request.getUsername(),
 						request.getPassword()));
 
-		String token = jwtUtil.generateToken(request.getUsername());
+		String token = jwtToken.generateToken(request.getUsername());
 
 
 		return ResponseEntity.ok(new AuthResponse(token));

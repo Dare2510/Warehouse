@@ -15,7 +15,6 @@ import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,17 +55,15 @@ public class OrderService {
 		}
 
 		OrderEntity orderEntity = new OrderEntity(
-				orderedItem.getProduct(),
-				orderedItem.getId(),
-				orderRequest.getQuantity(),
-				new BigDecimal(orderRequest.getQuantity()*orderedItem.getValuePerPiece().doubleValue())
+				orderedItem,
+				orderRequest.getQuantity()
 		);
 		orderRepository.save(orderEntity);
 		orderedItem.setQuantity(orderedItem.getQuantity()-orderRequest.getQuantity());
 		productRepository.save(orderedItem);
 
 		return new OrderResponse(
-				orderEntity.getProduct(),
+				orderEntity.getProductEntity().getProduct(),
 				orderEntity.getQuantity(),
 				orderEntity.getTotalPrice(),
 				orderEntity.getStatus()
@@ -81,7 +78,7 @@ public class OrderService {
 
 		if(orderEntity.getStatus().equals(OrderStatus.ORDER_PLACED)) {
 			orderEntity.setStatus(OrderStatus.CANCELLED);
-			ProductEntity canceledItem = productRepository.findByProduct(orderEntity.getProduct());
+			ProductEntity canceledItem = productRepository.findByProduct(orderEntity.getProductEntity().getProduct());
 			canceledItem.setQuantity(canceledItem.getQuantity()+orderEntity.getQuantity());
 
 			productRepository.save(canceledItem);
@@ -91,7 +88,7 @@ public class OrderService {
 		}
 
 		return new OrderResponse(
-				orderEntity.getProduct(),
+				orderEntity.getProductEntity().getProduct(),
 				orderEntity.getQuantity(),
 				orderEntity.getTotalPrice(),
 				orderEntity.getStatus()

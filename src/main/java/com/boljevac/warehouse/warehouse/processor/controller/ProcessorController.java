@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/processor")
+@RequestMapping("api/warehouse/processing")
 public class ProcessorController {
 
 	private final ProcessorService processorService;
@@ -20,31 +20,36 @@ public class ProcessorController {
 	public ProcessorController(ProcessorService processorService) {
 		this.processorService = processorService;
 	}
+	//get Orders by status
 
 	@PostMapping
-	public ResponseEntity<List<ProcessorResponse>> getOpenOrders(@RequestBody@Valid ProcessorRequest processorRequest) {
+	public ResponseEntity<List<ProcessorResponse>> getOrders(@RequestBody@Valid ProcessorRequest processorRequest) {
 
 		return ResponseEntity.status(HttpStatus.OK).body(processorService.getOrders(processorRequest));
 	}
+	//change the status of an Order
 
-	@PutMapping("/changeStatus/{id}/{status}")
+	@PutMapping("/statusChange/{id}/{status}")
 	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@PathVariable Long id,@PathVariable OrderStatus status) {
 		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeOrderStatus(id,status));
 	}
+	//delete canceled Order by ID - Orderstatus must be canceled
 
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteOrderById(@PathVariable Long id) {
 		processorService.deleteOrderById(id);
 		return ResponseEntity.noContent().build();
 	}
+	//Move all Orders with status "shipped" to "shippedOrdersRepo"
 
-	@GetMapping("/move")
+	@GetMapping("/archive")
 	public ResponseEntity<Void> moveShippedOrders() {
 		processorService.moveShippedOrders();
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok().build();
 	}
+	//delete all canceled Orders
 
-	@GetMapping("/deleteCancelled")
+	@DeleteMapping("/deleteCancelled")
 	public ResponseEntity<Void> deleteCancelledOrders() {
 		processorService.deleteCancelledOrders();
 		return ResponseEntity.noContent().build();

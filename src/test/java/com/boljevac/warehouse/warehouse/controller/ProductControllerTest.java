@@ -43,7 +43,7 @@ public class ProductControllerTest {
 	//Get all Products -> Response OK
 	@Test
 	void getProducts_expecting_200() throws Exception {
-		mockMvc.perform(get("/api/products"))
+		mockMvc.perform(get("/api/warehouse/products"))
 				.andExpect(status().isOk());
 
 	}
@@ -57,7 +57,7 @@ public class ProductControllerTest {
 						BigDecimal.valueOf(500),
 						100));
 
-		mockMvc.perform(post("/api/products")
+		mockMvc.perform(post("/api/warehouse/products/receipt")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 						{ "product" : "TestProduct", "value" : 500, "quantity" : 100 }
@@ -75,7 +75,7 @@ void createProduct_expecting_400() throws Exception {
 						100
 
 				));
-		mockMvc.perform(post("/api/products")
+		mockMvc.perform(post("/api/warehouse/products/receipt")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
 				{ "productName" : "TestProduct", "value" : 500, "quantity" : 100 }

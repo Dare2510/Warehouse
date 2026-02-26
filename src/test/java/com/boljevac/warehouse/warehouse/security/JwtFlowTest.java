@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = "app.jwt.secret=dGhpcy1pcy1qdXN0LWEtdGVzdC1zZWNyZXQtbG9uZy1lbm91Z2g=")
 @AutoConfigureMockMvc
 public class JwtFlowTest {
 
@@ -36,6 +36,7 @@ public class JwtFlowTest {
 		String userJson = """
 						{ "username": "%s", "password": "%s" }
 						""".formatted(username, password);
+		System.out.println("JWT_SECRET=" + System.getenv("JWT_SECRET"));
 		String responseJson = mockMvc
 				.perform(post("/api/warehouse/login")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -47,13 +48,13 @@ public class JwtFlowTest {
 				.getContentAsString();
 
 		JsonNode responseJsonNode = objectMapper.readTree(responseJson);
-
+		System.out.println("JWT_SECRET=" + System.getenv("JWT_SECRET"));
 		return responseJsonNode.get("token").asText();
 	}
 
 	@Test
 	void getOrders_withoutLogin_expecting401() throws Exception {
-		mockMvc.perform(get("/api/order")).andExpect(status().isUnauthorized());
+		mockMvc.perform(get("/api/orders")).andExpect(status().isUnauthorized());
 	}
 
 	@Test
@@ -67,7 +68,7 @@ public class JwtFlowTest {
 
 				)));
 		String token = loginAndGetToken("clerk", "ClerkPassword");
-		mockMvc.perform(get("/api/order/products")
+		mockMvc.perform(get("/api/orders/products")
 				.header("Authorization","Bearer " + token))
 				.andExpect(status().isForbidden());
 	}
@@ -83,7 +84,7 @@ public class JwtFlowTest {
 				)));
 
 		String token = loginAndGetToken("user", "UserPassword");
-		mockMvc.perform(get("/api/order/products")
+		mockMvc.perform(get("/api/orders/products")
 						.header("Authorization","Bearer " + token))
 				.andExpect(status().isOk());
 	}

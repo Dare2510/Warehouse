@@ -51,7 +51,7 @@ public class OrderControllerTest {
 							3, BigDecimal.valueOf(30),
 							OrderStatus.ORDER_PLACED));
 
-			mockMvc.perform(post("/api/order")
+			mockMvc.perform(post("/api/warehouse/orders")
 							.contentType(MediaType.APPLICATION_JSON)
 							.content("""
 									{"id":1,"quantity":3}
@@ -65,7 +65,7 @@ public class OrderControllerTest {
 		when(orderService.createOrder(any(OrderRequest.class)))
 				.thenThrow(new OrderExceedsStockException());
 
-		mockMvc.perform(post("/api/order")
+		mockMvc.perform(post("/api/warehouse/orders")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
 						{"id":1,"quantity":3}
@@ -83,7 +83,7 @@ public class OrderControllerTest {
 						OrderStatus.ORDER_PLACED
 				));
 		mockMvc
-				.perform(post("/api/order")
+				.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{"id": -1, "quantity":3}
@@ -99,7 +99,7 @@ public class OrderControllerTest {
 						OrderStatus.CANCELLED));
 
 
-		mockMvc.perform(patch("/api/order/1/cancel")
+		mockMvc.perform(patch("/api/warehouse/orders/1/cancel")
 		).andExpect(status().isOk());
 
 
@@ -113,7 +113,7 @@ public class OrderControllerTest {
 				.thenThrow(new OrderCancelNotPossibleException(1L));
 
 		mockMvc
-				.perform(patch("/api/order/1/cancel"))
+				.perform(patch("/api/warehouse/orders/1/cancel"))
 				.andExpect(status().isNotAcceptable());
 		}
 

@@ -55,7 +55,10 @@ public class OrderServiceTest {
 	@Test
 	public void order_cancel_not_possible_throws() {
 		OrderEntity order = new OrderEntity(
-				"TestProduct", 1L,30, BigDecimal.valueOf(5000));
+				new ProductEntity("TestProduct",
+						BigDecimal.valueOf(50),
+						100),
+				30);
 
 		order.setStatus(OrderStatus.PROCESSING);
 
@@ -74,7 +77,7 @@ public class OrderServiceTest {
 				"TestProduct", BigDecimal.valueOf(500), 10
 		);
 		OrderEntity order = new OrderEntity(
-				"TestProduct", 1L, 5, BigDecimal.valueOf(5000));
+				product, 5);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
 		when(productRepository.findByProduct("TestProduct")).thenReturn(product);

@@ -1,5 +1,4 @@
 package com.boljevac.warehouse.warehouse.controller;
-;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
@@ -44,7 +43,7 @@ public class ProcessorControllerTest {
 	@Autowired MockMvc mockMvc;
 
 
-		//get open Orders -> Response isOK
+	//get open Orders -> Response isOK
 	@Test
 	public void get_open_orders_expecting_200() throws Exception {
 		when(processorService.getOrders(any(ProcessorRequest.class)))
@@ -56,14 +55,14 @@ public class ProcessorControllerTest {
 
 
 		mockMvc
-			.perform(post("/api/processor")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content("""
+				.perform(post("/api/warehouse/processing")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
 						{ "Orderstatus" : "ORDER_PLACED" }
 					"""))
-					.andExpect(status().isOk());
+				.andExpect(status().isOk());
 	}
-		//change Order status -> Response isOK
+	//change Order status -> Response isOK
 	@Test
 	public void change_order_status_expecting_200() throws Exception {
 		when(processorService.changeOrderStatus(1L, OrderStatus.PROCESSING))
@@ -75,27 +74,27 @@ public class ProcessorControllerTest {
 				));
 
 		mockMvc.perform(
-				put("/api/processor/changeStatus/1/PROCESSING"))
+						put("/api/warehouse/processing/statusChange/1/PROCESSING"))
 				.andExpect(status().isOk());
 	}
-		// changer Order status -> Response bad Request
+	// changer Order status -> Response bad Request
 	@Test
 	public void change_order_status_expecting_400() throws Exception {
 		when(processorService.changeOrderStatus(1L, OrderStatus.SHIPPED))
 				.thenThrow(new StatusChangeInvalidOrderException());
 
 		mockMvc.perform(
-				put("/api/processor/changeStatus/1/SHIPPED"))
+						put("/api/warehouse/processing/statusChange/1/SHIPPED"))
 				.andExpect(status().isBadRequest());
 	}
-		//change Order status with not available status -> Response bad Request
+	//change Order status with not available status -> Response bad Request
 	@Test
 	public void change_order_withInvalidStatus_expecting_400() throws Exception {
 		when(processorService.changeOrderStatus(1L, OrderStatus.ORDER_PLACED))
 				.thenThrow(new StatusChangeInvalidOrderException());
 
 		mockMvc
-				.perform(put("/api/processor/changeStatus/1/PLANNED"))
+				.perform(put("/api/warehouse/processing/statusChange/1/PLANNED"))
 				.andExpect(status().isBadRequest());
 
 	}

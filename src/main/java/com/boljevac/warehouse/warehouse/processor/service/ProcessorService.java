@@ -40,10 +40,10 @@ public class ProcessorService {
 		List<ProcessorResponse> processorResponses = new ArrayList<>();
 		for(OrderEntity orderEntity : orderEntityList) {
 			processorResponses.add(new ProcessorResponse(
-					orderEntity.getId(),
-					orderEntity.getProduct(),
+					orderEntity.getProductEntity().getId(),
+					orderEntity.getProductEntity().getProduct(),
 					orderEntity.getQuantity(),
-					orderStatus
+					orderEntity.getStatus()
 			));
 		}
 
@@ -85,8 +85,8 @@ public class ProcessorService {
 			orderRepository.save(toChange);
 
 			return new ProcessorResponse(
-					toChange.getId(),
-					toChange.getProduct(),
+					toChange.getProductEntity().getId(),
+					toChange.getProductEntity().getProduct(),
 					toChange.getQuantity(),
 					toChange.getStatus()
 			);
@@ -118,11 +118,7 @@ public class ProcessorService {
 		List<ShippedEntity> shippedEntities = new ArrayList<>();
 		for(OrderEntity orderEntity : shippedOrders) {
 			shippedEntities.add(new ShippedEntity(
-					orderEntity.getId(),
-					orderEntity.getProduct(),
-					orderEntity.getProductId(),
-					orderEntity.getQuantity(),
-					orderEntity.getTotalPrice()
+					orderEntity
 			));
 
 		}

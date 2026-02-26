@@ -1,5 +1,6 @@
 package com.boljevac.warehouse.warehouse.order.entity;
 
+import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -8,15 +9,14 @@ import java.math.BigDecimal;
 @Table(name = "Orders")
 public class OrderEntity {
 
+
+	@ManyToOne
+	@JoinColumn(name = "product_entity_id")
+	private ProductEntity productEntity;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	@Column(nullable = false)
-	private Long productId;
-
-	@Column(nullable = false)
-	private String product;
 
 	@Column(nullable = false)
 	private int quantity;
@@ -28,23 +28,15 @@ public class OrderEntity {
 	@Column(nullable = false)
 	private OrderStatus status;
 
-	public OrderEntity(String product, Long productId, int quantity, BigDecimal totalPrice) {
-		this.product = product;
-		this.productId = productId;
+	public OrderEntity(ProductEntity productEntity, int quantity) {
+		this.productEntity = productEntity;
 		this.quantity = quantity;
-		this.totalPrice = totalPrice;
+		this.totalPrice = BigDecimal.valueOf(quantity).multiply(productEntity.getValuePerPiece());
 		this.status = OrderStatus.ORDER_PLACED;
 	}
 
 	public OrderEntity() {}
 
-	public String getProduct() {
-		return product;
-	}
-
-	public void setProduct(String product) {
-		this.product = product;
-	}
 
 	public int getQuantity() {
 		return quantity;
@@ -74,11 +66,15 @@ public class OrderEntity {
 		this.status = status;
 	}
 
-	public Long getProductId() {
-		return productId;
+	public ProductEntity getProductEntity() {
+		return productEntity;
 	}
 
-	public void setProductId(Long productId) {
-		this.productId = productId;
+	public void setProductEntity(ProductEntity productEntity) {
+		this.productEntity = productEntity;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

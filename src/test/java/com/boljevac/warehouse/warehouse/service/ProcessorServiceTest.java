@@ -5,6 +5,7 @@ import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
 import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
+import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,10 +31,11 @@ public class ProcessorServiceTest {
 	@Test
 	public void change_Order_Status_Success() {
 		OrderEntity  orderEntity = new OrderEntity(
-				"TestProduct",
-				1L,
-				3,
-				BigDecimal.valueOf(500)
+				new ProductEntity(
+						"TestProduct",
+						BigDecimal.valueOf(30),
+						1000),
+				3
 		);
 
 		orderEntity.setStatus(OrderStatus.ORDER_PLACED);
@@ -52,10 +54,11 @@ public class ProcessorServiceTest {
 	@Test
 	public void change_Order_Status_Failure_throws() {
 		OrderEntity  orderEntity = new OrderEntity(
-				"TestProduct",
-				1L,
-				3,
-				BigDecimal.valueOf(500)
+				new ProductEntity(
+						"TestProduct",
+						BigDecimal.valueOf(30),
+						1000),
+				3
 		);
 		Long  id = 1L;
 		orderEntity.setStatus(OrderStatus.ORDER_PLACED);

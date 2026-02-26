@@ -33,19 +33,9 @@ public class SecurityFilter {
 						.authorizeHttpRequests(authorizeRequests
 								->authorizeRequests
 								.requestMatchers(HttpMethod.POST,"/api/warehouse/login").permitAll()
-								.requestMatchers(HttpMethod.GET,"/api/products/**").hasAnyRole("ADMIN", "CLERK")
-								.requestMatchers(HttpMethod.POST,"/api/products/**").hasAnyRole("ADMIN", "CLERK")
-								.requestMatchers(HttpMethod.DELETE,"/api/products/**").hasAnyRole("ADMIN", "CLERK")
-								.requestMatchers(HttpMethod.PUT,"/api/products/**").hasAnyRole("ADMIN", "CLERK")
-
-								.requestMatchers(HttpMethod.GET,"/api/order/**").hasAnyRole("ADMIN", "USER")
-								.requestMatchers(HttpMethod.POST,"/api/order/**").hasAnyRole("ADMIN", "USER")
-								.requestMatchers(HttpMethod.PATCH,"/api/order/**").hasAnyRole("ADMIN", "USER")
-
-								.requestMatchers(HttpMethod.GET,"/api/processor/**").hasAnyRole("ADMIN", "CLERK")
-								.requestMatchers(HttpMethod.POST,"/api/processor/**").hasAnyRole("ADMIN", "CLERK")
-								.requestMatchers(HttpMethod.DELETE,"/api/processor/**").hasAnyRole("ADMIN", "CLERK")
-								.requestMatchers(HttpMethod.PUT,"/api/processor/**").hasAnyRole("ADMIN", "CLERK")
+								.requestMatchers("/api/warehouse/products/**").hasAnyRole("ADMIN", "CLERK")
+								.requestMatchers("/api/warehouse/orders/**").hasAnyRole("ADMIN", "USER")
+								.requestMatchers("/api/warehouse/processor/**").hasAnyRole("ADMIN", "CLERK")
 								.anyRequest().authenticated()
 						).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

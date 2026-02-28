@@ -25,7 +25,7 @@ public class ShippedEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private OrderStatus status;
+	private OrderStatuses orderStatuses;
 
 	public ShippedEntity(OrderEntity orderEntity) {
 		this.id = orderEntity.getId();
@@ -33,7 +33,7 @@ public class ShippedEntity {
 		this.productId = orderEntity.getProductEntity().getId();
 		this.quantity = orderEntity.getQuantity();
 		this.totalPrice = orderEntity.getTotalPrice();
-		this.status = orderEntity.getStatus();
+		this.orderStatuses = orderEntity.getStatus();
 	}
 
 	public ShippedEntity() {}
@@ -66,12 +66,12 @@ public class ShippedEntity {
 		return id;
 	}
 
-	public OrderStatus getStatus() {
-		return status;
+	public OrderStatuses getStatus() {
+		return orderStatuses;
 	}
 
-	public void setStatus(OrderStatus status) {
-		this.status = status;
+	public void setStatus(OrderStatuses orderStatuses) {
+		this.orderStatuses = orderStatuses;
 	}
 
 	public void setId(Long id) {

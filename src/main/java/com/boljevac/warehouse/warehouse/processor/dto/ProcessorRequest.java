@@ -1,24 +1,26 @@
 package com.boljevac.warehouse.warehouse.processor.dto;
 
 
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
+import jakarta.validation.constraints.NotBlank;
 
 public class ProcessorRequest {
 
-	private OrderStatus orderStatus;
+	@NotBlank(message = "OrderStatus is required")
+	private OrderStatuses orderStatuses;
 
 
-	public ProcessorRequest(OrderStatus orderStatus) {
-		this.orderStatus = orderStatus;
+	public ProcessorRequest(OrderStatuses orderStatuses) {
+		this.orderStatuses = orderStatuses;
 	}
 
 
-	public OrderStatus getOrderStatus() {
-		return orderStatus;
+	public OrderStatuses getOrderStatus() {
+		return orderStatuses;
 	}
 
-	public void setOrderStatus(OrderStatus orderStatus) {
-		this.orderStatus = orderStatus;
+	public void setOrderStatus(OrderStatuses orderStatuses) {
+		this.orderStatuses = orderStatuses;
 	}
 
 }

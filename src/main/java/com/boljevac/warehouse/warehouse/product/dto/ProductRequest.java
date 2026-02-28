@@ -6,15 +6,15 @@ import java.math.BigDecimal;
 
 public class ProductRequest {
 
-	@NotBlank
+	@NotBlank(message = "product is required")
 	@Pattern(regexp = "^[A-Za-z]{4,30}$", message = "Not a valid Product name, only Characters allowed")
 	private String product;
 
-
+	@NotNull(message = "value is required")
 	@Positive(message = "Value must be over 0")
 	private BigDecimal value;
 
-
+	@NotNull(message = "quantity is required")
 	@PositiveOrZero(message = "Stock cannot be negative")
 	private int quantity;
 

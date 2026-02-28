@@ -1,5 +1,7 @@
 package com.boljevac.warehouse.warehouse;
 ;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,6 +11,7 @@ public class WarehouseApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(WarehouseApplication.class, args);
+
 	}
 
 

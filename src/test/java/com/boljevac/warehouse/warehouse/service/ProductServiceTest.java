@@ -2,6 +2,7 @@ package com.boljevac.warehouse.warehouse.service;
 
 
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -28,6 +30,28 @@ public class ProductServiceTest {
 	@InjectMocks
 	ProductService productService;
 
+
+
+	@Test
+	public void test_double_createProduct(){
+		ProductEntity productEntity = new ProductEntity(
+				"TestProduct", BigDecimal.valueOf(300),100
+		);
+		ProductRequest request = new ProductRequest(
+				"TestProduct",
+				BigDecimal.valueOf(300),
+				50
+		);
+		when(productRepository.findByProduct(request.getProduct())).thenReturn(productEntity);
+
+		assertThrows(ProductDuplicateCreationException.class, ()->{
+			productService.createItem(request);
+		});
+
+		verify(productRepository,never()).save(any());
+
+
+	}
 	@Test
 	public void test_create_product_and_get_response() {
 		ProductRequest request = new ProductRequest(
@@ -44,7 +68,6 @@ public class ProductServiceTest {
 		when(productRepository.save(any(ProductEntity.class))).thenReturn(productEntity);
 
 		ProductResponse response = productService.createItem(request);
-
 
 		verify(productRepository).save(any(ProductEntity.class));
 		assertEquals("TestProduct", response.getName());

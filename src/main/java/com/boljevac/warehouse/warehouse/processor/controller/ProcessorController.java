@@ -1,6 +1,6 @@
 package com.boljevac.warehouse.warehouse.processor.controller;
 
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
 import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
@@ -30,8 +30,8 @@ public class ProcessorController {
 	//change the status of an Order
 
 	@PutMapping("/statusChange/{id}/{status}")
-	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@PathVariable Long id,@PathVariable OrderStatus status) {
-		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeOrderStatus(id,status));
+	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@PathVariable Long id,@PathVariable OrderStatuses orderStatuses) {
+		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeOrderStatus(id, orderStatuses));
 	}
 	//delete canceled Order by ID - Orderstatus must be canceled
 

@@ -1,7 +1,7 @@
 package com.boljevac.warehouse.warehouse.service;
 
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
 import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
@@ -38,15 +38,15 @@ public class ProcessorServiceTest {
 				3
 		);
 
-		orderEntity.setStatus(OrderStatus.ORDER_PLACED);
+		orderEntity.setStatus(OrderStatuses.ORDER_PLACED);
 
 		Long id = 1L;
 
 		when(orderRepository.findById(id)).thenReturn(Optional.of(orderEntity));
 
-		processorService.changeOrderStatus(id, OrderStatus.PROCESSING);
+		processorService.changeOrderStatus(id, OrderStatuses.CANCELLED);
 
-		assertEquals(OrderStatus.PROCESSING, orderEntity.getStatus());
+		assertEquals(OrderStatuses.CANCELLED, orderEntity.getStatus());
 
 		verify(orderRepository).save(orderEntity);
 	}
@@ -61,15 +61,15 @@ public class ProcessorServiceTest {
 				3
 		);
 		Long  id = 1L;
-		orderEntity.setStatus(OrderStatus.ORDER_PLACED);
+		orderEntity.setStatus(OrderStatuses.ORDER_PLACED);
 
 		when(orderRepository.findById(id)).thenReturn(Optional.of(orderEntity));
 
 		assertThrows(StatusChangeInvalidOrderException.class, () -> {
-			processorService.changeOrderStatus(id, OrderStatus.SHIPPED);
+			processorService.changeOrderStatus(id, OrderStatuses.SHIPPED);
 		});
 
-		assertEquals(OrderStatus.ORDER_PLACED, orderEntity.getStatus());
+		assertEquals(OrderStatuses.ORDER_PLACED, orderEntity.getStatus());
 		verify(orderRepository, never()).save(any());
 
 

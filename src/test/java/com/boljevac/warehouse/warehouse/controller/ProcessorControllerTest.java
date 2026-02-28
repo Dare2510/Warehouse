@@ -1,5 +1,5 @@
 package com.boljevac.warehouse.warehouse.controller;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
 import com.boljevac.warehouse.warehouse.processor.controller.ProcessorController;
@@ -51,7 +51,7 @@ public class ProcessorControllerTest {
 						1L,
 						"TestProduct",
 						500,
-						OrderStatus.ORDER_PLACED)));
+						OrderStatuses.ORDER_PLACED)));
 
 
 		mockMvc
@@ -65,12 +65,12 @@ public class ProcessorControllerTest {
 	//change Order status -> Response isOK
 	@Test
 	public void change_order_status_expecting_200() throws Exception {
-		when(processorService.changeOrderStatus(1L, OrderStatus.PROCESSING))
+		when(processorService.changeOrderStatus(1L, OrderStatuses.PROCESSING))
 				.thenReturn(new ProcessorResponse(
 						1L,
 						"TestProduct",
 						50,
-						OrderStatus.ORDER_PLACED
+						OrderStatuses.ORDER_PLACED
 				));
 
 		mockMvc.perform(
@@ -80,7 +80,7 @@ public class ProcessorControllerTest {
 	// changer Order status -> Response bad Request
 	@Test
 	public void change_order_status_expecting_400() throws Exception {
-		when(processorService.changeOrderStatus(1L, OrderStatus.SHIPPED))
+		when(processorService.changeOrderStatus(1L, OrderStatuses.SHIPPED))
 				.thenThrow(new StatusChangeInvalidOrderException());
 
 		mockMvc.perform(
@@ -90,7 +90,7 @@ public class ProcessorControllerTest {
 	//change Order status with not available status -> Response bad Request
 	@Test
 	public void change_order_withInvalidStatus_expecting_400() throws Exception {
-		when(processorService.changeOrderStatus(1L, OrderStatus.ORDER_PLACED))
+		when(processorService.changeOrderStatus(1L, OrderStatuses.ORDER_PLACED))
 				.thenThrow(new StatusChangeInvalidOrderException());
 
 		mockMvc

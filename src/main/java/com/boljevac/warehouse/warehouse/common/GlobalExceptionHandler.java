@@ -4,6 +4,7 @@ import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleEx
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
+import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -93,6 +94,18 @@ public class GlobalExceptionHandler {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				"Order Status must be ORDER_PLACED|PACKAGED|PROCESSING|SHIPPED|CANCELLED",
+				request.getRequestURI()
+		);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
+	@ExceptionHandler(ProductDuplicateCreationException.class)
+	public ResponseEntity<ErrorResponse> handleProductDoubleCreationException(ProductDuplicateCreationException ex,
+																			  HttpServletRequest request) {
+
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
 				request.getRequestURI()
 		);
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);

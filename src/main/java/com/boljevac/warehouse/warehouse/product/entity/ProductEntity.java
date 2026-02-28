@@ -67,4 +67,19 @@ public class ProductEntity {
 	public void setTotalValue(BigDecimal totalValue) {
 		this.totalValue = totalValue;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ProductEntity product1 = (ProductEntity) o;
+		return product.equals(product1.product) && valuePerPiece.equals(product1.valuePerPiece);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = product.hashCode();
+		result = 31 * result + valuePerPiece.hashCode();
+		return result;
+	}
 }

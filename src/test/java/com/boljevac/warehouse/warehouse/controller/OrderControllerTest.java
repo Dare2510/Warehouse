@@ -2,7 +2,7 @@ package com.boljevac.warehouse.warehouse.controller;
 
 import com.boljevac.warehouse.warehouse.order.controller.OrderController;
 import com.boljevac.warehouse.warehouse.order.service.OrderService;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
@@ -49,7 +49,7 @@ public class OrderControllerTest {
 			when(orderService.createOrder(any(OrderRequest.class)))
 					.thenReturn(new OrderResponse("Item",
 							3, BigDecimal.valueOf(30),
-							OrderStatus.ORDER_PLACED));
+							OrderStatuses.ORDER_PLACED));
 
 			mockMvc.perform(post("/api/warehouse/orders")
 							.contentType(MediaType.APPLICATION_JSON)
@@ -80,7 +80,7 @@ public class OrderControllerTest {
 				.thenReturn(new OrderResponse(
 						"Item",
 						3, BigDecimal.valueOf(30),
-						OrderStatus.ORDER_PLACED
+						OrderStatuses.ORDER_PLACED
 				));
 		mockMvc
 				.perform(post("/api/warehouse/orders")
@@ -96,7 +96,7 @@ public class OrderControllerTest {
 		when(orderService.cancelOrder(1L))
 				.thenReturn(new OrderResponse("Item",
 						3, BigDecimal.valueOf(30),
-						OrderStatus.CANCELLED));
+						OrderStatuses.CANCELLED));
 
 
 		mockMvc.perform(patch("/api/warehouse/orders/1/cancel")

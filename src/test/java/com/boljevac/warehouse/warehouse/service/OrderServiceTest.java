@@ -2,7 +2,7 @@ package com.boljevac.warehouse.warehouse.service;
 
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.service.OrderService;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
@@ -60,7 +60,7 @@ public class OrderServiceTest {
 						100),
 				30);
 
-		order.setStatus(OrderStatus.PROCESSING);
+		order.setStatus(OrderStatuses.PROCESSING);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
 
@@ -84,7 +84,7 @@ public class OrderServiceTest {
 
 		OrderResponse response = orderService.cancelOrder(1L);
 
-		assertEquals(OrderStatus.CANCELLED, order.getStatus());
+		assertEquals(OrderStatuses.CANCELLED, order.getStatus());
 		assertEquals(15, product.getQuantity());
 
 		verify(productRepository).save(product);

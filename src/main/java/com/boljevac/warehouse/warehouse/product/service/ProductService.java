@@ -1,6 +1,7 @@
 package com.boljevac.warehouse.warehouse.product.service;
 
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
@@ -14,8 +15,18 @@ public class ProductService {
 
 	ProductRepository productRepository;
 
+	public ProductRepository getProductRepository() {
+		return productRepository;
+	}
+
 	public ProductService(ProductRepository productRepository) {
 		this.productRepository = productRepository;
+	}
+
+	//Helper Method to get Product by id
+	public ProductEntity getProductById(Long id) throws ProductNotFoundException {
+		return productRepository.findById(id).
+				orElseThrow(() -> new ProductNotFoundException(id));
 	}
 
 	public ProductResponse createItem(ProductRequest productRequest) {
@@ -25,15 +36,22 @@ public class ProductService {
 				productRequest.getQuantity()
 		);
 
+		ProductEntity checkProduct = productRepository.findByProduct(productRequest.getProduct());
+		if(checkProduct!=null) {
+				throw new ProductDuplicateCreationException(newProductEntity);
+		}
+
+
 		productRepository.save(newProductEntity);
 
-		return new ProductResponse(newProductEntity.getId(), newProductEntity.getProduct(), newProductEntity.getValuePerPiece(), newProductEntity.getQuantity());
+		return new ProductResponse(newProductEntity.getId(),
+				newProductEntity.getProduct(),
+				newProductEntity.getValuePerPiece(),
+				newProductEntity.getQuantity());
 	}
 
 	public void deleteItem(Long id) {
-		ProductEntity toDelete = productRepository.findById(id).
-				orElseThrow(() -> new ProductNotFoundException(id));
-
+		ProductEntity toDelete = getProductById(id);
 		productRepository.delete(toDelete);
 	}
 
@@ -46,14 +64,15 @@ public class ProductService {
 	}
 
 	public void updateProduct(Long id, ProductRequest productRequest) {
-		ProductEntity toUpdate = productRepository.findById(id).orElseThrow(
-				() -> new ProductNotFoundException(id)
-		);
+		ProductEntity toUpdate = getProductById(id);
 		toUpdate.setProduct(productRequest.getProduct());
 		toUpdate.setQuantity(productRequest.getQuantity());
 		toUpdate.setValuePerPiece(productRequest.getValue());
 		productRepository.save(toUpdate);
+
 		}
+
+
 
 
 

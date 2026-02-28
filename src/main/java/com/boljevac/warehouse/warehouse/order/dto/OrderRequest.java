@@ -5,12 +5,12 @@ import jakarta.validation.constraints.Positive;
 
 public class OrderRequest {
 
-	@Positive(message = "ID must be positive")
-	@NotNull(message = "ID must not be null")
+	@Positive(message = "id must be positive")
+	@NotNull(message = "id must not be null")
 	private Long id;
 
-	@Positive(message = "Quantity must be positive")
-	@NotNull(message = "Quantity must not be null")
+	@Positive(message = "quantity must be positive")
+	@NotNull(message = "quantity must not be null")
 	private int quantity;
 
 	public OrderRequest(Long id, int quantity) {

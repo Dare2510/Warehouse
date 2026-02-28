@@ -2,11 +2,12 @@ package com.boljevac.warehouse.warehouse.processor.service;
 
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.repository.ShippedOrdersRepository;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.entity.ShippedEntity;
+import com.boljevac.warehouse.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
@@ -26,13 +27,18 @@ public class ProcessorService {
 		this.shippedOrdersRepository = shippedOrdersRepository;
 	}
 
-
+	//Helper Method to get Order
+	public OrderEntity getOrderById(Long id) throws OrderNotFoundException {
+		return orderRepository.findById(id).orElseThrow(
+				OrderNotFoundException::new
+		);
+	}
 
 	public List<ProcessorResponse> getOrders(ProcessorRequest processorRequest) {
-		OrderStatus orderStatus = processorRequest.getOrderStatus();
+		OrderStatuses orderStatuses = processorRequest.getOrderStatus();
 
 		List<OrderEntity> orderEntityList = orderRepository
-				.getOrdersByStatus(orderStatus).stream().toList();
+				.getOrdersByStatus(orderStatuses).stream().toList();
 		if(orderEntityList.isEmpty()) {
 			throw new OrderNotFoundException();
 		}
@@ -51,37 +57,15 @@ public class ProcessorService {
 
 	}
 
-	public ProcessorResponse changeOrderStatus(Long id, OrderStatus status) {
-		OrderEntity toChange = orderRepository.findById(id).orElseThrow(
-				OrderNotFoundException::new
-		);
+	public ProcessorResponse changeOrderStatus(Long id, OrderStatuses orderStatus) {
+		OrderEntity toChange = getOrderById(id);
 
-		switch(toChange.getStatus()) {
-			case ORDER_PLACED:
-				if(status != OrderStatus.PROCESSING) {
-					throw new StatusChangeInvalidOrderException();
-				} else {
-					toChange.setStatus(status);
-				}
-				break;
-			case PROCESSING:
-				if(status != OrderStatus.PACKAGED) {
-					throw new StatusChangeInvalidOrderException();
-				} else {
-					toChange.setStatus(status);
-				}
-				break;
-			case PACKAGED:
-				if(status != OrderStatus.SHIPPED) {
-					throw new StatusChangeInvalidOrderException();
-				} else {
-					toChange.setStatus(status);
-				}
-				break;
-			default:
-				throw new StatusChangeInvalidOrderException();
-		}
-			toChange.setStatus(status);
+		OrderStatuses status = toChange.getStatus();
+
+		status.sequenceValidator(toChange,orderStatus);
+
+
+			toChange.setStatus(orderStatus);
 			orderRepository.save(toChange);
 
 			return new ProcessorResponse(
@@ -96,11 +80,9 @@ public class ProcessorService {
 
 	@Transactional
 	public void deleteOrderById(Long id) {
-		OrderEntity toDelete = orderRepository.findById(id).orElseThrow(
-				OrderNotFoundException::new
-		);
+		OrderEntity toDelete = getOrderById(id);
 
-		if(toDelete.getStatus().equals(OrderStatus.CANCELLED)) {
+		if(toDelete.getStatus().equals(OrderStatuses.CANCELLED)) {
 			orderRepository.delete(toDelete);
 		} else{
 			throw new OrderCancelNotPossibleException(id);
@@ -110,7 +92,7 @@ public class ProcessorService {
 	public void moveShippedOrders() {
 
 		List<OrderEntity> shippedOrders = orderRepository.
-				getOrdersByStatus(OrderStatus.SHIPPED);
+				getOrdersByStatus(OrderStatuses.SHIPPED);
 
 		if(shippedOrders.isEmpty()) {
 			throw new OrderNotFoundException();
@@ -130,7 +112,7 @@ public class ProcessorService {
 	@Transactional
 	public void deleteCancelledOrders(){
 			List<OrderEntity> shippedOrders = orderRepository.
-					getOrdersByStatus(OrderStatus.CANCELLED);
+					getOrdersByStatus(OrderStatuses.CANCELLED);
 
 			if(shippedOrders.isEmpty()) {
 				throw new OrderNotFoundException();

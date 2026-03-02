@@ -1,6 +1,5 @@
 package com.boljevac.warehouse.warehouse.order.repository;
 
-import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.entity.ShippedEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

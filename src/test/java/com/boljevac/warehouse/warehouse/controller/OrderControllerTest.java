@@ -8,6 +8,7 @@ import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
+import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
 import org.junit.jupiter.api.Test;
@@ -21,8 +22,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -117,5 +121,7 @@ public class OrderControllerTest {
 				.andExpect(status().isNotAcceptable());
 		}
 
-	}
+}
+
+
 

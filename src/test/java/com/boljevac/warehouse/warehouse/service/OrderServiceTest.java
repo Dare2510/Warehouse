@@ -1,5 +1,6 @@
 package com.boljevac.warehouse.warehouse.service;
 
+import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -115,8 +117,37 @@ public class OrderServiceTest {
 
 		verify(productRepository).save(product);
 
+	}
 
+	@Test
+	public void get_order_by_id(){
+		Long id = 1L;
+		OrderEntity  order = new OrderEntity(
+				new ProductEntity(
+						"TestProduct",
+						BigDecimal.valueOf(30),
+						1000),
+				3
+		);
+		order.setId(id);
 
+		when(orderRepository.findById(id)).thenReturn(java.util.Optional.of(order));
+			orderService.getOrderById(id);
+
+		verify(orderRepository).findById(id);
+		assertEquals(order,orderService.getOrderById(id));
+
+	}
+
+	@Test
+	public void get_order_by_product_id_throws() {
+
+		when(orderRepository.findById(anyLong())).thenThrow(OrderNotFoundException.class);
+
+		assertThrows(OrderNotFoundException.class,
+				() -> orderService.getOrderById(1L));
+
+		verify(orderRepository).findById(1L);
 	}
 
 

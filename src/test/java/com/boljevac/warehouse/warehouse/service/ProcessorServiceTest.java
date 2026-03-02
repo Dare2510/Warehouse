@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -169,13 +170,14 @@ public class ProcessorServiceTest {
 		processingOrder.setStatus(OrderStatuses.PROCESSING);
 
 		List<OrderEntity> orders = List.of(cancelledOrder, processingOrder);
-		when(orderRepository.getOrdersByStatus(OrderStatuses.SHIPPED)).thenThrow(new OrderNotFoundException());
+		when(orderRepository.getOrdersByStatus(OrderStatuses.SHIPPED)).thenReturn(Collections.emptyList());
 
 		assertThrows(OrderNotFoundException.class, () -> {
 			processorService.moveShippedOrders();
 		});
 
-		verify(orderRepository, never()).deleteAll(orders);
+		verify(orderRepository, never()).deleteAll(anyList());
+		verify(orderRepository, never()).saveAll(orders);
 
 	}
 
@@ -192,7 +194,6 @@ public class ProcessorServiceTest {
 		processorService.deleteOrderById(id);
 
 		verify(orderRepository).delete(cancelledOrder);
-		assertFalse(orderRepository.existsById(id));
 
 	}
 
@@ -205,7 +206,7 @@ public class ProcessorServiceTest {
 						500), 30);
 		processingOrder.setStatus(OrderStatuses.PROCESSING);
 		Long  id = 1L;
-		when(orderRepository.findById(id)).thenThrow(new OrderNotFoundException());
+		when(orderRepository.findById(id)).thenReturn(Optional.empty());
 		assertThrows(OrderNotFoundException.class, () -> {
 			processorService.deleteOrderById(id);
 		});
@@ -234,8 +235,6 @@ public class ProcessorServiceTest {
 		when(orderRepository.getOrdersByStatus(OrderStatuses.CANCELLED)).thenReturn(cancelledOrders);
 		processorService.deleteCancelledOrders();
 		verify(orderRepository).deleteAll(cancelledOrders);
-		assertFalse(orderRepository.existsById(cancelledOrderA.getId()));
-		assertFalse(orderRepository.existsById(cancelledOrderB.getId()));
 	}
 
 	@Test
@@ -256,7 +255,7 @@ public class ProcessorServiceTest {
 
 		List<OrderEntity> orders = List.of(processingOrder,shippedOrder);
 
-		when(orderRepository.getOrdersByStatus(OrderStatuses.CANCELLED)).thenThrow(new OrderNotFoundException());
+		when(orderRepository.getOrdersByStatus(OrderStatuses.CANCELLED)).thenReturn(Collections.emptyList());
 
 		assertThrows(OrderNotFoundException.class, () -> {
 			processorService.deleteCancelledOrders();

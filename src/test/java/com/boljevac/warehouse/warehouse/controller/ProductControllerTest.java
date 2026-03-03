@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -19,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,8 +45,13 @@ public class ProductControllerTest {
 	//Get all Products -> Response OK
 	@Test
 	void getProducts_expecting_200() throws Exception {
+
+		when(productService.getAll(any(Pageable.class))).thenReturn(Page.empty());
+
 		mockMvc.perform(get("/api/warehouse/products"))
 				.andExpect(status().isOk());
+
+		verify(productService).getAll(any(Pageable.class));
 
 	}
 	//Create Product -> Response isCreated.
@@ -63,24 +70,27 @@ public class ProductControllerTest {
 						{ "product" : "TestProduct", "value" : 500, "quantity" : 100 }
 						""")).
 						andExpect(status().isCreated());
+
+		verify(productService).createItem(any(ProductRequest.class));
 }
 //Validation Test , invalid Json -> Response Bad Request
 @Test
 void createProduct_expecting_400() throws Exception {
 		when(productService.createItem(any(ProductRequest.class)))
-				.thenReturn(new  ProductResponse(
+				.thenReturn(new ProductResponse(
 						1L,
 						"TestProduct",
 						BigDecimal.valueOf(500),
-						100
+						100));
 
-				));
 		mockMvc.perform(post("/api/warehouse/products/receipt")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
 				{ "productName" : "TestProduct", "value" : 500, "quantity" : 100 }
 				"""))
 				.andExpect(status().isBadRequest());
+
+		verify(productService, never()).createItem(any(ProductRequest.class));
 	}
 
 

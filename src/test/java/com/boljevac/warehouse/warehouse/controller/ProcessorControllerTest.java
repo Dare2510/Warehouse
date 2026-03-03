@@ -1,6 +1,7 @@
 package com.boljevac.warehouse.warehouse.controller;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 
+import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
 import com.boljevac.warehouse.warehouse.processor.controller.ProcessorController;
 import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
@@ -22,7 +23,7 @@ import java.util.List;
 
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,9 +59,29 @@ public class ProcessorControllerTest {
 				.perform(post("/api/warehouse/processing")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-						{ "Orderstatus" : "ORDER_PLACED" }
+						{ "orderStatuses" : "ORDER_PLACED" }
 					"""))
 				.andExpect(status().isOk());
+
+		verify(processorService).getOrders(any(ProcessorRequest.class));
+	}
+	//get open Orders -> Response not found
+	@Test
+	public void get_open_orders_expecting_404() throws Exception {
+		when(processorService.getOrders(any(ProcessorRequest.class)))
+				.thenThrow(new OrderNotFoundException());
+
+		mockMvc
+				.perform(post("/api/warehouse/processing")
+				.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{ "orderStatuses" : "ORDER_PLACED" }
+								"""))
+				.andExpect(status().isNotFound());
+
+		verify(processorService).getOrders(any(ProcessorRequest.class));
+
+
 	}
 	//change Order status -> Response isOK
 	@Test
@@ -76,6 +97,8 @@ public class ProcessorControllerTest {
 		mockMvc.perform(
 						put("/api/warehouse/processing/statusChange/1/PROCESSING"))
 				.andExpect(status().isOk());
+
+		verify(processorService).changeOrderStatus(1L, OrderStatuses.PROCESSING);
 	}
 	// changer Order status -> Response bad Request
 	@Test
@@ -86,6 +109,8 @@ public class ProcessorControllerTest {
 		mockMvc.perform(
 						put("/api/warehouse/processing/statusChange/1/SHIPPED"))
 				.andExpect(status().isBadRequest());
+
+		verify(processorService).changeOrderStatus(1L, OrderStatuses.SHIPPED);
 	}
 	//change Order status with not available status -> Response bad Request
 	@Test
@@ -97,6 +122,7 @@ public class ProcessorControllerTest {
 				.perform(put("/api/warehouse/processing/statusChange/1/PLANNED"))
 				.andExpect(status().isBadRequest());
 
+		verify(processorService, never()).changeOrderStatus(1L, OrderStatuses.ORDER_PLACED);
 	}
 
 

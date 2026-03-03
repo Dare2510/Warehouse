@@ -33,7 +33,7 @@ public class ProcessorService {
 	}
 
 	public List<ProcessorResponse> getOrders(ProcessorRequest processorRequest) {
-		OrderStatuses orderStatuses = processorRequest.getOrderStatus();
+		OrderStatuses orderStatuses = processorRequest.getOrderStatuses();
 
 		List<OrderEntity> orderEntityList = orderRepository
 				.getOrdersByStatus(orderStatuses).stream().toList();

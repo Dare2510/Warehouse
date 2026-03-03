@@ -29,7 +29,7 @@ public class ProcessorController {
 	}
 	//change the status of an Order
 
-	@PutMapping("/statusChange/{id}/{status}")
+	@PutMapping("/statusChange/{id}/{orderStatuses}")
 	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@PathVariable Long id,@PathVariable OrderStatuses orderStatuses) {
 		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeOrderStatus(id, orderStatuses));
 	}

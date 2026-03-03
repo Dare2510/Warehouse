@@ -8,7 +8,6 @@ import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
-import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
 import org.junit.jupiter.api.Test;
@@ -22,12 +21,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,6 +59,8 @@ public class OrderControllerTest {
 									"""))
 					.andExpect(status().isCreated());
 
+			verify(orderService).createOrder(any(OrderRequest.class));
+
 		}
 		//Test Order exceeding Stock -> Response is not acceptable
 	@Test
@@ -76,16 +75,12 @@ public class OrderControllerTest {
 						"""))
 				.andExpect(status().isNotAcceptable());
 
+		verify(orderService).createOrder(any(OrderRequest.class));
+
 	}
 		//Test invalid validation create Order -> Response bad Request
 	@Test
 	public void createOrder_expecting_400() throws Exception{
-		when(orderService.createOrder(any(OrderRequest.class)))
-				.thenReturn(new OrderResponse(
-						"Item",
-						3, BigDecimal.valueOf(30),
-						OrderStatuses.ORDER_PLACED
-				));
 		mockMvc
 				.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -93,6 +88,7 @@ public class OrderControllerTest {
 								{"id": -1, "quantity":3}
 								"""))
 				.andExpect(status().isBadRequest());
+		verify(orderService, never()).createOrder(any(OrderRequest.class));
 	}
 		//Test to successfully cancel Order -> Response OK
 	@Test
@@ -106,6 +102,7 @@ public class OrderControllerTest {
 		mockMvc.perform(patch("/api/warehouse/orders/1/cancel")
 		).andExpect(status().isOk());
 
+		verify(orderService).cancelOrder(1L);
 
 		}
 
@@ -119,8 +116,19 @@ public class OrderControllerTest {
 		mockMvc
 				.perform(patch("/api/warehouse/orders/1/cancel"))
 				.andExpect(status().isNotAcceptable());
-		}
 
+		verify(orderService).cancelOrder(1L);
+		}
+	@Test
+	public void getProducts_expecting_200() throws Exception {
+		when(orderService.getProducts()).thenReturn(Collections.emptyList());
+
+		mockMvc
+				.perform(get("/api/warehouse/orders/products"))
+				.andExpect(status().isOk());
+
+		verify(orderService).getProducts();
+	}
 }
 
 

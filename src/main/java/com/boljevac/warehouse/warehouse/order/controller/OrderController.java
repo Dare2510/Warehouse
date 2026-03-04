@@ -20,21 +20,19 @@ public class OrderController {
 	public OrderController(OrderService orderService) {
 		this.orderService = orderService;
 	}
-	//Overview of available goods - Inventory
 
 	@GetMapping("/products")
 	public ResponseEntity<List<ProductResponse>> getAllProducts() {
 		return ResponseEntity.ok(orderService.getProducts());
 	}
 
-	//create Order
-
+	//Required are product id and order quantity
 	@PostMapping
-	public ResponseEntity<OrderResponse> createOrder(@RequestBody@Valid OrderRequest orderRequest) {
+	public ResponseEntity<OrderResponse> createOrder(@RequestBody @Valid OrderRequest orderRequest) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderRequest));
 	}
-	//Cancel an Order if the requirements are met (Status = Order_placed)
 
+	//Cancel only possibly if status ist order placed
 	@PatchMapping("/{id}/cancel")
 	public ResponseEntity<OrderResponse> cancelOrderById(@PathVariable Long id) {
 		return ResponseEntity.status(HttpStatus.OK).body(orderService.cancelOrder(id));

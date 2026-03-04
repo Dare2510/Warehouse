@@ -32,14 +32,14 @@ public class ProcessorServiceTest {
 	private OrderRepository orderRepository;
 
 	@Mock
-	private ShippedOrdersRepository  shippedOrdersRepository;
+	private ShippedOrdersRepository shippedOrdersRepository;
 
 	@InjectMocks
 	private ProcessorService processorService;
 
 	@Test
 	public void change_Order_Status_Success() {
-		OrderEntity  orderWithValidStatus = new OrderEntity(
+		OrderEntity orderWithValidStatus = new OrderEntity(
 				new ProductEntity(
 						"TestProduct",
 						BigDecimal.valueOf(30),
@@ -62,14 +62,14 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void change_Order_Status_Failure_throws() {
-		OrderEntity  orderWithInvalidStatus = new OrderEntity(
+		OrderEntity orderWithInvalidStatus = new OrderEntity(
 				new ProductEntity(
 						"TestProduct",
 						BigDecimal.valueOf(30),
 						1000),
 				3
 		);
-		Long  id = 1L;
+		Long id = 1L;
 		orderWithInvalidStatus.setStatus(OrderStatuses.ORDER_PLACED);
 
 		when(orderRepository.findById(id)).thenReturn(Optional.of(orderWithInvalidStatus));
@@ -85,17 +85,17 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void delete_Order_by_id_Success() {
-		Long  id = 1L;
+		Long id = 1L;
 		OrderEntity cancelledOrder = new OrderEntity(
 				new ProductEntity(
 						"TestProduct",
 						BigDecimal.valueOf(30),
 						500
-				),30);
+				), 30);
 		cancelledOrder.setStatus(OrderStatuses.CANCELLED);
 		when(orderRepository.findById(id)).thenReturn(Optional.of(cancelledOrder));
 
-			processorService.deleteOrderById(id);
+		processorService.deleteOrderById(id);
 
 		verify(orderRepository).delete(cancelledOrder);
 		assertFalse(orderRepository.existsById(id));
@@ -103,13 +103,13 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void delete_Order_by_id_Failure_throws() {
-		Long  id = 1L;
+		Long id = 1L;
 		OrderEntity processingOrder = new OrderEntity(
 				new ProductEntity(
 						"TestProduct",
 						BigDecimal.valueOf(30),
 						500
-				),30);
+				), 30);
 		processingOrder.setStatus(OrderStatuses.PROCESSING);
 		when(orderRepository.findById(id)).thenReturn(Optional.of(processingOrder));
 
@@ -126,25 +126,25 @@ public class ProcessorServiceTest {
 				new ProductEntity(
 						"TestProductA",
 						BigDecimal.valueOf(30),
-						500),30);
+						500), 30);
 
 		OrderEntity shippedOrderB = new OrderEntity(
 				new ProductEntity(
 						"TestProductB",
 						BigDecimal.valueOf(50),
-						600),10);
+						600), 10);
 
 		shippedOrderA.setStatus(OrderStatuses.SHIPPED);
 		shippedOrderB.setStatus(OrderStatuses.SHIPPED);
 
-		List<OrderEntity> shippedOrders = List.of(shippedOrderA,shippedOrderB);
+		List<OrderEntity> shippedOrders = List.of(shippedOrderA, shippedOrderB);
 		when(orderRepository.getOrdersByStatus(OrderStatuses.SHIPPED)).thenReturn(shippedOrders);
 
 		processorService.moveShippedOrders();
 
 		verify(orderRepository).deleteAll(shippedOrders);
 
-		ArgumentCaptor<List<ShippedEntity>> orderEntityArgumentCaptor = ArgumentCaptor.forClass((Class)List.class);
+		ArgumentCaptor<List<ShippedEntity>> orderEntityArgumentCaptor = ArgumentCaptor.forClass((Class) List.class);
 		verify(shippedOrdersRepository).saveAll(orderEntityArgumentCaptor.capture());
 
 		List<ShippedEntity> saved = orderEntityArgumentCaptor.getValue();
@@ -182,14 +182,14 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void delete_cancelled_Order_by_id_success(){
+	public void delete_cancelled_Order_by_id_success() {
 		OrderEntity cancelledOrder = new OrderEntity(
 				new ProductEntity(
 						"TestProductA",
 						BigDecimal.valueOf(30),
 						500), 30);
 		cancelledOrder.setStatus(OrderStatuses.CANCELLED);
-		Long  id = 1L;
+		Long id = 1L;
 		when(orderRepository.findById(id)).thenReturn(Optional.of(cancelledOrder));
 		processorService.deleteOrderById(id);
 
@@ -205,7 +205,7 @@ public class ProcessorServiceTest {
 						BigDecimal.valueOf(30),
 						500), 30);
 		processingOrder.setStatus(OrderStatuses.PROCESSING);
-		Long  id = 1L;
+		Long id = 1L;
 		when(orderRepository.findById(id)).thenReturn(Optional.empty());
 		assertThrows(OrderNotFoundException.class, () -> {
 			processorService.deleteOrderById(id);
@@ -214,23 +214,23 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void delete_all_cancelled_Orders_success(){
+	public void delete_all_cancelled_Orders_success() {
 		OrderEntity cancelledOrderA = new OrderEntity(
 				new ProductEntity(
 						"TestProductA",
 						BigDecimal.valueOf(30),
-						500),30);
+						500), 30);
 
 		OrderEntity cancelledOrderB = new OrderEntity(
 				new ProductEntity(
 						"TestProductB",
 						BigDecimal.valueOf(50),
-						600),10);
+						600), 10);
 
 		cancelledOrderA.setStatus(OrderStatuses.CANCELLED);
 		cancelledOrderB.setStatus(OrderStatuses.CANCELLED);
 
-		List<OrderEntity> cancelledOrders = List.of(cancelledOrderA,cancelledOrderB);
+		List<OrderEntity> cancelledOrders = List.of(cancelledOrderA, cancelledOrderB);
 
 		when(orderRepository.getOrdersByStatus(OrderStatuses.CANCELLED)).thenReturn(cancelledOrders);
 		processorService.deleteCancelledOrders();
@@ -243,17 +243,17 @@ public class ProcessorServiceTest {
 				new ProductEntity(
 						"TestProductA",
 						BigDecimal.valueOf(30),
-						500),30);
+						500), 30);
 
 		OrderEntity shippedOrder = new OrderEntity(
 				new ProductEntity(
 						"TestProductB",
 						BigDecimal.valueOf(50),
-						600),10);
+						600), 10);
 		processingOrder.setStatus(OrderStatuses.PROCESSING);
 		processingOrder.setStatus(OrderStatuses.SHIPPED);
 
-		List<OrderEntity> orders = List.of(processingOrder,shippedOrder);
+		List<OrderEntity> orders = List.of(processingOrder, shippedOrder);
 
 		when(orderRepository.getOrdersByStatus(OrderStatuses.CANCELLED)).thenReturn(Collections.emptyList());
 

@@ -16,6 +16,7 @@ public class AppUserConfig {
 	public AppUserConfig(PasswordService passwordService) {
 		this.passwordService = passwordService;
 	}
+
 	@Bean
 	public UserDetailsService userDetailsService() {
 		UserDetails user = User
@@ -36,6 +37,6 @@ public class AppUserConfig {
 				.roles("ADMIN")
 				.build();
 
-		return new InMemoryUserDetailsManager(user,clerk,admin);
+		return new InMemoryUserDetailsManager(user, clerk, admin);
 	}
 }

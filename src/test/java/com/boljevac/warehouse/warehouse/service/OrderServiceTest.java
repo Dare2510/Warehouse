@@ -35,8 +35,8 @@ public class OrderServiceTest {
 	OrderService orderService;
 
 
-	public ProductEntity createProductHelper(String product, BigDecimal value, int quantity){
-		return new ProductEntity(product,value,quantity);
+	public ProductEntity createProductHelper(String product, BigDecimal value, int quantity) {
+		return new ProductEntity(product, value, quantity);
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class OrderServiceTest {
 
 		assertThrows(OrderExceedsStockException.class,
 				() -> orderService.createOrder(new OrderRequest(1L, 30))
-				);
+		);
 		verify(orderRepository, never()).save(any());
 	}
 
@@ -83,7 +83,7 @@ public class OrderServiceTest {
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
 		when(productRepository.findByProduct("TestProduct")).thenReturn(product);
 
-		OrderResponse response = orderService.cancelOrder(1L);
+		orderService.cancelOrder(1L);
 
 		assertEquals(OrderStatuses.CANCELLED, order.getStatus());
 		assertEquals(15, product.getQuantity());
@@ -95,7 +95,7 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void test_create_Order(){
+	public void test_create_Order() {
 		Long id = 1L;
 		ProductEntity product = createProductHelper(
 				"TestProduct", BigDecimal.valueOf(500), 10
@@ -108,20 +108,20 @@ public class OrderServiceTest {
 		when(productRepository.findById(id)).thenReturn(java.util.Optional.of(product));
 
 		OrderResponse orderResponse = orderService.createOrder(orderRequest);
-		assertEquals(9,product.getQuantity());
+		assertEquals(9, product.getQuantity());
 
-		assertEquals(1,orderResponse.quantity());
-		assertEquals("TestProduct",orderResponse.product());
-		assertEquals(500,orderResponse.totalPrice().doubleValue());
+		assertEquals(1, orderResponse.quantity());
+		assertEquals("TestProduct", orderResponse.product());
+		assertEquals(500, orderResponse.totalPrice().doubleValue());
 
 		verify(productRepository).save(product);
 
 	}
 
 	@Test
-	public void get_order_by_id(){
+	public void get_order_by_id() {
 		Long id = 1L;
-		OrderEntity  order = new OrderEntity(
+		OrderEntity order = new OrderEntity(
 				new ProductEntity(
 						"TestProduct",
 						BigDecimal.valueOf(30),
@@ -131,10 +131,10 @@ public class OrderServiceTest {
 		order.setId(id);
 
 		when(orderRepository.findById(id)).thenReturn(java.util.Optional.of(order));
-			orderService.getOrderById(id);
+		orderService.getOrderById(id);
 
 		verify(orderRepository).findById(id);
-		assertEquals(order,orderService.getOrderById(id));
+		assertEquals(order, orderService.getOrderById(id));
 
 	}
 
@@ -148,33 +148,6 @@ public class OrderServiceTest {
 
 		verify(orderRepository).findById(1L);
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

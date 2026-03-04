@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+
 @Component
 public class RestAuthFailedHandler implements AuthenticationEntryPoint {
 
@@ -20,11 +21,11 @@ public class RestAuthFailedHandler implements AuthenticationEntryPoint {
 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType("application/json");
 		response.getWriter().write("{" +
-									"httpStatusCode: " + HttpServletResponse.SC_UNAUTHORIZED + "\n" +
-									"message: " + authException.getMessage() + "\n" +
-									"path: " + request.getRequestURI() +
-									"timestamp" + LocalDateTime.now() +
-									"}"
+				"httpStatusCode: " + HttpServletResponse.SC_UNAUTHORIZED + "\n" +
+				"message: " + authException.getMessage() + "\n" +
+				"path: " + request.getRequestURI() +
+				"timestamp" + LocalDateTime.now() +
+				"}"
 
 		);
 

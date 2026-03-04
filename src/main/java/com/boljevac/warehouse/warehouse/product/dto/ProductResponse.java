@@ -35,6 +35,7 @@ public class ProductResponse {
 	public Long getId() {
 		return id;
 	}
+
 	public BigDecimal getTotalValue() {
 		return totalValue;
 	}

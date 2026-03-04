@@ -36,7 +36,8 @@ public class ShippedEntity {
 		this.orderStatuses = orderEntity.getStatus();
 	}
 
-	public ShippedEntity() {}
+	public ShippedEntity() {
+	}
 
 	public String getProduct() {
 		return product;

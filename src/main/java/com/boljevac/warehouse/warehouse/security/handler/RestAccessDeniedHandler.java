@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 	@Override
@@ -16,10 +17,10 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 					   HttpServletResponse response,
 					   AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
-			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			response.setContentType("application/json");
-			response.getWriter().write("{" +
-				"httpStatusCode: " + HttpServletResponse.SC_FORBIDDEN+  "\n" +
+		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+		response.setContentType("application/json");
+		response.getWriter().write("{" +
+				"httpStatusCode: " + HttpServletResponse.SC_FORBIDDEN + "\n" +
 				"message: " + accessDeniedException.getMessage() + "\n" +
 				"path: " + request.getRequestURI() +
 				"timestamp" + LocalDateTime.now() +

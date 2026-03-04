@@ -1,4 +1,5 @@
 package com.boljevac.warehouse.warehouse.controller;
+
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
@@ -33,18 +34,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProcessorControllerTest {
 
 
-	@MockitoBean ProcessorService processorService;
+	@MockitoBean
+	ProcessorService processorService;
 
 	@MockitoBean
 	JwtToken jwtToken;
 
-	@MockitoBean JwtAuthFilter  jwtAuthFilter;
+	@MockitoBean
+	JwtAuthFilter jwtAuthFilter;
 
-	@MockitoBean UserDetailsService userDetailsService;
-	@Autowired MockMvc mockMvc;
+	@MockitoBean
+	UserDetailsService userDetailsService;
+	@Autowired
+	MockMvc mockMvc;
 
 
-	//get open Orders -> Response isOK
 	@Test
 	public void get_open_orders_expecting_200() throws Exception {
 		when(processorService.getOrders(any(ProcessorRequest.class)))
@@ -59,13 +63,13 @@ public class ProcessorControllerTest {
 				.perform(post("/api/warehouse/processing")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-						{ "orderStatuses" : "ORDER_PLACED" }
-					"""))
+									{ "orderStatuses" : "ORDER_PLACED" }
+								"""))
 				.andExpect(status().isOk());
 
 		verify(processorService).getOrders(any(ProcessorRequest.class));
 	}
-	//get open Orders -> Response not found
+
 	@Test
 	public void get_open_orders_expecting_404() throws Exception {
 		when(processorService.getOrders(any(ProcessorRequest.class)))
@@ -73,7 +77,7 @@ public class ProcessorControllerTest {
 
 		mockMvc
 				.perform(post("/api/warehouse/processing")
-				.contentType(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{ "orderStatuses" : "ORDER_PLACED" }
 								"""))
@@ -83,7 +87,7 @@ public class ProcessorControllerTest {
 
 
 	}
-	//change Order status -> Response isOK
+
 	@Test
 	public void change_order_status_expecting_200() throws Exception {
 		when(processorService.changeOrderStatus(1L, OrderStatuses.PROCESSING))
@@ -100,7 +104,7 @@ public class ProcessorControllerTest {
 
 		verify(processorService).changeOrderStatus(1L, OrderStatuses.PROCESSING);
 	}
-	// changer Order status -> Response bad Request
+
 	@Test
 	public void change_order_status_expecting_400() throws Exception {
 		when(processorService.changeOrderStatus(1L, OrderStatuses.SHIPPED))
@@ -112,6 +116,7 @@ public class ProcessorControllerTest {
 
 		verify(processorService).changeOrderStatus(1L, OrderStatuses.SHIPPED);
 	}
+
 	//change Order status with not available status -> Response bad Request
 	@Test
 	public void change_order_withInvalidStatus_expecting_400() throws Exception {
@@ -124,10 +129,6 @@ public class ProcessorControllerTest {
 
 		verify(processorService, never()).changeOrderStatus(1L, OrderStatuses.ORDER_PLACED);
 	}
-
-
-
-
 
 
 }

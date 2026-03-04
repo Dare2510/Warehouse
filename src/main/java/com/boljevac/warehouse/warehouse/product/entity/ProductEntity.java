@@ -31,7 +31,8 @@ public class ProductEntity {
 		this.totalValue = new BigDecimal(valuePerPiece.doubleValue() * quantity);
 	}
 
-	public ProductEntity() {}
+	public ProductEntity() {
+	}
 
 	public Long getId() {
 		return id;
@@ -64,6 +65,7 @@ public class ProductEntity {
 	public BigDecimal getTotalValue() {
 		return totalValue;
 	}
+
 	public void setTotalValue(BigDecimal totalValue) {
 		this.totalValue = totalValue;
 	}

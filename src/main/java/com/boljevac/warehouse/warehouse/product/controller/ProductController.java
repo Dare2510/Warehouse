@@ -19,24 +19,23 @@ public class ProductController {
 	public ProductController(ProductService service) {
 		this.service = service;
 	}
-	//Book new goods
+
 	@PostMapping("/receipt")
-	public ResponseEntity<ProductResponse> createItem(@RequestBody@Valid ProductRequest productRequest) {
+	public ResponseEntity<ProductResponse> createItem(@RequestBody @Valid ProductRequest productRequest) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(service.createItem(productRequest));
 	}
-	//Reverse good receipt (delete Booking)
+
 	@DeleteMapping("/reverse/{id}")
 	public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
 		service.deleteItem(id);
 		return ResponseEntity.noContent().build();
 	}
-	//Overview of available goods - Inventory
 
 	@GetMapping
 	public ResponseEntity<Page<ProductResponse>> getItems(Pageable pageable) {
 		return ResponseEntity.status(HttpStatus.OK).body(service.getAll(pageable));
 	}
-	//Update goods
+
 	@PutMapping("/{id}")
 	public ResponseEntity<Void> updateItem(@PathVariable Long id,
 										   @RequestBody @Valid ProductRequest productRequest) {

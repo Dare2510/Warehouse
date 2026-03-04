@@ -33,16 +33,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class ProductControllerTest {
 
-	@Autowired MockMvc mockMvc;
+	@Autowired
+	MockMvc mockMvc;
 
 	//Mocked JWT
-	@MockitoBean ProductService  productService;
+	@MockitoBean
+	ProductService productService;
 	@MockitoBean
 	JwtToken jwtToken;
-	@MockitoBean JwtAuthFilter  jwtAuthFilter;
-	@MockitoBean UserDetailsService  userDetailsService;
+	@MockitoBean
+	JwtAuthFilter jwtAuthFilter;
+	@MockitoBean
+	UserDetailsService userDetailsService;
 
-	//Get all Products -> Response OK
 	@Test
 	void getProducts_expecting_200() throws Exception {
 
@@ -54,7 +57,7 @@ public class ProductControllerTest {
 		verify(productService).getAll(any(Pageable.class));
 
 	}
-	//Create Product -> Response isCreated.
+
 	@Test
 	void createProduct_expecting_201() throws Exception {
 		when(productService.createItem(any(ProductRequest.class)))
@@ -67,15 +70,16 @@ public class ProductControllerTest {
 		mockMvc.perform(post("/api/warehouse/products/receipt")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-						{ "product" : "TestProduct", "value" : 500, "quantity" : 100 }
-						""")).
-						andExpect(status().isCreated());
+								{ "product" : "TestProduct", "value" : 500, "quantity" : 100 }
+								""")).
+				andExpect(status().isCreated());
 
 		verify(productService).createItem(any(ProductRequest.class));
-}
-//Validation Test , invalid Json -> Response Bad Request
-@Test
-void createProduct_expecting_400() throws Exception {
+	}
+
+	//Validation Test , invalid Json -> Response Bad Request
+	@Test
+	void createProduct_expecting_400() throws Exception {
 		when(productService.createItem(any(ProductRequest.class)))
 				.thenReturn(new ProductResponse(
 						1L,
@@ -84,15 +88,14 @@ void createProduct_expecting_400() throws Exception {
 						100));
 
 		mockMvc.perform(post("/api/warehouse/products/receipt")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("""
-				{ "productName" : "TestProduct", "value" : 500, "quantity" : 100 }
-				"""))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{ "productName" : "TestProduct", "value" : 500, "quantity" : 100 }
+								"""))
 				.andExpect(status().isBadRequest());
 
 		verify(productService, never()).createItem(any(ProductRequest.class));
 	}
-
 
 
 }

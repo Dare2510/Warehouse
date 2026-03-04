@@ -31,11 +31,10 @@ public class ProductServiceTest {
 	ProductService productService;
 
 
-
 	@Test
-	public void test_double_createProduct(){
+	public void test_double_createProduct() {
 		ProductEntity productEntity = new ProductEntity(
-				"TestProduct", BigDecimal.valueOf(300),100
+				"TestProduct", BigDecimal.valueOf(300), 100
 		);
 		ProductRequest request = new ProductRequest(
 				"TestProduct",
@@ -44,14 +43,15 @@ public class ProductServiceTest {
 		);
 		when(productRepository.findByProduct(request.getProduct())).thenReturn(productEntity);
 
-		assertThrows(ProductDuplicateCreationException.class, ()->{
+		assertThrows(ProductDuplicateCreationException.class, () -> {
 			productService.createItem(request);
 		});
 
-		verify(productRepository,never()).save(any());
+		verify(productRepository, never()).save(any());
 
 
 	}
+
 	@Test
 	public void test_create_product_and_get_response() {
 		ProductRequest request = new ProductRequest(
@@ -97,12 +97,11 @@ public class ProductServiceTest {
 
 		assertEquals("TestNewNameProduct", productEntity.getProduct());
 		assertEquals(5000, productEntity.getQuantity());
-		assertEquals(BigDecimal.valueOf(30),productEntity.getValuePerPiece());
+		assertEquals(BigDecimal.valueOf(30), productEntity.getValuePerPiece());
 
-		verify(productRepository,times(2)).save(any(ProductEntity.class));
+		verify(productRepository, times(2)).save(any(ProductEntity.class));
 
 	}
-
 
 
 }

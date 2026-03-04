@@ -45,7 +45,7 @@ public class JwtToken {
 		}
 	}
 
-	public String generateToken (String username) {
+	public String generateToken(String username) {
 		Date now = new Date();
 		Date expiration = new Date(now.getTime() + duration);
 

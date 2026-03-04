@@ -23,7 +23,6 @@ public class ProductService {
 		this.productRepository = productRepository;
 	}
 
-	//Helper Method to get Product by id
 	public ProductEntity getProductById(Long id) throws ProductNotFoundException {
 		return productRepository.findById(id).
 				orElseThrow(() -> new ProductNotFoundException(id));
@@ -37,8 +36,8 @@ public class ProductService {
 		);
 
 		ProductEntity checkProduct = productRepository.findByProduct(productRequest.getProduct());
-		if(checkProduct!=null) {
-				throw new ProductDuplicateCreationException(newProductEntity);
+		if (checkProduct != null) {
+			throw new ProductDuplicateCreationException(newProductEntity);
 		}
 
 
@@ -55,10 +54,10 @@ public class ProductService {
 		productRepository.delete(toDelete);
 	}
 
-	public Page<ProductResponse> getAll(Pageable pageable){
+	public Page<ProductResponse> getAll(Pageable pageable) {
 		Page<ProductEntity> items = productRepository.findAll(pageable);
 
-		return items.map(productEntity ->  new ProductResponse(
+		return items.map(productEntity -> new ProductResponse(
 				productEntity.getId(), productEntity.getProduct(), productEntity.getValuePerPiece(), productEntity.getQuantity()
 		));
 	}
@@ -70,10 +69,7 @@ public class ProductService {
 		toUpdate.setValuePerPiece(productRequest.getValue());
 		productRepository.save(toUpdate);
 
-		}
-
-
-
+	}
 
 
 }

@@ -2,6 +2,7 @@ package com.boljevac.warehouse.warehouse.processor.service;
 
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
+import com.boljevac.warehouse.warehouse.order.exception.EmptyOrderRepositoryException;
 import com.boljevac.warehouse.warehouse.order.repository.ShippedOrdersRepository;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 public class ProcessorService {
 
@@ -25,7 +27,6 @@ public class ProcessorService {
 		this.shippedOrdersRepository = shippedOrdersRepository;
 	}
 
-	//Helper Method to get Order
 	public OrderEntity getOrderById(Long id) throws OrderNotFoundException {
 		return orderRepository.findById(id).orElseThrow(
 				OrderNotFoundException::new
@@ -37,12 +38,12 @@ public class ProcessorService {
 
 		List<OrderEntity> orderEntityList = orderRepository
 				.getOrdersByStatus(orderStatuses).stream().toList();
-		if(orderEntityList.isEmpty()) {
-			throw new OrderNotFoundException();
+		if (orderEntityList.isEmpty()) {
+			throw new EmptyOrderRepositoryException();
 		}
 
 		List<ProcessorResponse> processorResponses = new ArrayList<>();
-		for(OrderEntity orderEntity : orderEntityList) {
+		for (OrderEntity orderEntity : orderEntityList) {
 			processorResponses.add(new ProcessorResponse(
 					orderEntity.getProductEntity().getId(),
 					orderEntity.getProductEntity().getProduct(),
@@ -60,43 +61,45 @@ public class ProcessorService {
 
 		OrderStatuses status = toChange.getStatus();
 
-		status.sequenceValidator(toChange,orderStatus);
+		//Validation if the required sequence of status changes is met
+		status.sequenceValidator(toChange, orderStatus);
 
 
-			toChange.setStatus(orderStatus);
-			orderRepository.save(toChange);
+		toChange.setStatus(orderStatus);
+		orderRepository.save(toChange);
 
-			return new ProcessorResponse(
-					toChange.getProductEntity().getId(),
-					toChange.getProductEntity().getProduct(),
-					toChange.getQuantity(),
-					toChange.getStatus()
-			);
+		return new ProcessorResponse(
+				toChange.getProductEntity().getId(),
+				toChange.getProductEntity().getProduct(),
+				toChange.getQuantity(),
+				toChange.getStatus()
+		);
 
 
-		}
+	}
 
 	@Transactional
 	public void deleteOrderById(Long id) {
 		OrderEntity toDelete = getOrderById(id);
 
-		if(toDelete.getStatus().equals(OrderStatuses.CANCELLED)) {
+		if (toDelete.getStatus().equals(OrderStatuses.CANCELLED)) {
 			orderRepository.delete(toDelete);
-		} else{
+		} else {
 			throw new OrderCancelNotPossibleException(id);
 		}
 	}
+
 	@Transactional
 	public void moveShippedOrders() {
 
 		List<OrderEntity> shippedOrders = orderRepository.
 				getOrdersByStatus(OrderStatuses.SHIPPED);
 
-		if(shippedOrders.isEmpty()) {
+		if (shippedOrders.isEmpty()) {
 			throw new OrderNotFoundException();
 		}
 		List<ShippedEntity> shippedEntities = new ArrayList<>();
-		for(OrderEntity orderEntity : shippedOrders) {
+		for (OrderEntity orderEntity : shippedOrders) {
 			shippedEntities.add(new ShippedEntity(
 					orderEntity
 			));
@@ -107,15 +110,16 @@ public class ProcessorService {
 		orderRepository.deleteAll(shippedOrders);
 
 	}
-	@Transactional
-	public void deleteCancelledOrders(){
-			List<OrderEntity> shippedOrders = orderRepository.
-					getOrdersByStatus(OrderStatuses.CANCELLED);
 
-			if(shippedOrders.isEmpty()) {
-				throw new OrderNotFoundException();
-			}
-			orderRepository.deleteAll(shippedOrders);
+	@Transactional
+	public void deleteCancelledOrders() {
+		List<OrderEntity> shippedOrders = orderRepository.
+				getOrdersByStatus(OrderStatuses.CANCELLED);
+
+		if (shippedOrders.isEmpty()) {
+			throw new OrderNotFoundException();
+		}
+		orderRepository.deleteAll(shippedOrders);
 
 	}
 }

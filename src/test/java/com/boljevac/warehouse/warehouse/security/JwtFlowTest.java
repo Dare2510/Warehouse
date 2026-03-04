@@ -29,18 +29,19 @@ public class JwtFlowTest {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	@MockitoBean OrderService orderService;
+	@MockitoBean
+	OrderService orderService;
 
 	//Helper for Login and get Token
 	public String loginAndGetToken(String username, String password) throws Exception {
 		String userJson = """
-						{ "username": "%s", "password": "%s" }
-						""".formatted(username, password);
+				{ "username": "%s", "password": "%s" }
+				""".formatted(username, password);
 		System.out.println("JWT_SECRET=" + System.getenv("JWT_SECRET"));
 		String responseJson = mockMvc
 				.perform(post("/api/warehouse/login")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(userJson))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(userJson))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andReturn()
@@ -54,22 +55,22 @@ public class JwtFlowTest {
 
 	@Test
 	void getOrders_withoutLogin_expecting401() throws Exception {
-		mockMvc.perform(get("/api/orders")).andExpect(status().isUnauthorized());
+		mockMvc.perform(get("/api/warehouse/orders")).andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	void getOrders_withClerkLogin_expecting403() throws Exception {
 		when(orderService.getProducts())
 				.thenReturn(List.of(new ProductResponse(
-								1L,
-								"TestProduct",
-								BigDecimal.valueOf(500),
-								10
+						1L,
+						"TestProduct",
+						BigDecimal.valueOf(500),
+						10
 
 				)));
 		String token = loginAndGetToken("clerk", "ClerkPassword");
-		mockMvc.perform(get("/api/orders/products")
-				.header("Authorization","Bearer " + token))
+		mockMvc.perform(get("/api/warehouse/orders/products")
+						.header("Authorization", "Bearer " + token))
 				.andExpect(status().isForbidden());
 	}
 
@@ -84,8 +85,8 @@ public class JwtFlowTest {
 				)));
 
 		String token = loginAndGetToken("user", "UserPassword");
-		mockMvc.perform(get("/api/orders/products")
-						.header("Authorization","Bearer " + token))
+		mockMvc.perform(get("/api/warehouse/orders/products")
+						.header("Authorization", "Bearer " + token))
 				.andExpect(status().isOk());
 	}
 }

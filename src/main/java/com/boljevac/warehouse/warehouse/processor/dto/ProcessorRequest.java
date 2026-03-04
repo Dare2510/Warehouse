@@ -2,7 +2,6 @@ package com.boljevac.warehouse.warehouse.processor.dto;
 
 
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class ProcessorRequest {

@@ -35,7 +35,8 @@ public class OrderEntity {
 		this.orderStatuses = OrderStatuses.ORDER_PLACED;
 	}
 
-	public OrderEntity() {}
+	public OrderEntity() {
+	}
 
 
 	public int getQuantity() {

@@ -20,7 +20,7 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
 	private JwtToken jwtToken;
-	private UserDetailsService  userDetailsService;
+	private UserDetailsService userDetailsService;
 	private static final Logger log = LoggerFactory.getLogger(JwtAuthFilter.class);
 
 	public JwtAuthFilter(JwtToken jwtToken, UserDetailsService userDetailsService) {
@@ -36,9 +36,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
 			String token = authHeader.substring(7);
-			if (jwtToken.validateToken(token)&& SecurityContextHolder.getContext().getAuthentication() == null) {
-				String username =  jwtToken.getUsernameFromToken(token);
-				if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+			if (jwtToken.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+				String username = jwtToken.getUsernameFromToken(token);
+				if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 					UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 					jwtToken.validateToken(token);
 					UsernamePasswordAuthenticationToken authentication =

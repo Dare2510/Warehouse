@@ -25,25 +25,26 @@ public class SecurityFilter {
 
 		http
 				.csrf(csrf -> csrf.disable())
-						.sessionManagement(sessionManagement
-								-> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-						.exceptionHandling(ex
-								-> ex.authenticationEntryPoint(restAuthFailedHandler)
-								.accessDeniedHandler(restAccessDeniedHandler))
-						.authorizeHttpRequests(authorizeRequests
-								->authorizeRequests
-								.requestMatchers(HttpMethod.POST,"/api/warehouse/login").permitAll()
-								.requestMatchers("/api/warehouse/products/**").hasAnyRole("ADMIN", "CLERK")
-								.requestMatchers("/api/warehouse/orders/**").hasAnyRole("ADMIN", "USER")
-								.requestMatchers("/api/warehouse/processor/**").hasAnyRole("ADMIN", "CLERK")
-								.anyRequest().authenticated()
-						).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+				.sessionManagement(sessionManagement
+						-> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(ex
+						-> ex.authenticationEntryPoint(restAuthFailedHandler)
+						.accessDeniedHandler(restAccessDeniedHandler))
+				.authorizeHttpRequests(authorizeRequests
+						-> authorizeRequests
+						.requestMatchers(HttpMethod.POST, "/api/warehouse/login").permitAll()
+						.requestMatchers("/api/warehouse/products/**").hasAnyRole("ADMIN", "CLERK")
+						.requestMatchers("/api/warehouse/orders/**").hasAnyRole("ADMIN", "USER")
+						.requestMatchers("/api/warehouse/processor/**").hasAnyRole("ADMIN", "CLERK")
+						.anyRequest().authenticated()
+				).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 
 	}
+
 	@Bean
 	public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration configuration) throws Exception {
-		return  configuration.getAuthenticationManager();
+		return configuration.getAuthenticationManager();
 	}
 }

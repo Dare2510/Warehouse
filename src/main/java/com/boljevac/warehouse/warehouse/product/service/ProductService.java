@@ -32,7 +32,7 @@ public class ProductService {
 		ProductEntity newProductEntity = new ProductEntity(
 				productRequest.getProduct(),
 				productRequest.getValue(),
-				productRequest.getQuantity()
+				productRequest.getWeight()
 		);
 
 		ProductEntity checkProduct = productRepository.findByProduct(productRequest.getProduct());
@@ -45,8 +45,8 @@ public class ProductService {
 
 		return new ProductResponse(newProductEntity.getId(),
 				newProductEntity.getProduct(),
-				newProductEntity.getValuePerPiece(),
-				newProductEntity.getQuantity());
+				newProductEntity.getPricePerPiece(),
+				newProductEntity.getWeightPerPiece());
 	}
 
 	public void deleteItem(Long id) {
@@ -58,15 +58,18 @@ public class ProductService {
 		Page<ProductEntity> items = productRepository.findAll(pageable);
 
 		return items.map(productEntity -> new ProductResponse(
-				productEntity.getId(), productEntity.getProduct(), productEntity.getValuePerPiece(), productEntity.getQuantity()
+				productEntity.getId(),
+				productEntity.getProduct(),
+				productEntity.getPricePerPiece(),
+				productEntity.getWeightPerPiece()
 		));
 	}
-
+		//productEntity.getQuantity()
 	public void updateProduct(Long id, ProductRequest productRequest) {
 		ProductEntity toUpdate = getProductById(id);
 		toUpdate.setProduct(productRequest.getProduct());
-		toUpdate.setQuantity(productRequest.getQuantity());
-		toUpdate.setValuePerPiece(productRequest.getValue());
+		//toUpdate.setQuantity(productRequest.getQuantity());
+		toUpdate.setPricePerPiece(productRequest.getValue());
 		productRepository.save(toUpdate);
 
 	}

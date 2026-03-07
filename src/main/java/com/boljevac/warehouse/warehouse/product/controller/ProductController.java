@@ -20,12 +20,12 @@ public class ProductController {
 		this.service = service;
 	}
 
-	@PostMapping("/receipt")
+	@PostMapping("/create")
 	public ResponseEntity<ProductResponse> createItem(@RequestBody @Valid ProductRequest productRequest) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(service.createItem(productRequest));
 	}
 
-	@DeleteMapping("/reverse/{id}")
+	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
 		service.deleteItem(id);
 		return ResponseEntity.noContent().build();

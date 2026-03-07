@@ -36,6 +36,7 @@ public class SecurityFilter {
 						.requestMatchers("/api/warehouse/products/**").hasAnyRole("ADMIN", "CLERK")
 						.requestMatchers("/api/warehouse/orders/**").hasAnyRole("ADMIN", "USER")
 						.requestMatchers("/api/warehouse/processor/**").hasAnyRole("ADMIN", "CLERK")
+						.requestMatchers("/api/warehouse/inventory/**").hasAnyRole("ADMIN", "CLERK")
 						.anyRequest().authenticated()
 				).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

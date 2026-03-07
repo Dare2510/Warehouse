@@ -11,20 +11,20 @@ public class ShippedEntity {
 	@Id
 	private Long id;
 
-	@Column(nullable = false)
+	@Column(name="product_id",nullable = false)
 	private Long productId;
 
-	@Column(nullable = false)
+	@Column(name="product_name",nullable = false)
 	private String product;
 
-	@Column(nullable = false)
+	@Column(name="order_quantity",nullable = false)
 	private int quantity;
 
-	@Column(nullable = false)
+	@Column(name="total_order_price",nullable = false)
 	private BigDecimal totalPrice;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(name="orderstatus",nullable = false)
 	private OrderStatuses orderStatuses;
 
 	public ShippedEntity(OrderEntity orderEntity) {
@@ -33,7 +33,7 @@ public class ShippedEntity {
 		this.productId = orderEntity.getProductEntity().getId();
 		this.quantity = orderEntity.getQuantity();
 		this.totalPrice = orderEntity.getTotalPrice();
-		this.orderStatuses = orderEntity.getStatus();
+		this.orderStatuses = orderEntity.getOrderStatuses();
 	}
 
 	public ShippedEntity() {
@@ -67,14 +67,6 @@ public class ShippedEntity {
 		return id;
 	}
 
-	public OrderStatuses getStatus() {
-		return orderStatuses;
-	}
-
-	public void setStatus(OrderStatuses orderStatuses) {
-		this.orderStatuses = orderStatuses;
-	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -85,5 +77,13 @@ public class ShippedEntity {
 
 	public void setProductId(Long productId) {
 		this.productId = productId;
+	}
+
+	public OrderStatuses getOrderStatuses() {
+		return orderStatuses;
+	}
+
+	public void setOrderStatuses(OrderStatuses orderStatuses) {
+		this.orderStatuses = orderStatuses;
 	}
 }

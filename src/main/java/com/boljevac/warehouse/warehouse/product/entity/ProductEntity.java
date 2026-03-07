@@ -12,23 +12,27 @@ public class ProductEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
+	@Column(name="product_name",nullable = false)
 	private String product;
 
-	@Column(nullable = false)
-	private BigDecimal valuePerPiece;
+	@Column(name="price_per_piece",nullable = false)
+	private BigDecimal pricePerPiece;
 
-	@Column(nullable = false)
-	private int quantity;
+	@Column(name="weight_per_piece", nullable = false)
+	private double weightPerPiece;
 
-	@Column(nullable = false)
-	private BigDecimal totalValue;
+//	@Column(name="total_stock",nullable = false)
+//	private int quantity;
 
-	public ProductEntity(String product, BigDecimal valuePerPiece, int quantity) {
+//	@Column(name="total_stock_value",nullable = false)
+//	private BigDecimal totalValue;
+
+	public ProductEntity(String product, BigDecimal pricePerPiece, double weightPerPiece ) {
 		this.product = product;
-		this.valuePerPiece = valuePerPiece;
-		this.quantity = quantity;
-		this.totalValue = new BigDecimal(valuePerPiece.doubleValue() * quantity);
+		this.pricePerPiece = pricePerPiece;
+		this.weightPerPiece = weightPerPiece;
+//		this.quantity = quantity;
+//		this.totalValue = new BigDecimal(valuePerPiece.doubleValue() * quantity);
 	}
 
 	public ProductEntity() {
@@ -42,32 +46,39 @@ public class ProductEntity {
 		return product;
 	}
 
-	public BigDecimal getValuePerPiece() {
-		return valuePerPiece;
+	public BigDecimal getPricePerPiece() {
+		return pricePerPiece;
 	}
 
-	public int getQuantity() {
-		return quantity;
-	}
+//	public int getQuantity() {
+//		return quantity;
+//	}
 
 	public void setProduct(String product) {
 		this.product = product;
 	}
 
-	public void setValuePerPiece(BigDecimal valuePerPiece) {
-		this.valuePerPiece = valuePerPiece;
+	public void setPricePerPiece(BigDecimal pricePerPiece) {
+		this.pricePerPiece = pricePerPiece;
 	}
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
+//	public void setQuantity(int quantity) {
+//		this.quantity = quantity;
+//	}
+//
+//	public BigDecimal getTotalValue() {
+//		return totalValue;
+//	}
+//
+//	public void setTotalValue(BigDecimal totalValue) {
+//		this.totalValue = totalValue;
+//	}
+	public double getWeightPerPiece() {
+		return weightPerPiece;
 	}
 
-	public BigDecimal getTotalValue() {
-		return totalValue;
-	}
-
-	public void setTotalValue(BigDecimal totalValue) {
-		this.totalValue = totalValue;
+	public void setWeightPerPiece(double weightPerPiece) {
+		this.weightPerPiece = weightPerPiece;
 	}
 
 	@Override
@@ -75,13 +86,15 @@ public class ProductEntity {
 		if (o == null || getClass() != o.getClass()) return false;
 
 		ProductEntity product1 = (ProductEntity) o;
-		return product.equals(product1.product) && valuePerPiece.equals(product1.valuePerPiece);
+		return Double.compare(weightPerPiece, product1.weightPerPiece) == 0
+				&& product.equals(product1.product) && pricePerPiece.equals(product1.pricePerPiece);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = product.hashCode();
-		result = 31 * result + valuePerPiece.hashCode();
+		result = 31 * result + pricePerPiece.hashCode();
+		result = 31 * result + Double.hashCode(weightPerPiece);
 		return result;
 	}
 }

@@ -138,7 +138,7 @@ public class ProcessorServiceTest {
 		shippedOrderB.setStatus(OrderStatuses.SHIPPED);
 
 		List<OrderEntity> shippedOrders = List.of(shippedOrderA, shippedOrderB);
-		when(orderRepository.getOrdersByStatus(OrderStatuses.SHIPPED)).thenReturn(shippedOrders);
+		when(orderRepository.getByOrderStatuses(OrderStatuses.SHIPPED)).thenReturn(shippedOrders);
 
 		processorService.moveShippedOrders();
 
@@ -170,7 +170,7 @@ public class ProcessorServiceTest {
 		processingOrder.setStatus(OrderStatuses.PROCESSING);
 
 		List<OrderEntity> orders = List.of(cancelledOrder, processingOrder);
-		when(orderRepository.getOrdersByStatus(OrderStatuses.SHIPPED)).thenReturn(Collections.emptyList());
+		when(orderRepository.getByOrderStatuses(OrderStatuses.SHIPPED)).thenReturn(Collections.emptyList());
 
 		assertThrows(OrderNotFoundException.class, () -> {
 			processorService.moveShippedOrders();
@@ -232,7 +232,7 @@ public class ProcessorServiceTest {
 
 		List<OrderEntity> cancelledOrders = List.of(cancelledOrderA, cancelledOrderB);
 
-		when(orderRepository.getOrdersByStatus(OrderStatuses.CANCELLED)).thenReturn(cancelledOrders);
+		when(orderRepository.getByOrderStatuses(OrderStatuses.CANCELLED)).thenReturn(cancelledOrders);
 		processorService.deleteCancelledOrders();
 		verify(orderRepository).deleteAll(cancelledOrders);
 	}
@@ -255,7 +255,7 @@ public class ProcessorServiceTest {
 
 		List<OrderEntity> orders = List.of(processingOrder, shippedOrder);
 
-		when(orderRepository.getOrdersByStatus(OrderStatuses.CANCELLED)).thenReturn(Collections.emptyList());
+		when(orderRepository.getByOrderStatuses(OrderStatuses.CANCELLED)).thenReturn(Collections.emptyList());
 
 		assertThrows(OrderNotFoundException.class, () -> {
 			processorService.deleteCancelledOrders();

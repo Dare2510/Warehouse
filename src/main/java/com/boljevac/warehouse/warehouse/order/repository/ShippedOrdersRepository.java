@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface ShippedOrdersRepository extends JpaRepository<ShippedEntity, Long> {
 
-	List<ShippedEntity> getOrdersByStatus(OrderStatuses status);
+	List<ShippedEntity> getByOrderStatuses(OrderStatuses orderStatuses);
 
 }

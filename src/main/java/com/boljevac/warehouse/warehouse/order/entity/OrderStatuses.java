@@ -11,10 +11,10 @@ public enum OrderStatuses {
 
 	//Validator for the correct sequence of order changes
 	public void sequenceValidator(OrderEntity toChange, OrderStatuses orderStatus) throws StatusChangeInvalidOrderException {
-		switch (toChange.getStatus()) {
+		switch (toChange.getOrderStatuses()) {
 			case ORDER_PLACED:
 				if (orderStatus == OrderStatuses.PROCESSING || orderStatus == OrderStatuses.CANCELLED) {
-					toChange.setStatus(orderStatus);
+					toChange.setOrderStatuses(orderStatus);
 				} else {
 					throw new StatusChangeInvalidOrderException();
 				}
@@ -23,14 +23,14 @@ public enum OrderStatuses {
 				if (orderStatus != OrderStatuses.PACKAGED) {
 					throw new StatusChangeInvalidOrderException();
 				} else {
-					toChange.setStatus(orderStatus);
+					toChange.setOrderStatuses(orderStatus);
 				}
 				break;
 			case PACKAGED:
 				if (orderStatus != OrderStatuses.SHIPPED) {
 					throw new StatusChangeInvalidOrderException();
 				} else {
-					toChange.setStatus(orderStatus);
+					toChange.setOrderStatuses(orderStatus);
 				}
 				break;
 			default:

@@ -97,7 +97,7 @@ public class ProductServiceTest {
 
 		assertEquals("TestNewNameProduct", productEntity.getProduct());
 		assertEquals(5000, productEntity.getQuantity());
-		assertEquals(BigDecimal.valueOf(30), productEntity.getValuePerPiece());
+		assertEquals(BigDecimal.valueOf(30), productEntity.getPricePerPiece());
 
 		verify(productRepository, times(2)).save(any(ProductEntity.class));
 

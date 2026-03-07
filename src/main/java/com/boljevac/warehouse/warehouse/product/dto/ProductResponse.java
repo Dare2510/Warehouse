@@ -6,37 +6,42 @@ public class ProductResponse {
 
 	private final Long id;
 	private final String name;
-	private final BigDecimal value;
-	private final int quantity;
-	private final BigDecimal totalValue;
+	private final BigDecimal price;
+	private final double weight;
+//	private final int quantity;
+//	private final BigDecimal totalValue;
 
 
-	public ProductResponse(Long id, String name, BigDecimal value, int quantity) {
+	public ProductResponse(Long id, String name, BigDecimal price, double weight) {
 		this.id = id;
 		this.name = name;
-		this.value = value;
-		this.quantity = quantity;
-		this.totalValue = new BigDecimal(value.doubleValue() * quantity);
-
+		this.price = price;
+		//this.quantity = quantity;
+	//	this.totalValue = new BigDecimal(value.doubleValue() * quantity);
+		this.weight = weight;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public BigDecimal getValue() {
-		return value;
+	public BigDecimal getPrice() {
+		return price;
 	}
 
-	public int getQuantity() {
-		return quantity;
-	}
+//	public int getQuantity() {
+//		return quantity;
+//	}
 
 	public Long getId() {
 		return id;
 	}
 
-	public BigDecimal getTotalValue() {
-		return totalValue;
+	public double getWeight() {
+		return weight;
 	}
+
+//	public BigDecimal getTotalValue() {
+//		return totalValue;
+//	}
 }

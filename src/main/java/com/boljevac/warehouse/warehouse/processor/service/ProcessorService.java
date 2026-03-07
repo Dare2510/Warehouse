@@ -37,7 +37,7 @@ public class ProcessorService {
 		OrderStatuses orderStatuses = processorRequest.getOrderStatuses();
 
 		List<OrderEntity> orderEntityList = orderRepository
-				.getOrdersByStatus(orderStatuses).stream().toList();
+				.getByOrderStatuses(orderStatuses).stream().toList();
 		if (orderEntityList.isEmpty()) {
 			throw new EmptyOrderRepositoryException();
 		}
@@ -48,7 +48,7 @@ public class ProcessorService {
 					orderEntity.getProductEntity().getId(),
 					orderEntity.getProductEntity().getProduct(),
 					orderEntity.getQuantity(),
-					orderEntity.getStatus()
+					orderEntity.getOrderStatuses()
 			));
 		}
 
@@ -59,20 +59,20 @@ public class ProcessorService {
 	public ProcessorResponse changeOrderStatus(Long id, OrderStatuses orderStatus) {
 		OrderEntity toChange = getOrderById(id);
 
-		OrderStatuses status = toChange.getStatus();
+		OrderStatuses status = toChange.getOrderStatuses();
 
 		//Validation if the required sequence of status changes is met
 		status.sequenceValidator(toChange, orderStatus);
 
 
-		toChange.setStatus(orderStatus);
+		toChange.setOrderStatuses(orderStatus);
 		orderRepository.save(toChange);
 
 		return new ProcessorResponse(
 				toChange.getProductEntity().getId(),
 				toChange.getProductEntity().getProduct(),
 				toChange.getQuantity(),
-				toChange.getStatus()
+				toChange.getOrderStatuses()
 		);
 
 
@@ -82,7 +82,7 @@ public class ProcessorService {
 	public void deleteOrderById(Long id) {
 		OrderEntity toDelete = getOrderById(id);
 
-		if (toDelete.getStatus().equals(OrderStatuses.CANCELLED)) {
+		if (toDelete.getOrderStatuses().equals(OrderStatuses.CANCELLED)) {
 			orderRepository.delete(toDelete);
 		} else {
 			throw new OrderCancelNotPossibleException(id);
@@ -93,7 +93,7 @@ public class ProcessorService {
 	public void moveShippedOrders() {
 
 		List<OrderEntity> shippedOrders = orderRepository.
-				getOrdersByStatus(OrderStatuses.SHIPPED);
+				getByOrderStatuses(OrderStatuses.SHIPPED);
 
 		if (shippedOrders.isEmpty()) {
 			throw new OrderNotFoundException();
@@ -114,7 +114,7 @@ public class ProcessorService {
 	@Transactional
 	public void deleteCancelledOrders() {
 		List<OrderEntity> shippedOrders = orderRepository.
-				getOrdersByStatus(OrderStatuses.CANCELLED);
+				getByOrderStatuses(OrderStatuses.CANCELLED);
 
 		if (shippedOrders.isEmpty()) {
 			throw new OrderNotFoundException();

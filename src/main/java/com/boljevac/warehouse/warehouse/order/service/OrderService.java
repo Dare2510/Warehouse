@@ -1,5 +1,8 @@
 package com.boljevac.warehouse.warehouse.order.service;
 
+import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
+import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
+import com.boljevac.warehouse.warehouse.inventory.service.InventoryService;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
@@ -23,11 +26,15 @@ import java.util.List;
 public class OrderService {
 
 	private final OrderRepository orderRepository;
+	private final InventoryRepository inventoryRepository;
 	private final ProductRepository productRepository;
 
 
-	public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
+	public OrderService(OrderRepository orderRepository,
+						InventoryRepository inventoryRepository,
+						ProductRepository productRepository) {
 		this.orderRepository = orderRepository;
+		this.inventoryRepository = inventoryRepository;
 		this.productRepository = productRepository;
 	}
 
@@ -44,8 +51,8 @@ public class OrderService {
 			products.add(new ProductResponse(
 					productEntity.getId(),
 					productEntity.getProduct(),
-					productEntity.getValuePerPiece(),
-					productEntity.getQuantity()));
+					productEntity.getPricePerPiece(),
+					productEntity.getWeightPerPiece()));
 		}
 
 		if (products.isEmpty()) {
@@ -57,38 +64,47 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse createOrder(OrderRequest orderRequest) {
+		InventoryService inventoryService = new InventoryService(inventoryRepository,productRepository);
+
 		ProductService productService = new ProductService(productRepository);
 		ProductEntity orderedItem = productService.getProductById(orderRequest.getId());
 
-		if (orderedItem.getQuantity() < orderRequest.getQuantity()) {
+		InventoryEntity item = inventoryService.getInventoryProduct(orderedItem);
+
+		if (item.getQuantity() < orderRequest.getQuantity()) {
 			throw new OrderExceedsStockException();
 		}
+
+
 
 		OrderEntity orderEntity = new OrderEntity(
 				orderedItem,
 				orderRequest.getQuantity()
 		);
 		orderRepository.save(orderEntity);
-		orderedItem.setQuantity(orderedItem.getQuantity() - orderRequest.getQuantity());
+		item.setQuantity(item.getQuantity() - orderRequest.getQuantity());
 		productRepository.save(orderedItem);
 
 		return new OrderResponse(
 				orderEntity.getProductEntity().getProduct(),
 				orderEntity.getQuantity(),
 				orderEntity.getTotalPrice(),
-				orderEntity.getStatus()
+				orderEntity.getOrderStatuses()
 		);
 
 	}
 
 	@Transactional
 	public OrderResponse cancelOrder(Long id) {
+		InventoryService inventoryService = new InventoryService(inventoryRepository,productRepository);
 		OrderEntity toCancel = getOrderById(id);
+		InventoryEntity item =  inventoryService.getInventoryProduct(toCancel.getProductEntity());
 
-		if (toCancel.getStatus().equals(OrderStatuses.ORDER_PLACED)) {
-			toCancel.setStatus(OrderStatuses.CANCELLED);
+
+		if (toCancel.getOrderStatuses().equals(OrderStatuses.ORDER_PLACED)) {
+			toCancel.setOrderStatuses(OrderStatuses.CANCELLED);
 			ProductEntity canceledItem = productRepository.findByProduct(toCancel.getProductEntity().getProduct());
-			canceledItem.setQuantity(canceledItem.getQuantity() + toCancel.getQuantity());
+			item.setQuantity(item.getQuantity() + toCancel.getQuantity());
 
 			productRepository.save(canceledItem);
 			orderRepository.save(toCancel);
@@ -100,7 +116,7 @@ public class OrderService {
 				toCancel.getProductEntity().getProduct(),
 				toCancel.getQuantity(),
 				toCancel.getTotalPrice(),
-				toCancel.getStatus()
+				toCancel.getOrderStatuses()
 		);
 	}
 

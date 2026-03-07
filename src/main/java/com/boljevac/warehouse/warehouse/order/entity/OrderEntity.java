@@ -9,29 +9,28 @@ import java.math.BigDecimal;
 @Table(name = "Orders")
 public class OrderEntity {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
 	@ManyToOne
 	@JoinColumn(name = "product_entity_id")
 	private ProductEntity productEntity;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-
-	@Column(nullable = false)
+	@Column(name="order_quantity",nullable = false)
 	private int quantity;
 
-	@Column(nullable = false)
+	@Column(name="order_total_price",nullable = false)
 	private BigDecimal totalPrice;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(name="order_status",nullable = false)
 	private OrderStatuses orderStatuses;
 
 	public OrderEntity(ProductEntity productEntity, int quantity) {
 		this.productEntity = productEntity;
 		this.quantity = quantity;
-		this.totalPrice = BigDecimal.valueOf(quantity).multiply(productEntity.getValuePerPiece());
+		this.totalPrice = BigDecimal.valueOf(quantity).multiply(productEntity.getPricePerPiece());
 		this.orderStatuses = OrderStatuses.ORDER_PLACED;
 	}
 
@@ -59,13 +58,6 @@ public class OrderEntity {
 		return id;
 	}
 
-	public OrderStatuses getStatus() {
-		return orderStatuses;
-	}
-
-	public void setStatus(OrderStatuses orderStatuses) {
-		this.orderStatuses = orderStatuses;
-	}
 
 	public ProductEntity getProductEntity() {
 		return productEntity;
@@ -77,5 +69,13 @@ public class OrderEntity {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public OrderStatuses getOrderStatuses() {
+		return orderStatuses;
+	}
+
+	public void setOrderStatuses(OrderStatuses orderStatuses) {
+		this.orderStatuses = orderStatuses;
 	}
 }

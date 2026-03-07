@@ -14,15 +14,20 @@ public class ProductRequest {
 	@Positive(message = "Value must be over 0")
 	private BigDecimal value;
 
-	@NotNull(message = "quantity is required")
-	@PositiveOrZero(message = "Stock cannot be negative")
-	private int quantity;
+	@NotNull(message = "weight is required")
+	@Positive(message = "weight must be >0")
+	private double weight;
+
+//	@NotNull(message = "quantity is required")
+//	@PositiveOrZero(message = "Stock cannot be negative")
+//	private int quantity;
 
 
-	public ProductRequest(String product, BigDecimal value, int quantity) {
+	public ProductRequest(String product, BigDecimal value, double weight) {
 		this.product = product;
 		this.value = value;
-		this.quantity = quantity;
+		this.weight = weight;
+	//	this.quantity = quantity;
 	}
 
 	public String getProduct() {
@@ -33,9 +38,9 @@ public class ProductRequest {
 		return value;
 	}
 
-	public int getQuantity() {
-		return quantity;
-	}
+//	public int getQuantity() {
+//		return quantity;
+//	}
 
 	public void setProduct(String product) {
 		this.product = product;
@@ -45,7 +50,15 @@ public class ProductRequest {
 		this.value = value;
 	}
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
+	public double getWeight() {
+		return weight;
 	}
+
+	public void setWeight(double weight) {
+		this.weight = weight;
+	}
+
+//	public void setQuantity(int quantity) {
+//		this.quantity = quantity;
+//	}
 }

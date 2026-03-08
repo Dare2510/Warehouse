@@ -10,8 +10,6 @@ import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class InventoryService {
 

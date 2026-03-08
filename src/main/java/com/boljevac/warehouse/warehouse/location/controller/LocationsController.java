@@ -1,7 +1,5 @@
 package com.boljevac.warehouse.warehouse.location.controller;
 
-import com.boljevac.warehouse.warehouse.inventory.dto.InventoryRequest;
-import com.boljevac.warehouse.warehouse.inventory.dto.InventoryResponse;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
 import com.boljevac.warehouse.warehouse.location.service.LocationService;

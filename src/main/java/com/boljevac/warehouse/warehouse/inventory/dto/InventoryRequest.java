@@ -1,10 +1,5 @@
 package com.boljevac.warehouse.warehouse.inventory.dto;
 
-import com.boljevac.warehouse.warehouse.location.Aisle;
-import com.boljevac.warehouse.warehouse.location.LevelOn;
-import com.boljevac.warehouse.warehouse.location.Rack;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Positive;
 
 public class InventoryRequest {

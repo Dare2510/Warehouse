@@ -1,9 +1,5 @@
 package com.boljevac.warehouse.warehouse.inventory.dto;
 
-import com.boljevac.warehouse.warehouse.location.Location;
-
-import java.util.List;
-
 public class InventoryResponse {
 
 	private final String product;

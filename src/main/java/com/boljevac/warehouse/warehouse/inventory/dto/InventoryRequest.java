@@ -13,29 +13,29 @@ public class InventoryRequest {
 	private Long id;
 
 
-	@Enumerated(EnumType.STRING)
-	private final Aisle aisle;
-
-	@Positive(message = "Column must be positive and max 50")
-	private int rack;
-
-	@Positive(message = "Row must be positive and max 10")
-	private int levelOn;
+//	@Enumerated(EnumType.STRING)
+//	private final Aisle aisle;
+//
+//	@Positive(message = "Column must be positive and max 50")
+//	private int rack;
+//
+//	@Positive(message = "Row must be positive and max 10")
+//	private int levelOn;
 
 	@Positive(message = "quantity must be > 0")
 	private int quantity;
 
-	public InventoryRequest(Long productId, Aisle aisle, int rack, int levelOn, int quantity) {
+	public InventoryRequest(Long productId,int quantity) {
 		this.id = productId;
-		this.aisle = aisle;
-		this.rack = rack;
-		this.levelOn = levelOn;
+//		this.aisle = aisle;
+//		this.rack = rack;
+//		this.levelOn = levelOn;
 		this.quantity = quantity;
 	}
 
-	public Aisle getAisle() {
-		return aisle;
-	}
+//	public Aisle getAisle() {
+//		return aisle;
+//	}
 
 
 	public Long getProductId() {
@@ -46,21 +46,21 @@ public class InventoryRequest {
 		this.id = productId;
 	}
 
-	public int getRack() {
-		return rack;
-	}
+//	public int getRack() {
+//		return rack;
+//	}
 
-	public void setRack(int rack) {
-		this.rack = rack;
-	}
+//	public void setRack(int rack) {
+//		this.rack = rack;
+//	}
 
-	public int getLevelOn() {
-		return levelOn;
-	}
+//	public int getLevelOn() {
+//		return levelOn;
+//	}
 
-	public void setLevelOn(int levelOn) {
-		this.levelOn = levelOn;
-	}
+//	public void setLevelOn(int levelOn) {
+//		this.levelOn = levelOn;
+//	}
 
 	public int getQuantity() {
 		return quantity;

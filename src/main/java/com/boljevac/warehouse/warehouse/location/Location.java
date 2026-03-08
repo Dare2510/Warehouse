@@ -7,11 +7,22 @@ public class Location {
 	private final Rack rack;
 	private final LevelOn level;
 
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	private int quantity;
+
 
 	public Location(Aisle aisle, Rack rack, LevelOn level) {
 		this.aisle = aisle;
 		this.rack = rack;
 		this.level = level;
+
 	}
 
 	public int getMaxWeightLocation() {

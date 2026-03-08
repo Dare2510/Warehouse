@@ -19,16 +19,14 @@ public class InventoryController {
 	public InventoryController(InventoryService inventoryService) {
 		this.inventoryService = inventoryService;
 	}
-
-	@PostMapping("/store")
-	public ResponseEntity<InventoryResponse> storeInventory(@RequestBody InventoryRequest inventoryRequest) {
-
-		return ResponseEntity.status(HttpStatus.OK).body(inventoryService.storeProduct(inventoryRequest));
+	@GetMapping("/{id}")
+	public  ResponseEntity<InventoryResponse> getStock(@PathVariable Long id) {
+		return ResponseEntity.ok(inventoryService.getStock(id));
 	}
 
-	@GetMapping("/getAll")
-	public ResponseEntity<List<InventoryResponse>> getAllInventory() {
-		return ResponseEntity.status(HttpStatus.OK).body(inventoryService.getInventory());
+	@PostMapping
+	public ResponseEntity<InventoryResponse> addStock(@RequestBody InventoryRequest inventoryRequest) {
+		return ResponseEntity.ok(inventoryService.createStock(inventoryRequest));
 	}
 
 

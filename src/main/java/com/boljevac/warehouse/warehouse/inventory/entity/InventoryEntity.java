@@ -1,40 +1,30 @@
 package com.boljevac.warehouse.warehouse.inventory.entity;
 
-import com.boljevac.warehouse.warehouse.location.*;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "inventory_location")
+@Table(name = "Inventory")
 public class InventoryEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="product_entity_id")
-	private ProductEntity productEntity;
-
-	@Column(name = "Aisle")
-	private String aisle;
-
-	@Column(name="Rack")
-	private int rack;
-
-	@Column(name="Level")
-	private int levelOn;
+	private ProductEntity productId;
 
 	@Column(name="Quantity")
 	private int quantity;
 
-	public InventoryEntity(ProductEntity productEntity, String aisle, int rack,
-						   int levelOn,  int quantity) {
-		this.productEntity = productEntity;
-		this.aisle = aisle;
-		this.rack = rack;
-		this.levelOn = levelOn;
+	@Column(name="Location")
+	private String location;
+
+	public InventoryEntity(ProductEntity productId, int quantity, String location) {
+		this.productId = productId;
 		this.quantity = quantity;
+		this.location = location;
 	}
 
 	public InventoryEntity() {
@@ -48,36 +38,12 @@ public class InventoryEntity {
 		this.id = id;
 	}
 
-	public ProductEntity getProductEntity() {
-		return productEntity;
+	public ProductEntity getProductId() {
+		return productId;
 	}
 
-	public void setProductEntity(ProductEntity productEntity) {
-		this.productEntity = productEntity;
-	}
-
-	public String getAisle() {
-		return aisle;
-	}
-
-	public void setAisle(String aisle) {
-		this.aisle = aisle;
-	}
-
-	public int getRack() {
-		return rack;
-	}
-
-	public void setRack(int rack) {
-		this.rack = rack;
-	}
-
-	public int getLevelOn() {
-		return levelOn;
-	}
-
-	public void setLevelOn(int levelOn) {
-		this.levelOn = levelOn;
+	public void setProductId(ProductEntity productId) {
+		this.productId = productId;
 	}
 
 	public int getQuantity() {
@@ -86,5 +52,13 @@ public class InventoryEntity {
 
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
 	}
 }

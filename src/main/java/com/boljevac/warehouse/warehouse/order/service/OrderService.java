@@ -2,7 +2,6 @@ package com.boljevac.warehouse.warehouse.order.service;
 
 import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
-import com.boljevac.warehouse.warehouse.inventory.service.InventoryService;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
@@ -64,12 +63,10 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse createOrder(OrderRequest orderRequest) {
-		InventoryService inventoryService = new InventoryService(inventoryRepository,productRepository);
-
 		ProductService productService = new ProductService(productRepository);
 		ProductEntity orderedItem = productService.getProductById(orderRequest.getId());
 
-		InventoryEntity item = inventoryService.getInventoryProduct(orderedItem);
+		InventoryEntity item = inventoryRepository.getById(orderedItem.getId());
 
 		if (item.getQuantity() < orderRequest.getQuantity()) {
 			throw new OrderExceedsStockException();
@@ -96,9 +93,8 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse cancelOrder(Long id) {
-		InventoryService inventoryService = new InventoryService(inventoryRepository,productRepository);
 		OrderEntity toCancel = getOrderById(id);
-		InventoryEntity item =  inventoryService.getInventoryProduct(toCancel.getProductEntity());
+		InventoryEntity item =  inventoryRepository.getById(toCancel.getProductEntity().getId());
 
 
 		if (toCancel.getOrderStatuses().equals(OrderStatuses.ORDER_PLACED)) {

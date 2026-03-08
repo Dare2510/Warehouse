@@ -1,5 +1,7 @@
 package com.boljevac.warehouse.warehouse.common;
 
+import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationException;
+import com.boljevac.warehouse.warehouse.location.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.order.exception.*;
 import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
@@ -148,6 +150,29 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 
+	}
 
+	@ExceptionHandler(NotSufficientStockToStoreException.class)
+	public ResponseEntity<ErrorResponse> handleNotSufficientStockToStoreException(NotSufficientStockToStoreException ex,
+																		   HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.NOT_ACCEPTABLE.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+
+		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
+	}
+
+	@ExceptionHandler(NoUnusedLocationException.class)
+	public ResponseEntity<ErrorResponse>  handleLocationIsLoadedException(NoUnusedLocationException ex,
+																		  HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 }

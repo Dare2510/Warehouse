@@ -63,24 +63,45 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse createOrder(OrderRequest orderRequest) {
+
 		ProductService productService = new ProductService(productRepository);
 		ProductEntity orderedItem = productService.getProductById(orderRequest.getId());
 
-		InventoryEntity item = inventoryRepository.getById(orderedItem.getId());
+		List<InventoryEntity> inventories = inventoryRepository.getAllByProductId(orderedItem);
 
-		if (item.getQuantity() < orderRequest.getQuantity()) {
+		int totalQuantity = inventories.stream().mapToInt(InventoryEntity::getQuantity).sum();
+
+		System.out.println("Total quantity: " + totalQuantity);
+
+		if (totalQuantity < orderRequest.getQuantity()) {
 			throw new OrderExceedsStockException();
 		}
-
-
 
 		OrderEntity orderEntity = new OrderEntity(
 				orderedItem,
 				orderRequest.getQuantity()
 		);
+
+		int remaining = orderRequest.getQuantity();
+		for(InventoryEntity inventoryEntity : inventories) {
+			if(remaining <=0) {
+				break;
+			}
+
+			int available = inventoryEntity.getQuantity();
+
+			if(available <= remaining) {
+				remaining -= available;
+				inventoryEntity.setQuantity(0);
+			} else {
+				inventoryEntity.setQuantity(inventoryEntity.getQuantity() - remaining);
+				remaining = 0;
+			}
+			inventoryRepository.save(inventoryEntity);
+
+		}
+
 		orderRepository.save(orderEntity);
-		item.setQuantity(item.getQuantity() - orderRequest.getQuantity());
-		productRepository.save(orderedItem);
 
 		return new OrderResponse(
 				orderEntity.getProductEntity().getProduct(),

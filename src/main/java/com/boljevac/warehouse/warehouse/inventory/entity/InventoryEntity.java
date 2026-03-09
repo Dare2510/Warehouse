@@ -2,6 +2,7 @@ package com.boljevac.warehouse.warehouse.inventory.entity;
 
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
+import org.springframework.security.core.parameters.P;
 
 @Entity
 @Table(name = "Inventory")

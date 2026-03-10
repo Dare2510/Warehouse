@@ -1,5 +1,6 @@
 package com.boljevac.warehouse.warehouse.common;
 
+import com.boljevac.warehouse.warehouse.location.exceptions.InventoryNotFoundException;
 import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationException;
 import com.boljevac.warehouse.warehouse.location.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.order.exception.*;
@@ -174,5 +175,17 @@ public class GlobalExceptionHandler {
 		);
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
+	@ExceptionHandler(InventoryNotFoundException.class)
+	public ResponseEntity<ErrorResponse>  handleInventoryNotFoundException(InventoryNotFoundException ex,
+																		   HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.NOT_FOUND.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 }

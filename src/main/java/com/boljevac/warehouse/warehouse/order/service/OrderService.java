@@ -27,14 +27,16 @@ public class OrderService {
 	private final OrderRepository orderRepository;
 	private final InventoryRepository inventoryRepository;
 	private final ProductRepository productRepository;
+	private final ProductService productService;
 
 
 	public OrderService(OrderRepository orderRepository,
 						InventoryRepository inventoryRepository,
-						ProductRepository productRepository) {
+						ProductRepository productRepository, ProductService productService) {
 		this.orderRepository = orderRepository;
 		this.inventoryRepository = inventoryRepository;
 		this.productRepository = productRepository;
+		this.productService = productService;
 	}
 
 	public OrderEntity getOrderById(Long id) throws OrderNotFoundException {
@@ -64,14 +66,11 @@ public class OrderService {
 	@Transactional
 	public OrderResponse createOrder(OrderRequest orderRequest) {
 
-		ProductService productService = new ProductService(productRepository);
 		ProductEntity orderedItem = productService.getProductById(orderRequest.getId());
 
-		List<InventoryEntity> inventories = inventoryRepository.getAllByProductId(orderedItem);
+		List<InventoryEntity> inventories = inventoryRepository.getAllByProductEntity(orderedItem);
 
 		int totalQuantity = inventories.stream().mapToInt(InventoryEntity::getQuantity).sum();
-
-		System.out.println("Total quantity: " + totalQuantity);
 
 		if (totalQuantity < orderRequest.getQuantity()) {
 			throw new OrderExceedsStockException();
@@ -115,15 +114,18 @@ public class OrderService {
 	@Transactional
 	public OrderResponse cancelOrder(Long id) {
 		OrderEntity toCancel = getOrderById(id);
-		InventoryEntity item =  inventoryRepository.getById(toCancel.getProductEntity().getId());
 
 
 		if (toCancel.getOrderStatuses().equals(OrderStatuses.ORDER_PLACED)) {
 			toCancel.setOrderStatuses(OrderStatuses.CANCELLED);
 			ProductEntity canceledItem = productRepository.findByProduct(toCancel.getProductEntity().getProduct());
-			item.setQuantity(item.getQuantity() + toCancel.getQuantity());
+			InventoryEntity canceledQuantity = new InventoryEntity(
+					canceledItem,
+					toCancel.getQuantity(),
+					"Block storage"
+			);
 
-			productRepository.save(canceledItem);
+			inventoryRepository.save(canceledQuantity);
 			orderRepository.save(toCancel);
 		} else {
 			throw new OrderCancelNotPossibleException(id);

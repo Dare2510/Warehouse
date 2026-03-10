@@ -26,7 +26,9 @@ public class InventoryService {
 	InventoryEntity stockProduct = inventoryRepository.findById(id).orElseThrow(
 			() ->  new ProductNotFoundException(id)
 	);
-	return new InventoryResponse(stockProduct.getProductId().getProduct(),stockProduct.getQuantity());
+	return new InventoryResponse(inventoryRepository.getByProductEntity(
+			stockProduct.getProductEntity()).getProductEntity().getProduct(),
+			stockProduct.getQuantity());
 
 	}
 	@Transactional
@@ -37,7 +39,7 @@ public class InventoryService {
 		InventoryEntity existingInventoryProduct = inventoryRepository.findById(product.getId()).orElse(null);
 
 		if(existingInventoryProduct!=null) {
-			int currentQuantity = inventoryRepository.getById(product.getId()).getQuantity();
+			int currentQuantity = inventoryRepository.getByProductEntity(product).getQuantity();
 			existingInventoryProduct.setQuantity(currentQuantity+inventoryRequest.getQuantity());
 			inventoryRepository.save(existingInventoryProduct);
 		}
@@ -48,7 +50,7 @@ public class InventoryService {
 
 		inventoryRepository.save(newInventoryProduct);
 
-		return new InventoryResponse(newInventoryProduct.getProductId().getProduct(), newInventoryProduct.getQuantity());
+		return new InventoryResponse(product.getProduct(), newInventoryProduct.getQuantity());
 
 	}
 

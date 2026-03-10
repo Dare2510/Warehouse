@@ -6,10 +6,10 @@ import com.boljevac.warehouse.warehouse.location.Aisle;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
+import com.boljevac.warehouse.warehouse.location.exceptions.InventoryNotFoundException;
 import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationException;
 import com.boljevac.warehouse.warehouse.location.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
-import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,10 +33,11 @@ public class LocationService {
 		for (Aisle aisle : Aisle.values()) {
 			for (int i = firstRack; i <= lastRack; i++) {
 				for (int j = minLevel; j <= maxLevel; j++) {
-					LocationEntity locationEntity = new LocationEntity(
-							null,
-							aisle.name(), i, j, 0
-					);
+					LocationEntity locationEntity = new LocationEntity();
+					locationEntity.setRack(i);
+					locationEntity.setLevel(j);
+					locationEntity.setAisle(aisle.name());
+					locationEntity.setLoaded(false);
 					locationsRepository.save(locationEntity);
 				}
 			}
@@ -47,7 +48,7 @@ public class LocationService {
 	public LocationsResponse storeInventory(LocationsRequest locationsRequest) {
 		InventoryEntity toStore =
 				inventoryRepository.findById(locationsRequest.getInventoryId()).orElseThrow(
-						() -> new ProductNotFoundException(locationsRequest.getInventoryId())
+						() -> new InventoryNotFoundException(locationsRequest.getInventoryId())
 				);
 		Long nextUnusedId = 0L;
 
@@ -71,12 +72,12 @@ public class LocationService {
 
 		LocationEntity toStoreInLocation = locationsRepository.getLocationById(nextUnusedId);
 		toStoreInLocation.setLoaded(true);
-		toStoreInLocation.setProductId(toStore.getProductId());
+		toStoreInLocation.setProductEntity(toStore.getProductEntity());
 		toStoreInLocation.setQuantity(locationsRequest.getQuantity());
 		locationsRepository.save(toStoreInLocation);
 
 		InventoryEntity inventoryEntity = new InventoryEntity(
-				toStoreInLocation.getProductId(),
+				toStoreInLocation.getProductEntity(),
 				toStoreInLocation.getQuantity(),
 				toStoreInLocation.toString()
 		);

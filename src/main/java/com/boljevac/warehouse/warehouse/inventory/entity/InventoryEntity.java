@@ -2,7 +2,6 @@ package com.boljevac.warehouse.warehouse.inventory.entity;
 
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
-import org.springframework.security.core.parameters.P;
 
 @Entity
 @Table(name = "Inventory")
@@ -14,7 +13,7 @@ public class InventoryEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="product_entity_id")
-	private ProductEntity productId;
+	private ProductEntity productEntity;
 
 	@Column(name="Quantity")
 	private int quantity;
@@ -22,8 +21,8 @@ public class InventoryEntity {
 	@Column(name="Location")
 	private String location;
 
-	public InventoryEntity(ProductEntity productId, int quantity, String location) {
-		this.productId = productId;
+	public InventoryEntity(ProductEntity productEntity, int quantity, String location) {
+		this.productEntity = productEntity;
 		this.quantity = quantity;
 		this.location = location;
 	}
@@ -39,12 +38,12 @@ public class InventoryEntity {
 		this.id = id;
 	}
 
-	public ProductEntity getProductId() {
-		return productId;
+	public ProductEntity getProductEntity() {
+		return productEntity;
 	}
 
-	public void setProductId(ProductEntity productId) {
-		this.productId = productId;
+	public void setProductEntity(ProductEntity productEntity) {
+		this.productEntity = productEntity;
 	}
 
 	public int getQuantity() {

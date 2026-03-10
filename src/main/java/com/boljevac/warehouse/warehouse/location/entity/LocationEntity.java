@@ -1,7 +1,10 @@
 package com.boljevac.warehouse.warehouse.location.entity;
 
+import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name="Locations")
@@ -11,9 +14,9 @@ public class LocationEntity {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_entity_id")
-	private ProductEntity productId;
+	private ProductEntity productEntity;
 
 	@Column(name = "Aisle")
 	private String aisle;
@@ -30,8 +33,9 @@ public class LocationEntity {
 	@Column(name = "quantity")
 	private int quantity;
 
-	public LocationEntity(ProductEntity productId, String aisle, int rack, int level, int quantity) {
-		this.productId = productId;
+	public LocationEntity(ProductEntity productEntity,
+						  String aisle, int rack, int level, int quantity) {
+		this.productEntity = productEntity;
 		this.aisle = aisle;
 		this.rack = rack;
 		this.level = level;
@@ -87,12 +91,12 @@ public class LocationEntity {
 		return " "+aisle +"-"+ rack+"-"+level;
 	}
 
-	public ProductEntity getProductId() {
-		return productId;
+	public ProductEntity getProductEntity() {
+		return productEntity;
 	}
 
-	public void setProductId(ProductEntity productId) {
-		this.productId = productId;
+	public void setProductEntity(ProductEntity productEntity) {
+		this.productEntity = productEntity;
 	}
 
 	public int getQuantity() {

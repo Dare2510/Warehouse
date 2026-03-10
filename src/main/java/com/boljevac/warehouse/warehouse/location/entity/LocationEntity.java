@@ -1,10 +1,7 @@
 package com.boljevac.warehouse.warehouse.location.entity;
 
-import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
-
-import java.util.List;
 
 @Entity
 @Table(name="Locations")

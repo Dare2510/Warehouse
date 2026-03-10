@@ -23,29 +23,30 @@ public class InventoryService {
 	}
 
 	public InventoryResponse getStock(Long id) {
-	InventoryEntity stockProduct = inventoryRepository.findById(id).orElseThrow(
-			() ->  new ProductNotFoundException(id)
-	);
-	return new InventoryResponse(inventoryRepository.getByProductEntity(
-			stockProduct.getProductEntity()).getProductEntity().getProduct(),
-			stockProduct.getQuantity());
+		InventoryEntity stockProduct = inventoryRepository.findById(id).orElseThrow(
+				() -> new ProductNotFoundException(id)
+		);
+		return new InventoryResponse(inventoryRepository.getByProductEntity(
+				stockProduct.getProductEntity()).getProductEntity().getProduct(),
+				stockProduct.getQuantity());
 
 	}
+
 	@Transactional
 	public InventoryResponse createStock(InventoryRequest inventoryRequest) {
-		ProductEntity product =  productRepository.findById(inventoryRequest.getProductId()).orElseThrow(
-				() ->  new ProductNotFoundException(inventoryRequest.getProductId())
+		ProductEntity product = productRepository.findById(inventoryRequest.getProductId()).orElseThrow(
+				() -> new ProductNotFoundException(inventoryRequest.getProductId())
 		);
 		InventoryEntity existingInventoryProduct = inventoryRepository.findById(product.getId()).orElse(null);
 
-		if(existingInventoryProduct!=null) {
+		if (existingInventoryProduct != null) {
 			int currentQuantity = inventoryRepository.getByProductEntity(product).getQuantity();
-			existingInventoryProduct.setQuantity(currentQuantity+inventoryRequest.getQuantity());
+			existingInventoryProduct.setQuantity(currentQuantity + inventoryRequest.getQuantity());
 			inventoryRepository.save(existingInventoryProduct);
 		}
 
 		InventoryEntity newInventoryProduct = new InventoryEntity(
-				product,inventoryRequest.getQuantity(),"Block storage"
+				product, inventoryRequest.getQuantity(), "Block storage"
 		);
 
 		inventoryRepository.save(newInventoryProduct);

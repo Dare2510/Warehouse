@@ -2,7 +2,7 @@ package com.boljevac.warehouse.warehouse.location.service;
 
 import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
-import com.boljevac.warehouse.warehouse.location.Aisle;
+import com.boljevac.warehouse.warehouse.location.entity.Aisle;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
@@ -27,16 +27,18 @@ public class LocationService {
 		final int firstRack = 1;
 		final int lastRack = 10;
 
-		final int maxLevel = 6;
 		final int minLevel = 1;
+		final int maxLevel = 6;
+
 
 		for (Aisle aisle : Aisle.values()) {
 			for (int i = firstRack; i <= lastRack; i++) {
 				for (int j = minLevel; j <= maxLevel; j++) {
 					LocationEntity locationEntity = new LocationEntity();
+					locationEntity.setAisle(aisle.name());
 					locationEntity.setRack(i);
 					locationEntity.setLevel(j);
-					locationEntity.setAisle(aisle.name());
+
 					locationEntity.setLoaded(false);
 					locationsRepository.save(locationEntity);
 				}

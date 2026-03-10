@@ -12,13 +12,13 @@ public class InventoryEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="product_entity_id")
+	@JoinColumn(name = "product_entity_id")
 	private ProductEntity productEntity;
 
-	@Column(name="Quantity")
+	@Column(name = "quantity")
 	private int quantity;
 
-	@Column(name="Location")
+	@Column(name = "location")
 	private String location;
 
 	public InventoryEntity(ProductEntity productEntity, int quantity, String location) {

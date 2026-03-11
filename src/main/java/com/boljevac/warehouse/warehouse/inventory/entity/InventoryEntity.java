@@ -15,8 +15,19 @@ public class InventoryEntity {
 	@JoinColumn(name = "product_entity_id")
 	private ProductEntity productEntity;
 
-	@Column(name = "quantity")
+	@Column(name = "quantity", nullable = false)
 	private int quantity;
+
+	public double getTotalWeight() {
+		return totalWeight;
+	}
+
+	public void setTotalWeight(double totalWeight) {
+		this.totalWeight = totalWeight;
+	}
+
+	@Column(name="total_weight", nullable = false)
+	private double totalWeight;
 
 	@Column(name = "location")
 	private String location;
@@ -24,6 +35,7 @@ public class InventoryEntity {
 	public InventoryEntity(ProductEntity productEntity, int quantity, String location) {
 		this.productEntity = productEntity;
 		this.quantity = quantity;
+		this.totalWeight = quantity* productEntity.getWeightPerPiece();
 		this.location = location;
 	}
 

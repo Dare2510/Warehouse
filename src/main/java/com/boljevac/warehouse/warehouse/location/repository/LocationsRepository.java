@@ -7,6 +7,5 @@ import java.util.List;
 
 public interface LocationsRepository extends JpaRepository<LocationEntity, Long> {
 
-	List<LocationEntity> getByLoaded(boolean loaded);
 	LocationEntity getLocationById(Long locationId);
 }

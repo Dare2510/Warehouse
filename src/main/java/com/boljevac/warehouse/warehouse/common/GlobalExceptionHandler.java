@@ -1,8 +1,10 @@
 package com.boljevac.warehouse.warehouse.common;
 
-import com.boljevac.warehouse.warehouse.location.exceptions.InventoryNotFoundException;
+import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationLoadLimitExceededException;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationsAlreadyCreatedException;
 import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationException;
-import com.boljevac.warehouse.warehouse.location.exceptions.NotSufficientStockToStoreException;
+import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.order.exception.*;
 import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
@@ -166,7 +168,7 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(NoUnusedLocationException.class)
-	public ResponseEntity<ErrorResponse>  handleLocationIsLoadedException(NoUnusedLocationException ex,
+	public ResponseEntity<ErrorResponse>  handleNoUnusedLocationException(NoUnusedLocationException ex,
 																		  HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
@@ -187,5 +189,28 @@ public class GlobalExceptionHandler {
 		);
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+	//Maximum 300 locations
+	@ExceptionHandler(LocationsAlreadyCreatedException.class)
+	public ResponseEntity<ErrorResponse> handleLocationsAlreadyCreatedException(LocationsAlreadyCreatedException ex,
+																		   HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+	//Max weight per location = 1000
+	@ExceptionHandler(LocationLoadLimitExceededException.class)
+	public ResponseEntity<ErrorResponse> handleLocationLoadLimitExceededException(LocationLoadLimitExceededException ex,
+																				  HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 }

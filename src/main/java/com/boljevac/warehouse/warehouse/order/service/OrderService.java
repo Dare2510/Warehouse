@@ -92,8 +92,11 @@ public class OrderService {
 			if(available <= remaining) {
 				remaining -= available;
 				inventoryEntity.setQuantity(0);
+				inventoryEntity.setTotalWeight(0);
 			} else {
 				inventoryEntity.setQuantity(inventoryEntity.getQuantity() - remaining);
+				inventoryEntity.setTotalWeight(inventoryEntity.getTotalWeight()
+						- (orderedItem.getWeightPerPiece()*remaining));
 				remaining = 0;
 			}
 			inventoryRepository.save(inventoryEntity);
@@ -124,7 +127,6 @@ public class OrderService {
 					toCancel.getQuantity(),
 					"Block storage"
 			);
-
 			inventoryRepository.save(canceledQuantity);
 			orderRepository.save(toCancel);
 		} else {

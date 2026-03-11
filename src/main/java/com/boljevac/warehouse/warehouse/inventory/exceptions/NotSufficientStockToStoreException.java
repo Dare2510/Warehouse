@@ -1,4 +1,4 @@
-package com.boljevac.warehouse.warehouse.location.exceptions;
+package com.boljevac.warehouse.warehouse.inventory.exceptions;
 
 public class NotSufficientStockToStoreException extends RuntimeException {
 

@@ -15,20 +15,24 @@ public class LocationEntity {
 	@JoinColumn(name = "product_entity_id")
 	private ProductEntity productEntity;
 
-	@Column(name = "Aisle")
+	@Column(name = "aisle")
 	private String aisle;
 
-	@Column(name="Rack")
+	@Column(name="rack")
 	private int rack;
 
-	@Column(name = "Level")
+	@Column(name = "level")
 	private int level;
-
-	@Column(name="Loaded")
-	private boolean loaded;
 
 	@Column(name = "quantity")
 	private int quantity;
+
+	@Column(name="loaded")
+	private boolean loaded;
+
+	@Column(name="remaining_weight_to_store")
+	private double remainingWeightToStore;
+
 
 	public LocationEntity(ProductEntity productEntity,
 						  String aisle, int rack, int level, int quantity) {
@@ -37,6 +41,7 @@ public class LocationEntity {
 		this.rack = rack;
 		this.level = level;
 		this.quantity = quantity;
+		this.remainingWeightToStore = 1000.0;
 		this.loaded = false;
 	}
 
@@ -102,5 +107,13 @@ public class LocationEntity {
 
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+
+	public double getRemainingWeightToStore() {
+		return remainingWeightToStore;
+	}
+
+	public void setRemainingWeightToStore(double remainingWeightToStore) {
+		this.remainingWeightToStore = remainingWeightToStore;
 	}
 }

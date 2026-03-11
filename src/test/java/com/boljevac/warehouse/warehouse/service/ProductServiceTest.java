@@ -1,6 +1,5 @@
 package com.boljevac.warehouse.warehouse.service;
 
-
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
@@ -70,7 +69,7 @@ public class ProductServiceTest {
 		ProductResponse response = productService.createItem(request);
 
 		verify(productRepository).save(any(ProductEntity.class));
-		assertEquals("TestProduct", response.getName());
+		assertEquals("TestProduct", response.name());
 		assertEquals(50, response.getQuantity());
 
 	}

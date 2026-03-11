@@ -21,18 +21,10 @@ public class ProductEntity {
 	@Column(name="weight_per_piece", nullable = false)
 	private double weightPerPiece;
 
-//	@Column(name="total_stock",nullable = false)
-//	private int quantity;
-
-//	@Column(name="total_stock_value",nullable = false)
-//	private BigDecimal totalValue;
-
 	public ProductEntity(String product, BigDecimal pricePerPiece, double weightPerPiece ) {
 		this.product = product;
 		this.pricePerPiece = pricePerPiece;
 		this.weightPerPiece = weightPerPiece;
-//		this.quantity = quantity;
-//		this.totalValue = new BigDecimal(valuePerPiece.doubleValue() * quantity);
 	}
 
 	public ProductEntity() {
@@ -50,10 +42,6 @@ public class ProductEntity {
 		return pricePerPiece;
 	}
 
-//	public int getQuantity() {
-//		return quantity;
-//	}
-
 	public void setProduct(String product) {
 		this.product = product;
 	}
@@ -62,17 +50,6 @@ public class ProductEntity {
 		this.pricePerPiece = pricePerPiece;
 	}
 
-//	public void setQuantity(int quantity) {
-//		this.quantity = quantity;
-//	}
-//
-//	public BigDecimal getTotalValue() {
-//		return totalValue;
-//	}
-//
-//	public void setTotalValue(BigDecimal totalValue) {
-//		this.totalValue = totalValue;
-//	}
 	public double getWeightPerPiece() {
 		return weightPerPiece;
 	}

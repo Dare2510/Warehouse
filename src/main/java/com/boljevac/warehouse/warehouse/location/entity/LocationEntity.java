@@ -15,22 +15,22 @@ public class LocationEntity {
 	@JoinColumn(name = "product_entity_id")
 	private ProductEntity productEntity;
 
-	@Column(name = "aisle")
+	@Column(name = "aisle",nullable = false)
 	private String aisle;
 
-	@Column(name="rack")
+	@Column(name="rack",nullable = false)
 	private int rack;
 
-	@Column(name = "level")
+	@Column(name = "level",nullable = false)
 	private int level;
 
-	@Column(name = "quantity")
+	@Column(name = "quantity",nullable = false)
 	private int quantity;
 
-	@Column(name="loaded")
+	@Column(name="loaded",nullable = false)
 	private boolean loaded;
 
-	@Column(name="remaining_weight_to_store")
+	@Column(name="remaining_weight_to_store",nullable = false)
 	private double remainingWeightToStore;
 
 

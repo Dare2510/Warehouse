@@ -13,7 +13,13 @@ import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationExce
 import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LocationService {
@@ -80,9 +86,6 @@ public class LocationService {
 		}
 		toStore.setQuantity(toStore.getQuantity() - locationsRequest.getQuantity());
 		inventoryRepository.save(toStore);
-		if (toStore.getQuantity() == 0) {
-			inventoryRepository.deleteById(toStore.getId());
-		}
 
 		double weight = toStore.getProductEntity().getWeightPerPiece();
 		int quantity = locationsRequest.getQuantity();
@@ -106,7 +109,24 @@ public class LocationService {
 		inventoryRepository.save(toStore);
 
 		inventoryRepository.save(inventoryEntity);
-		return new LocationsResponse(toStoreInLocation.getId(), toStoreInLocation.toString());
+		return new LocationsResponse(
+				toStoreInLocation.getId(),
+				toStoreInLocation.getProductEntity().getProduct(),
+				toStoreInLocation.getProductEntity().getWeightPerPiece(),
+				toStoreInLocation.getQuantity()*toStoreInLocation.getProductEntity().getWeightPerPiece(),
+				toStoreInLocation.toString());
 
+	}
+	@Transactional
+	public Page<LocationsResponse> getInventories(Pageable pageable) {
+		Page<LocationEntity> locationsPage = locationsRepository.findByProductEntityIsNotNull(pageable);
+
+		return locationsPage.map(location -> new LocationsResponse(
+				location.getId(),
+				location.getProductEntity().getProduct(),
+				location.getProductEntity().getWeightPerPiece(),
+				location.getQuantity()*location.getProductEntity().getWeightPerPiece(),
+				location.toString()
+		));
 	}
 }

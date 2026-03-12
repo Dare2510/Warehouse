@@ -31,7 +31,7 @@ public class LocationEntity {
 	private boolean loaded;
 
 	@Column(name="remaining_weight_to_store",nullable = false)
-	private double remainingWeightToStore;
+	private double remainingWeightToStore = 1000;
 
 
 	public LocationEntity(ProductEntity productEntity,
@@ -41,7 +41,6 @@ public class LocationEntity {
 		this.rack = rack;
 		this.level = level;
 		this.quantity = quantity;
-		this.remainingWeightToStore = 1000.0;
 		this.loaded = false;
 	}
 

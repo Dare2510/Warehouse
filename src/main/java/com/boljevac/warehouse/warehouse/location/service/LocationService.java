@@ -101,7 +101,9 @@ public class LocationService {
 				location.getProductEntity().getWeightPerPiece(),
 				location.getQuantity() * location.getProductEntity().getWeightPerPiece(),
 				location.toString()));
-	} // Helper Methods
+	}
+
+	// Helper Methods
 
 	private InventoryEntity getEntityToStoreFrom(LocationsRequest locationsRequest) {
 

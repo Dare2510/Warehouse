@@ -4,6 +4,7 @@ import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
+import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
@@ -29,61 +30,112 @@ public class OrderService {
 	private final OrderRepository orderRepository;
 	private final InventoryRepository inventoryRepository;
 	private final ProductRepository productRepository;
+	private final LocationsRepository locationsRepository;
 	private final ProductService productService;
 
 
 	public OrderService(OrderRepository orderRepository,
 						InventoryRepository inventoryRepository,
-						ProductRepository productRepository, ProductService productService) {
+						ProductRepository productRepository, LocationsRepository locationsRepository, ProductService productService) {
 		this.orderRepository = orderRepository;
 		this.inventoryRepository = inventoryRepository;
 		this.productRepository = productRepository;
+		this.locationsRepository = locationsRepository;
 		this.productService = productService;
 	}
 
-	public OrderEntity getOrderById(Long id) throws OrderNotFoundException {
-		return orderRepository.findById(id).orElseThrow(
-				OrderNotFoundException::new
-		);
-	}
-
-	public List<ProductResponse> getProducts() {
-		List<ProductResponse> products = new ArrayList<>();
+	public List<ProductResponse> getListOfProducts() {
+		List<ProductResponse> productList = new ArrayList<>();
 
 		for (ProductEntity productEntity : productRepository.findAll()) {
-			products.add(new ProductResponse(
+			productList.add(new ProductResponse(
 					productEntity.getId(),
 					productEntity.getProduct(),
 					productEntity.getPricePerPiece(),
 					productEntity.getWeightPerPiece()));
 		}
 
-		if (products.isEmpty()) {
+		if (productList.isEmpty()) {
 			throw new EmptyProductRepositoryException();
 		}
 
-		return products;
+		return productList;
 	}
+
 
 	@Transactional
 	public OrderResponse createOrder(OrderRequest orderRequest) {
 
 		ProductEntity orderedItem = productService.getProductById(orderRequest.getId());
-
 		List<InventoryEntity> inventories = inventoryRepository.getAllByProductEntity(orderedItem);
 
-		int totalQuantity = inventories.stream().mapToInt(InventoryEntity::getQuantity).sum();
+		int totalAvailableQuantity = inventories.stream().mapToInt(InventoryEntity::getQuantity).sum();
+		int orderedQuantity = orderRequest.getQuantity();
+		int remainingToFulfill = orderRequest.getQuantity();
 
-		if (totalQuantity < orderRequest.getQuantity()) {
-			throw new OrderExceedsStockException();
+		validateOrderQuantity(totalAvailableQuantity, orderedQuantity);
+
+		OrderEntity fulfilledOrder = getQuantitiesAndReturnOrder(orderedItem, remainingToFulfill, inventories);
+
+		orderRepository.save(fulfilledOrder);
+
+		return mapToResponse(fulfilledOrder);
+
+	}
+
+	@Transactional
+	public OrderResponse cancelOrder(Long id) {
+		OrderEntity orderToCancel = getOrderById(id);
+
+		boolean cancelIsValid = validateCancelRequest(orderToCancel);
+
+		if (cancelIsValid) {
+			updateInventory(orderToCancel);
+		} else {
+				throw new OrderCancelNotPossibleException(orderToCancel.getId());
+			}
+		return mapToResponse(orderToCancel);
+	}
+
+	//Helper Methods
+
+	private boolean validateCancelRequest(OrderEntity orderToCancel) {
+		return orderToCancel.getOrderStatuses().equals(OrderStatuses.ORDER_PLACED);
+	}
+
+	private void updateInventory(OrderEntity orderToCancel){
+
+			orderToCancel.setOrderStatuses(OrderStatuses.CANCELLED);
+			ProductEntity canceledItem = productService.getProductById(orderToCancel.getId());
+			LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, orderToCancel.getQuantity(),true);
+
+			InventoryEntity canceledQuantity = new InventoryEntity(
+					canceledItem,
+					newLocation,
+					orderToCancel.getQuantity(),
+					newLocation.toString());
+
+			inventoryRepository.save(canceledQuantity);
+			orderRepository.save(orderToCancel);
+			locationsRepository.save(newLocation);
+
 		}
 
-		OrderEntity orderEntity = new OrderEntity(
-				orderedItem,
-				orderRequest.getQuantity()
+	private OrderEntity getOrderById(Long id) throws OrderNotFoundException {
+		return orderRepository.findById(id).orElseThrow(
+				OrderNotFoundException::new
 		);
+	}
 
-		int remaining = orderRequest.getQuantity();
+	private void validateOrderQuantity(int totalStockQuantity, int orderedQuantity) throws OrderExceedsStockException {
+		if (totalStockQuantity < orderedQuantity) {
+			throw new OrderExceedsStockException();
+		}
+	}
+
+	private OrderEntity getQuantitiesAndReturnOrder(ProductEntity product,int remaining,List<InventoryEntity> inventories) {
+
+		int orderedQuantity = remaining;
 
 		for(InventoryEntity inventoryEntity : inventories) {
 			if(remaining <=0) {
@@ -109,7 +161,7 @@ public class OrderService {
 			} else {
 				inventoryEntity.setQuantity(inventoryEntity.getQuantity() - remaining);
 				inventoryEntity.setTotalWeight(inventoryEntity.getTotalWeight()
-						- (orderedItem.getWeightPerPiece()*remaining));
+						- (inventoryEntity.getProductEntity().getWeightPerPiece()*remaining));
 
 				inventoryEntity.getLocationEntity().setQuantity(inventoryEntity.getLocationEntity().getQuantity() - remaining);
 				inventoryEntity.getLocationEntity().setRemainingWeightToStore(inventoryEntity.getLocationEntity().getRemainingWeightToStore()
@@ -120,43 +172,16 @@ public class OrderService {
 
 		}
 
-		orderRepository.save(orderEntity);
+		return new OrderEntity(product,orderedQuantity);
 
+	}
+
+	private OrderResponse mapToResponse(OrderEntity orderEntity) {
 		return new OrderResponse(
 				orderEntity.getProductEntity().getProduct(),
 				orderEntity.getQuantity(),
 				orderEntity.getTotalPrice(),
 				orderEntity.getOrderStatuses()
-		);
-
-	}
-
-	@Transactional
-	public OrderResponse cancelOrder(Long id) {
-		OrderEntity toCancel = getOrderById(id);
-
-
-		if (toCancel.getOrderStatuses().equals(OrderStatuses.ORDER_PLACED)) {
-			toCancel.setOrderStatuses(OrderStatuses.CANCELLED);
-			ProductEntity canceledItem = productRepository.findByProduct(toCancel.getProductEntity());
-			LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, toCancel.getQuantity(),true);
-			InventoryEntity canceledQuantity = new InventoryEntity(
-					canceledItem,
-					newLocation,
-					toCancel.getQuantity(),
-					newLocation.toString());
-
-			inventoryRepository.save(canceledQuantity);
-			orderRepository.save(toCancel);
-		} else {
-			throw new OrderCancelNotPossibleException(id);
-		}
-
-		return new OrderResponse(
-				toCancel.getProductEntity().getProduct(),
-				toCancel.getQuantity(),
-				toCancel.getTotalPrice(),
-				toCancel.getOrderStatuses()
 		);
 	}
 

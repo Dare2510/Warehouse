@@ -128,24 +128,24 @@ public class OrderControllerTest {
 
 	@Test
 	public void getProducts_expecting_200() throws Exception {
-		when(orderService.getProducts()).thenReturn(Collections.emptyList());
+		when(orderService.getListOfProducts()).thenReturn(Collections.emptyList());
 
 		mockMvc
 				.perform(get("/api/warehouse/orders/products"))
 				.andExpect(status().isOk());
 
-		verify(orderService).getProducts();
+		verify(orderService).getListOfProducts();
 	}
 
 	@Test
 	public void getProducts_expecting_404() throws Exception {
-		when(orderService.getProducts()).thenThrow(EmptyProductRepositoryException.class);
+		when(orderService.getListOfProducts()).thenThrow(EmptyProductRepositoryException.class);
 
 		mockMvc
 				.perform(get("/api/warehouse/orders/products"))
 				.andExpect(status().isNotFound());
 
-		verify(orderService).getProducts();
+		verify(orderService).getListOfProducts();
 	}
 }
 

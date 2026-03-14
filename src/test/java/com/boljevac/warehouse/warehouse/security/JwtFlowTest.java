@@ -60,7 +60,7 @@ public class JwtFlowTest {
 
 	@Test
 	void getOrders_withClerkLogin_expecting403() throws Exception {
-		when(orderService.getProducts())
+		when(orderService.getListOfProducts())
 				.thenReturn(List.of(new ProductResponse(
 						1L,
 						"TestProduct",
@@ -76,7 +76,7 @@ public class JwtFlowTest {
 
 	@Test
 	void getOrders_withClerkLogin_expecting200() throws Exception {
-		when(orderService.getProducts()).thenReturn(
+		when(orderService.getListOfProducts()).thenReturn(
 				List.of(new ProductResponse(
 						1L,
 						"TestProduct",

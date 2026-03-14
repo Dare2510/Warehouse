@@ -23,7 +23,7 @@ public class OrderController {
 
 	@GetMapping("/products")
 	public ResponseEntity<List<ProductResponse>> getAllProducts() {
-		return ResponseEntity.ok(orderService.getProducts());
+		return ResponseEntity.ok(orderService.getListOfProducts());
 	}
 
 	//Required are product id and order quantity

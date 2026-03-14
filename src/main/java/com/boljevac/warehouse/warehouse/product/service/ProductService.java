@@ -24,33 +24,33 @@ public class ProductService {
 				orElseThrow(() -> new ProductNotFoundException(id));
 	}
 
-	public ProductResponse createItem(ProductRequest productRequest) {
-		ProductEntity newProductEntity = new ProductEntity(
+	public ProductResponse createAndValidateNewProduct(ProductRequest productRequest) {
+		ProductEntity newProduct = new ProductEntity(
 				productRequest.getProduct(),
 				productRequest.getValue(),
 				productRequest.getWeight()
 		);
 
-		ProductEntity checkProduct = productRepository.findByProduct(productRequest.getProduct());
-		if (checkProduct != null) {
-			throw new ProductDuplicateCreationException(newProductEntity);
+		boolean checkForDuplicate = productRepository.existsByProduct(newProduct.getProduct());
+
+		if (checkForDuplicate) {
+			throw new ProductDuplicateCreationException(newProduct);
 		}
+		productRepository.save(newProduct);
 
-
-		productRepository.save(newProductEntity);
-
-		return new ProductResponse(newProductEntity.getId(),
-				newProductEntity.getProduct(),
-				newProductEntity.getPricePerPiece(),
-				newProductEntity.getWeightPerPiece());
+		return new ProductResponse(
+				newProduct.getId(),
+				newProduct.getProduct(),
+				newProduct.getPricePerPiece(),
+				newProduct.getWeightPerPiece());
 	}
 
-	public void deleteItem(Long id) {
+	public void deleteProduct(Long id) {
 		ProductEntity toDelete = getProductById(id);
 		productRepository.delete(toDelete);
 	}
 
-	public Page<ProductResponse> getAll(Pageable pageable) {
+	public Page<ProductResponse> getAllProducts(Pageable pageable) {
 		Page<ProductEntity> items = productRepository.findAll(pageable);
 
 		return items.map(productEntity -> new ProductResponse(
@@ -60,13 +60,12 @@ public class ProductService {
 				productEntity.getWeightPerPiece()
 		));
 	}
-		//productEntity.getQuantity()
+
 	public void updateProduct(Long id, ProductRequest productRequest) {
-		ProductEntity toUpdate = getProductById(id);
-		toUpdate.setProduct(productRequest.getProduct());
-		//toUpdate.setQuantity(productRequest.getQuantity());
-		toUpdate.setPricePerPiece(productRequest.getValue());
-		productRepository.save(toUpdate);
+		ProductEntity productToUpdate = getProductById(id);
+		productToUpdate.setProduct(productRequest.getProduct());
+		productToUpdate.setPricePerPiece(productRequest.getValue());
+		productRepository.save(productToUpdate);
 
 	}
 

@@ -49,18 +49,18 @@ public class ProductControllerTest {
 	@Test
 	void getProducts_expecting_200() throws Exception {
 
-		when(productService.getAll(any(Pageable.class))).thenReturn(Page.empty());
+		when(productService.getAllProducts(any(Pageable.class))).thenReturn(Page.empty());
 
 		mockMvc.perform(get("/api/warehouse/products"))
 				.andExpect(status().isOk());
 
-		verify(productService).getAll(any(Pageable.class));
+		verify(productService).getAllProducts(any(Pageable.class));
 
 	}
 
 	@Test
 	void createProduct_expecting_201() throws Exception {
-		when(productService.createItem(any(ProductRequest.class)))
+		when(productService.createAndValidateNewProduct(any(ProductRequest.class)))
 				.thenReturn(new ProductResponse(
 						1L,
 						"TestProduct",
@@ -74,13 +74,13 @@ public class ProductControllerTest {
 								""")).
 				andExpect(status().isCreated());
 
-		verify(productService).createItem(any(ProductRequest.class));
+		verify(productService).createAndValidateNewProduct(any(ProductRequest.class));
 	}
 
 	//Validation Test , invalid Json -> Response Bad Request
 	@Test
 	void createProduct_expecting_400() throws Exception {
-		when(productService.createItem(any(ProductRequest.class)))
+		when(productService.createAndValidateNewProduct(any(ProductRequest.class)))
 				.thenReturn(new ProductResponse(
 						1L,
 						"TestProduct",
@@ -94,7 +94,7 @@ public class ProductControllerTest {
 								"""))
 				.andExpect(status().isBadRequest());
 
-		verify(productService, never()).createItem(any(ProductRequest.class));
+		verify(productService, never()).createAndValidateNewProduct(any(ProductRequest.class));
 	}
 
 

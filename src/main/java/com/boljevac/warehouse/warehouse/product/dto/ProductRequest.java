@@ -18,11 +18,6 @@ public class ProductRequest {
 	@Positive(message = "weight must be >0")
 	private double weight;
 
-//	@NotNull(message = "quantity is required")
-//	@PositiveOrZero(message = "Stock cannot be negative")
-//	private int quantity;
-
-
 	public ProductRequest(String product, BigDecimal value, double weight) {
 		this.product = product;
 		this.value = value;

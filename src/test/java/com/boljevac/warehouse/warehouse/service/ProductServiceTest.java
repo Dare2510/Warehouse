@@ -43,7 +43,7 @@ public class ProductServiceTest {
 		when(productRepository.findByProduct(request.getProduct())).thenReturn(productEntity);
 
 		assertThrows(ProductDuplicateCreationException.class, () -> {
-			productService.createItem(request);
+			productService.createAndValidateNewProduct(request);
 		});
 
 		verify(productRepository, never()).save(any());
@@ -66,7 +66,7 @@ public class ProductServiceTest {
 
 		when(productRepository.save(any(ProductEntity.class))).thenReturn(productEntity);
 
-		ProductResponse response = productService.createItem(request);
+		ProductResponse response = productService.createAndValidateNewProduct(request);
 
 		verify(productRepository).save(any(ProductEntity.class));
 		assertEquals("TestProduct", response.name());

@@ -22,18 +22,18 @@ public class ProductController {
 
 	@PostMapping("/create")
 	public ResponseEntity<ProductResponse> createItem(@RequestBody @Valid ProductRequest productRequest) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(service.createItem(productRequest));
+		return ResponseEntity.status(HttpStatus.CREATED).body(service.createAndValidateNewProduct(productRequest));
 	}
 
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
-		service.deleteItem(id);
+		service.deleteProduct(id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping
 	public ResponseEntity<Page<ProductResponse>> getItems(Pageable pageable) {
-		return ResponseEntity.status(HttpStatus.OK).body(service.getAll(pageable));
+		return ResponseEntity.status(HttpStatus.OK).body(service.getAllProducts(pageable));
 	}
 
 	@PutMapping("/{id}")

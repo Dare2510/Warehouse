@@ -84,6 +84,7 @@ public class OrderService {
 		);
 
 		int remaining = orderRequest.getQuantity();
+
 		for(InventoryEntity inventoryEntity : inventories) {
 			if(remaining <=0) {
 				break;
@@ -93,12 +94,26 @@ public class OrderService {
 
 			if(available <= remaining) {
 				remaining -= available;
+				inventoryEntity.getLocationEntity().setLoaded(false);
+				inventoryEntity.getLocationEntity().setQuantity(0);
+				inventoryEntity.getLocationEntity().setProductEntity(null);
+				inventoryEntity.getLocationEntity().setRemainingWeightToStore(1000);
+
 				inventoryEntity.setQuantity(0);
 				inventoryEntity.setTotalWeight(0);
+				inventoryEntity.setLocationEntity(null);
+				inventoryEntity.setProductEntity(null);
+
+
+
 			} else {
 				inventoryEntity.setQuantity(inventoryEntity.getQuantity() - remaining);
 				inventoryEntity.setTotalWeight(inventoryEntity.getTotalWeight()
 						- (orderedItem.getWeightPerPiece()*remaining));
+
+				inventoryEntity.getLocationEntity().setQuantity(inventoryEntity.getLocationEntity().getQuantity() - remaining);
+				inventoryEntity.getLocationEntity().setRemainingWeightToStore(inventoryEntity.getLocationEntity().getRemainingWeightToStore()
+						+(inventoryEntity.getProductEntity().getWeightPerPiece()*remaining));
 				remaining = 0;
 			}
 			inventoryRepository.save(inventoryEntity);
@@ -123,7 +138,7 @@ public class OrderService {
 
 		if (toCancel.getOrderStatuses().equals(OrderStatuses.ORDER_PLACED)) {
 			toCancel.setOrderStatuses(OrderStatuses.CANCELLED);
-			ProductEntity canceledItem = productRepository.findByProduct(toCancel.getProductEntity().getProduct());
+			ProductEntity canceledItem = productRepository.findByProduct(toCancel.getProductEntity());
 			LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, toCancel.getQuantity(),true);
 			InventoryEntity canceledQuantity = new InventoryEntity(
 					canceledItem,

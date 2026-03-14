@@ -5,9 +5,6 @@ import com.boljevac.warehouse.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
 
-import java.util.Collections;
-import java.util.List;
-
 @Entity
 @Table(name = "Inventory")
 public class InventoryEntity {

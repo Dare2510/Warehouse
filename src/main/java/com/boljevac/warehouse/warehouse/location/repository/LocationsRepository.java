@@ -1,5 +1,6 @@
 package com.boljevac.warehouse.warehouse.location.repository;
 
+import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,4 +12,5 @@ public interface LocationsRepository extends JpaRepository<LocationEntity, Long>
 
 	LocationEntity getLocationById(Long locationId);
 	Page<LocationEntity> findByProductEntityIsNotNull(Pageable pageable);
+	InventoryEntity findInventoryEntityById(Long inventoryId);
 }

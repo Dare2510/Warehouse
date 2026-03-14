@@ -74,4 +74,9 @@ public class ProductEntity {
 		result = 31 * result + Double.hashCode(weightPerPiece);
 		return result;
 	}
+
+	@Override
+	public String toString() {
+		return " "+product;
+	}
 }

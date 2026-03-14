@@ -1,16 +1,17 @@
 package com.boljevac.warehouse.warehouse.location.service;
 
 import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
+import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
+import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
-import com.boljevac.warehouse.warehouse.location.entity.Aisle;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
+import com.boljevac.warehouse.warehouse.location.entity.Aisle;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
-import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
+import com.boljevac.warehouse.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationLoadLimitExceededException;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationsAlreadyCreatedException;
 import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationException;
-import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.transaction.Transactional;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LocationService {
-
+	private static final double MAX_LOCATION_WEIGHT = 1000;
 	private final LocationsRepository locationsRepository;
 	private final InventoryRepository inventoryRepository;
 
@@ -32,75 +33,64 @@ public class LocationService {
 	public void createLocations() {
 		final int firstRack = 1;
 		final int lastRack = 10;
-
 		final int minLevel = 1;
 		final int maxLevel = 6;
-
+		if (locationsRepository.count() > 0) {
+			throw new LocationsAlreadyCreatedException();
+		}
 		for (Aisle aisle : Aisle.values()) {
-			for (int i = firstRack; i <= lastRack; i++) {
-				for (int j = minLevel; j <= maxLevel; j++) {
+			if (aisle.name().equalsIgnoreCase(Aisle.Floor.toString())) {
+				continue;
+			}
+			for (int rack = firstRack; rack <= lastRack; rack++) {
+				for (int level = minLevel; level <= maxLevel; level++) {
 					LocationEntity locationEntity = new LocationEntity();
-
 					locationEntity.setAisle(aisle.name());
-					locationEntity.setRack(i);
-					locationEntity.setLevel(j);
-
+					locationEntity.setRack(rack);
+					locationEntity.setLevel(level);
 					locationEntity.setLoaded(false);
+					locationEntity.setQuantity(0);
+					locationEntity.setProductEntity(null);
+					locationEntity.setRemainingWeightToStore(MAX_LOCATION_WEIGHT);
+					locationEntity.setLocationType(LocationType.STORAGE);
 					locationsRepository.save(locationEntity);
-					if(locationEntity.getId()>300){
-						locationsRepository.delete(locationEntity);
-						throw new LocationsAlreadyCreatedException();
-					}
-
 				}
 			}
 		}
-
 	}
+
 	@Transactional
 	public LocationsResponse storeInventory(LocationsRequest toStoreRequest) {
 
 		InventoryEntity toStoreFrom = getEntityToStoreFrom(toStoreRequest);
-		Long freeLocationId = getAvailableLocationID();
-		LocationEntity toStoreInLocation = getLocationEntity();
+		LocationEntity fromLocation = toStoreFrom.getLocationEntity();
+		LocationEntity toStoreInLocation = getAvailableLocation();
+		ProductEntity product = toStoreFrom.getProductEntity();
 
-
-
-		double availableWeightOnLocation = toStoreInLocation.getRemainingWeightToStore();
-		int availableQuantity = toStoreFrom.getQuantity();
 		int quantityToStore = toStoreRequest.getQuantity();
-
+		int availableQuantity = toStoreFrom.getQuantity();
+		double weightPerPiece = product.getWeightPerPiece();
+		double weightToStore = weightPerPiece * quantityToStore;
+		double availableWeightOnLocation = toStoreInLocation.getRemainingWeightToStore();
 		double toStoreFromWeight = toStoreFrom.getTotalWeight();
-		double weightToStore = toStoreFrom.getProductEntity().getWeightPerPiece()*quantityToStore;
 
-		validateAvailableQuantity(toStoreRequest, toStoreFrom);
-		validateLocationWeight(weightToStore,availableWeightOnLocation,freeLocationId);
+		validateAvailableQuantity(quantityToStore, availableQuantity);
+		validateLocationWeight(weightToStore, availableWeightOnLocation, toStoreInLocation.getId());
 
-		setterForFromLocation(weightToStore,toStoreFromWeight,availableQuantity,quantityToStore,toStoreFrom);
-		inventoryRepository.save(toStoreFrom);
+		updateFromInventory(weightToStore, toStoreFromWeight, availableQuantity, quantityToStore, toStoreFrom, fromLocation);
+		updateTargetLocation(quantityToStore, weightToStore, product, toStoreInLocation);
 
-		setterForLocation(quantityToStore, weightToStore, toStoreFrom, toStoreInLocation);
-
-		locationsRepository.save(toStoreInLocation);
-
-		InventoryEntity inventoryEntity = new InventoryEntity(
-				toStoreInLocation.getProductEntity(),
+		InventoryEntity storedInventory = new InventoryEntity(
+				product,
+				toStoreInLocation,
 				toStoreInLocation.getQuantity(),
-				toStoreInLocation.toString()
-		);
-
-		inventoryRepository.save(toStoreFrom);
-		inventoryRepository.save(inventoryEntity);
-
-
-		return new LocationsResponse(
-				toStoreInLocation.getId(),
-				toStoreInLocation.getProductEntity().getProduct(),
-				toStoreInLocation.getProductEntity().getWeightPerPiece(),
-				toStoreInLocation.getProductEntity().getWeightPerPiece()*quantityToStore,
 				toStoreInLocation.toString());
 
+		saveEntities(fromLocation, toStoreInLocation, toStoreFrom, storedInventory);
+
+		return mapToResponse(toStoreInLocation, product, quantityToStore);
 	}
+
 	@Transactional
 	public Page<LocationsResponse> getInventories(Pageable pageable) {
 		Page<LocationEntity> locationsPage = locationsRepository.findByProductEntityIsNotNull(pageable);
@@ -109,69 +99,93 @@ public class LocationService {
 				location.getId(),
 				location.getProductEntity().getProduct(),
 				location.getProductEntity().getWeightPerPiece(),
-				location.getQuantity()*location.getProductEntity().getWeightPerPiece(),
-				location.toString()
-		));
-	}
+				location.getQuantity() * location.getProductEntity().getWeightPerPiece(),
+				location.toString()));
+	} // Helper Methods
 
-	//Helper Methods
 	private InventoryEntity getEntityToStoreFrom(LocationsRequest locationsRequest) {
-		return inventoryRepository.findById(locationsRequest.getInventoryId()).orElseThrow(
-				() -> new InventoryNotFoundException(locationsRequest.getInventoryId())
-		);
+
+		return inventoryRepository.findById(locationsRequest.getInventoryId()).orElseThrow(()
+				-> new InventoryNotFoundException(locationsRequest.getInventoryId()));
 	}
 
-	private Long getAvailableLocationID(){
-		Long availableLocationID = 0L;
+	private LocationEntity getAvailableLocation() {
+		Long availableLocationID = getAvailableLocationID();
+		return locationsRepository.getLocationById(availableLocationID);
+	}
+
+	private Long getAvailableLocationID() {
 		for (LocationEntity location : locationsRepository.findAll()) {
 			if (!location.isLoaded()) {
-				availableLocationID = location.getId();
-				break;
+				return location.getId();
 			}
 		}
-		if (availableLocationID == 0L) {
-			throw new NoUnusedLocationException();
-		}
-		return availableLocationID;
-
+		throw new NoUnusedLocationException();
 	}
 
-	private void validateAvailableQuantity(LocationsRequest locationsRequest,InventoryEntity toStore) {
-		if (toStore.getQuantity() < locationsRequest.getQuantity()) {
-			throw new NotSufficientStockToStoreException(locationsRequest.getQuantity());
+	private void validateAvailableQuantity(int quantityToStore, int availableQuantity) {
+		if (availableQuantity < quantityToStore) {
+			throw new NotSufficientStockToStoreException(quantityToStore);
 		}
 	}
 
 	private void validateLocationWeight(double weightToStore, double availableWeightToStore, Long locationId) {
-		if(weightToStore> availableWeightToStore){
+		if (weightToStore > availableWeightToStore) {
 			throw new LocationLoadLimitExceededException(locationId);
 		}
 	}
 
-	private LocationEntity getLocationEntity() {
-		Long  availableLocationID = getAvailableLocationID();
-
-		return locationsRepository.getLocationById(availableLocationID);
-	}
-
-	private void setterForLocation(int quantity, double weight, InventoryEntity toStoreFrom, LocationEntity toStoreInLocation) {
+	private void updateTargetLocation(int quantityToStore, double weightToStore, ProductEntity product,
+									  LocationEntity toStoreInLocation) {
 		toStoreInLocation.setLoaded(true);
-		toStoreInLocation.setProductEntity(toStoreFrom.getProductEntity());
-		toStoreInLocation.setQuantity(quantity);
-		toStoreInLocation.setRemainingWeightToStore(toStoreInLocation.getRemainingWeightToStore()-weight);
+		toStoreInLocation.setProductEntity(product);
+		toStoreInLocation.setQuantity(quantityToStore);
+		toStoreInLocation.setRemainingWeightToStore(toStoreInLocation.getRemainingWeightToStore() - weightToStore);
+
+		if (toStoreInLocation.getId() > 300) {
+			toStoreInLocation.setLocationType(LocationType.BLOCK);
+		} else {
+			toStoreInLocation.setLocationType(LocationType.STORAGE);
+		}
 	}
 
-	private void setterForFromLocation(double weightToStore, double toStoreFromWeight,
-									   int availableQuantity, int toStoreQuantity, InventoryEntity toStoreFrom) {
-	if(availableQuantity == toStoreQuantity){
-		toStoreFrom.setTotalWeight(0);
-		toStoreFrom.setQuantity(0);
-		toStoreFrom.setProductEntity(null);
+	private void updateFromInventory(double weightToStore, double toStoreFromWeight,
+									 int availableQuantity, int quantityToStore,
+									 InventoryEntity toStoreFrom, LocationEntity fromLocation) {
 
-		//todo LocationEntity updates
-	}
-		toStoreFrom.setQuantity(availableQuantity - toStoreQuantity);
-		toStoreFrom.setTotalWeight(toStoreFromWeight-(weightToStore));
+		if (availableQuantity == quantityToStore) {
+			toStoreFrom.setTotalWeight(0);
+			toStoreFrom.setQuantity(0);
+			toStoreFrom.setProductEntity(null);
+			toStoreFrom.setLocationEntity(null);
+
+			fromLocation.setLoaded(false);
+			fromLocation.setRemainingWeightToStore(MAX_LOCATION_WEIGHT);
+			fromLocation.setProductEntity(null);
+			fromLocation.setQuantity(0);
+			return;
+		}
+		toStoreFrom.setQuantity(availableQuantity - quantityToStore);
+		toStoreFrom.setTotalWeight(toStoreFromWeight - weightToStore);
+		fromLocation.setQuantity(fromLocation.getQuantity() - quantityToStore);
+		fromLocation.setRemainingWeightToStore(fromLocation.getRemainingWeightToStore() + weightToStore);
 	}
 
+	private void saveEntities(LocationEntity fromLocation, LocationEntity toStoreInLocation,
+							  InventoryEntity toStoreFrom, InventoryEntity storedInventory) {
+		locationsRepository.save(fromLocation);
+		locationsRepository.save(toStoreInLocation);
+		inventoryRepository.save(toStoreFrom);
+		inventoryRepository.save(storedInventory);
+	}
+
+	private LocationsResponse mapToResponse(LocationEntity location,
+											ProductEntity product, int quantityToStore) {
+		return new LocationsResponse(
+				location.getId(),
+				product.toString(),
+				product.getWeightPerPiece(),
+				product.getWeightPerPiece() * quantityToStore,
+				location.toString());
+	}
 }

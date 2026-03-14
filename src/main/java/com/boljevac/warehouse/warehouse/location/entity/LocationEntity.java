@@ -1,5 +1,6 @@
 package com.boljevac.warehouse.warehouse.location.entity;
 
+import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
 
@@ -14,6 +15,9 @@ public class LocationEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_entity_id")
 	private ProductEntity productEntity;
+
+	@Enumerated(EnumType.STRING)
+	private LocationType locationType;
 
 	@Column(name = "aisle",nullable = false)
 	private String aisle;
@@ -34,14 +38,12 @@ public class LocationEntity {
 	private double remainingWeightToStore = 1000;
 
 
-	public LocationEntity(ProductEntity productEntity,
-						  String aisle, int rack, int level, int quantity) {
+	public LocationEntity(ProductEntity productEntity,LocationType locationType,int quantity, boolean loaded) { {
 		this.productEntity = productEntity;
-		this.aisle = aisle;
-		this.rack = rack;
-		this.level = level;
+		this.setLocationType(locationType);
 		this.quantity = quantity;
 		this.loaded = false;
+		}
 	}
 
 	public LocationEntity() {
@@ -89,7 +91,13 @@ public class LocationEntity {
 
 	@Override
 	public String toString() {
-		return " "+aisle +"-"+ rack+"-"+level;
+		if(locationType == LocationType.BLOCK){
+			return "Block";
+		}
+		else {
+			return " "+aisle +"-"+ rack+"-"+level;
+		}
+
 	}
 
 	public ProductEntity getProductEntity() {
@@ -114,5 +122,25 @@ public class LocationEntity {
 
 	public void setRemainingWeightToStore(double remainingWeightToStore) {
 		this.remainingWeightToStore = remainingWeightToStore;
+	}
+
+	public LocationType getLocationType() {
+		return locationType;
+	}
+
+	public void setLocationType(LocationType locationType) {
+		if(locationType == LocationType.BLOCK) {
+		//	setLocationType(LocationType.BLOCK);
+			setAisle(Aisle.Floor.toString());
+			setLevel(0);
+			setRack(0);
+		}
+		if(locationType==LocationType.STORAGE){
+		//	setLocationType(LocationType.STORAGE);
+			setAisle(this.aisle);
+			setLevel(this.level);
+			setRack(this.rack);
+		}
+		this.locationType = locationType;
 	}
 }

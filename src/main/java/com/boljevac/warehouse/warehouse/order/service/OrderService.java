@@ -2,6 +2,8 @@ package com.boljevac.warehouse.warehouse.order.service;
 
 import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
+import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
+import com.boljevac.warehouse.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
@@ -122,11 +124,13 @@ public class OrderService {
 		if (toCancel.getOrderStatuses().equals(OrderStatuses.ORDER_PLACED)) {
 			toCancel.setOrderStatuses(OrderStatuses.CANCELLED);
 			ProductEntity canceledItem = productRepository.findByProduct(toCancel.getProductEntity().getProduct());
+			LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, toCancel.getQuantity(),true);
 			InventoryEntity canceledQuantity = new InventoryEntity(
 					canceledItem,
+					newLocation,
 					toCancel.getQuantity(),
-					"Block storage"
-			);
+					newLocation.toString());
+
 			inventoryRepository.save(canceledQuantity);
 			orderRepository.save(toCancel);
 		} else {

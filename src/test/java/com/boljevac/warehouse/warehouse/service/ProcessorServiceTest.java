@@ -1,10 +1,10 @@
 package com.boljevac.warehouse.warehouse.service;
 
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.entity.ShippedEntity;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
 import com.boljevac.warehouse.warehouse.order.repository.ShippedOrdersRepository;
@@ -47,15 +47,15 @@ public class ProcessorServiceTest {
 				3
 		);
 
-		orderWithValidStatus.setStatus(OrderStatuses.ORDER_PLACED);
+		orderWithValidStatus.setStatus(OrderStatus.ORDER_PLACED);
 
 		Long id = 1L;
 
 		when(orderRepository.findById(id)).thenReturn(Optional.of(orderWithValidStatus));
 
-		processorService.changeOrderStatus(id, OrderStatuses.CANCELLED);
+		processorService.changeStatusOfOrder(id, OrderStatus.CANCELLED);
 
-		assertEquals(OrderStatuses.CANCELLED, orderWithValidStatus.getStatus());
+		assertEquals(OrderStatus.CANCELLED, orderWithValidStatus.getStatus());
 
 		verify(orderRepository).save(orderWithValidStatus);
 	}
@@ -70,15 +70,15 @@ public class ProcessorServiceTest {
 				3
 		);
 		Long id = 1L;
-		orderWithInvalidStatus.setStatus(OrderStatuses.ORDER_PLACED);
+		orderWithInvalidStatus.setStatus(OrderStatus.ORDER_PLACED);
 
 		when(orderRepository.findById(id)).thenReturn(Optional.of(orderWithInvalidStatus));
 
 		assertThrows(StatusChangeInvalidOrderException.class, () -> {
-			processorService.changeOrderStatus(id, OrderStatuses.SHIPPED);
+			processorService.changeStatusOfOrder(id, OrderStatus.SHIPPED);
 		});
 
-		assertEquals(OrderStatuses.ORDER_PLACED, orderWithInvalidStatus.getStatus());
+		assertEquals(OrderStatus.ORDER_PLACED, orderWithInvalidStatus.getStatus());
 		verify(orderRepository, never()).save(any());
 
 	}
@@ -92,7 +92,7 @@ public class ProcessorServiceTest {
 						BigDecimal.valueOf(30),
 						500
 				), 30);
-		cancelledOrder.setStatus(OrderStatuses.CANCELLED);
+		cancelledOrder.setStatus(OrderStatus.CANCELLED);
 		when(orderRepository.findById(id)).thenReturn(Optional.of(cancelledOrder));
 
 		processorService.deleteOrderById(id);
@@ -110,7 +110,7 @@ public class ProcessorServiceTest {
 						BigDecimal.valueOf(30),
 						500
 				), 30);
-		processingOrder.setStatus(OrderStatuses.PROCESSING);
+		processingOrder.setStatus(OrderStatus.PROCESSING);
 		when(orderRepository.findById(id)).thenReturn(Optional.of(processingOrder));
 
 		assertThrows(OrderCancelNotPossibleException.class, () -> {
@@ -134,13 +134,13 @@ public class ProcessorServiceTest {
 						BigDecimal.valueOf(50),
 						600), 10);
 
-		shippedOrderA.setStatus(OrderStatuses.SHIPPED);
-		shippedOrderB.setStatus(OrderStatuses.SHIPPED);
+		shippedOrderA.setStatus(OrderStatus.SHIPPED);
+		shippedOrderB.setStatus(OrderStatus.SHIPPED);
 
 		List<OrderEntity> shippedOrders = List.of(shippedOrderA, shippedOrderB);
-		when(orderRepository.getByOrderStatuses(OrderStatuses.SHIPPED)).thenReturn(shippedOrders);
+		when(orderRepository.getByOrderStatus(OrderStatus.SHIPPED)).thenReturn(shippedOrders);
 
-		processorService.moveShippedOrders();
+		processorService.archiveShippedOrders();
 
 		verify(orderRepository).deleteAll(shippedOrders);
 
@@ -166,14 +166,14 @@ public class ProcessorServiceTest {
 						BigDecimal.valueOf(50),
 						600), 10);
 
-		cancelledOrder.setStatus(OrderStatuses.CANCELLED);
-		processingOrder.setStatus(OrderStatuses.PROCESSING);
+		cancelledOrder.setStatus(OrderStatus.CANCELLED);
+		processingOrder.setStatus(OrderStatus.PROCESSING);
 
 		List<OrderEntity> orders = List.of(cancelledOrder, processingOrder);
-		when(orderRepository.getByOrderStatuses(OrderStatuses.SHIPPED)).thenReturn(Collections.emptyList());
+		when(orderRepository.getByOrderStatus(OrderStatus.SHIPPED)).thenReturn(Collections.emptyList());
 
 		assertThrows(OrderNotFoundException.class, () -> {
-			processorService.moveShippedOrders();
+			processorService.archiveShippedOrders();
 		});
 
 		verify(orderRepository, never()).deleteAll(anyList());
@@ -188,7 +188,7 @@ public class ProcessorServiceTest {
 						"TestProductA",
 						BigDecimal.valueOf(30),
 						500), 30);
-		cancelledOrder.setStatus(OrderStatuses.CANCELLED);
+		cancelledOrder.setStatus(OrderStatus.CANCELLED);
 		Long id = 1L;
 		when(orderRepository.findById(id)).thenReturn(Optional.of(cancelledOrder));
 		processorService.deleteOrderById(id);
@@ -204,7 +204,7 @@ public class ProcessorServiceTest {
 						"TestProductA",
 						BigDecimal.valueOf(30),
 						500), 30);
-		processingOrder.setStatus(OrderStatuses.PROCESSING);
+		processingOrder.setStatus(OrderStatus.PROCESSING);
 		Long id = 1L;
 		when(orderRepository.findById(id)).thenReturn(Optional.empty());
 		assertThrows(OrderNotFoundException.class, () -> {
@@ -227,13 +227,13 @@ public class ProcessorServiceTest {
 						BigDecimal.valueOf(50),
 						600), 10);
 
-		cancelledOrderA.setStatus(OrderStatuses.CANCELLED);
-		cancelledOrderB.setStatus(OrderStatuses.CANCELLED);
+		cancelledOrderA.setStatus(OrderStatus.CANCELLED);
+		cancelledOrderB.setStatus(OrderStatus.CANCELLED);
 
 		List<OrderEntity> cancelledOrders = List.of(cancelledOrderA, cancelledOrderB);
 
-		when(orderRepository.getByOrderStatuses(OrderStatuses.CANCELLED)).thenReturn(cancelledOrders);
-		processorService.deleteCancelledOrders();
+		when(orderRepository.getByOrderStatus(OrderStatus.CANCELLED)).thenReturn(cancelledOrders);
+		processorService.deleteAllCancelledOrders();
 		verify(orderRepository).deleteAll(cancelledOrders);
 	}
 
@@ -250,15 +250,15 @@ public class ProcessorServiceTest {
 						"TestProductB",
 						BigDecimal.valueOf(50),
 						600), 10);
-		processingOrder.setStatus(OrderStatuses.PROCESSING);
-		processingOrder.setStatus(OrderStatuses.SHIPPED);
+		processingOrder.setStatus(OrderStatus.PROCESSING);
+		processingOrder.setStatus(OrderStatus.SHIPPED);
 
 		List<OrderEntity> orders = List.of(processingOrder, shippedOrder);
 
-		when(orderRepository.getByOrderStatuses(OrderStatuses.CANCELLED)).thenReturn(Collections.emptyList());
+		when(orderRepository.getByOrderStatus(OrderStatus.CANCELLED)).thenReturn(Collections.emptyList());
 
 		assertThrows(OrderNotFoundException.class, () -> {
-			processorService.deleteCancelledOrders();
+			processorService.deleteAllCancelledOrders();
 		});
 		verify(orderRepository, never()).deleteAll(orders);
 	}

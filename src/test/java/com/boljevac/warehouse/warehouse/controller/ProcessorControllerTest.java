@@ -1,6 +1,6 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
@@ -51,83 +51,83 @@ public class ProcessorControllerTest {
 
 	@Test
 	public void get_open_orders_expecting_200() throws Exception {
-		when(processorService.getOrders(any(ProcessorRequest.class)))
+		when(processorService.getListOfOrdersByStatus(any(ProcessorRequest.class)))
 				.thenReturn(List.of(new ProcessorResponse(
 						1L,
 						"TestProduct",
 						500,
-						OrderStatuses.ORDER_PLACED)));
+						OrderStatus.ORDER_PLACED)));
 
 
 		mockMvc
 				.perform(post("/api/warehouse/processing")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-									{ "orderStatuses" : "ORDER_PLACED" }
+									{ "orderStatus" : "ORDER_PLACED" }
 								"""))
 				.andExpect(status().isOk());
 
-		verify(processorService).getOrders(any(ProcessorRequest.class));
+		verify(processorService).getListOfOrdersByStatus(any(ProcessorRequest.class));
 	}
 
 	@Test
 	public void get_open_orders_expecting_404() throws Exception {
-		when(processorService.getOrders(any(ProcessorRequest.class)))
+		when(processorService.getListOfOrdersByStatus(any(ProcessorRequest.class)))
 				.thenThrow(new OrderNotFoundException());
 
 		mockMvc
 				.perform(post("/api/warehouse/processing")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{ "orderStatuses" : "ORDER_PLACED" }
+								{ "orderStatus" : "ORDER_PLACED" }
 								"""))
 				.andExpect(status().isNotFound());
 
-		verify(processorService).getOrders(any(ProcessorRequest.class));
+		verify(processorService).getListOfOrdersByStatus(any(ProcessorRequest.class));
 
 
 	}
 
 	@Test
 	public void change_order_status_expecting_200() throws Exception {
-		when(processorService.changeOrderStatus(1L, OrderStatuses.PROCESSING))
+		when(processorService.changeStatusOfOrder(1L, OrderStatus.PROCESSING))
 				.thenReturn(new ProcessorResponse(
 						1L,
 						"TestProduct",
 						50,
-						OrderStatuses.ORDER_PLACED
+						OrderStatus.ORDER_PLACED
 				));
 
 		mockMvc.perform(
 						put("/api/warehouse/processing/statusChange/1/PROCESSING"))
 				.andExpect(status().isOk());
 
-		verify(processorService).changeOrderStatus(1L, OrderStatuses.PROCESSING);
+		verify(processorService).changeStatusOfOrder(1L, OrderStatus.PROCESSING);
 	}
 
 	@Test
 	public void change_order_status_expecting_400() throws Exception {
-		when(processorService.changeOrderStatus(1L, OrderStatuses.SHIPPED))
+		when(processorService.changeStatusOfOrder(1L, OrderStatus.SHIPPED))
 				.thenThrow(new StatusChangeInvalidOrderException());
 
 		mockMvc.perform(
 						put("/api/warehouse/processing/statusChange/1/SHIPPED"))
 				.andExpect(status().isBadRequest());
 
-		verify(processorService).changeOrderStatus(1L, OrderStatuses.SHIPPED);
+		verify(processorService).changeStatusOfOrder(1L, OrderStatus.SHIPPED);
 	}
 
 	//change Order status with not available status -> Response bad Request
 	@Test
 	public void change_order_withInvalidStatus_expecting_400() throws Exception {
-		when(processorService.changeOrderStatus(1L, OrderStatuses.ORDER_PLACED))
+		when(processorService.changeStatusOfOrder(1L, OrderStatus.ORDER_PLACED))
 				.thenThrow(new StatusChangeInvalidOrderException());
 
 		mockMvc
 				.perform(put("/api/warehouse/processing/statusChange/1/PLANNED"))
 				.andExpect(status().isBadRequest());
 
-		verify(processorService, never()).changeOrderStatus(1L, OrderStatuses.ORDER_PLACED);
+		verify(processorService, never()).changeStatusOfOrder(1L, OrderStatus.ORDER_PLACED);
 	}
 
 

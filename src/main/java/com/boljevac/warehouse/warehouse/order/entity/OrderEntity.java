@@ -25,13 +25,13 @@ public class OrderEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name="order_status",nullable = false)
-	private OrderStatuses orderStatuses;
+	private OrderStatus orderStatus;
 
 	public OrderEntity(ProductEntity productEntity, int quantity) {
 		this.productEntity = productEntity;
 		this.quantity = quantity;
 		this.totalPrice = BigDecimal.valueOf(quantity).multiply(productEntity.getPricePerPiece());
-		this.orderStatuses = OrderStatuses.ORDER_PLACED;
+		this.orderStatus = OrderStatus.ORDER_PLACED;
 	}
 
 	public OrderEntity() {
@@ -71,11 +71,11 @@ public class OrderEntity {
 		this.id = id;
 	}
 
-	public OrderStatuses getOrderStatuses() {
-		return orderStatuses;
+	public OrderStatus getOrderStatus() {
+		return orderStatus;
 	}
 
-	public void setOrderStatuses(OrderStatuses orderStatuses) {
-		this.orderStatuses = orderStatuses;
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
 	}
 }

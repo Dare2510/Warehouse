@@ -3,13 +3,13 @@ package com.boljevac.warehouse.warehouse.inventory.service;
 import com.boljevac.warehouse.warehouse.inventory.dto.InventoryRequest;
 import com.boljevac.warehouse.warehouse.inventory.dto.InventoryResponse;
 import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
+import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
-import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
-import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
+import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -17,33 +17,35 @@ import org.springframework.stereotype.Service;
 public class InventoryService {
 
 	private final InventoryRepository inventoryRepository;
-	private final ProductRepository productRepository;
 	private final LocationsRepository  locationsRepository;
+	private final ProductService productService;
 
 	public InventoryService(InventoryRepository inventoryRepository,
-							ProductRepository productRepository,
-							LocationsRepository locationsRepository) {
+							LocationsRepository locationsRepository, ProductService productService) {
 		this.inventoryRepository = inventoryRepository;
-		this.productRepository = productRepository;
-
 		this.locationsRepository = locationsRepository;
+		this.productService = productService;
 	}
 
-	public InventoryResponse getStock(Long id) {
-		InventoryEntity stockProduct = inventoryRepository.findById(id).orElseThrow(
-				() -> new ProductNotFoundException(id)
+	private InventoryEntity getInventoryEntity(Long id) {
+		return inventoryRepository.findById(id).orElseThrow(
+				() -> new InventoryNotFoundException(id)
 		);
-		return new InventoryResponse(inventoryRepository.getByProductEntity(
-				stockProduct.getProductEntity()).getProductEntity().getProduct(),
-				stockProduct.getQuantity());
+	}
+
+
+	public InventoryResponse getInventoryResponse(Long id) {
+		InventoryEntity inventory = getInventoryEntity(id);
+
+		return new InventoryResponse(
+				inventory.getProductEntity().getProduct(),
+				inventory.getQuantity());
 
 	}
 
 	@Transactional
 	public InventoryResponse createStock(InventoryRequest inventoryRequest) {
-		ProductEntity product = productRepository.findById(inventoryRequest.getProductId()).orElseThrow(
-				() -> new ProductNotFoundException(inventoryRequest.getProductId())
-		);
+		ProductEntity product = productService.getProductById(inventoryRequest.getProductId());
 		InventoryEntity existingInventoryProduct = inventoryRepository.findById(product.getId()).orElse(null);
 
 		if (existingInventoryProduct != null) {

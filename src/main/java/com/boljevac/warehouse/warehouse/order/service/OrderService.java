@@ -5,8 +5,8 @@ import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
@@ -100,12 +100,12 @@ public class OrderService {
 	//Helper Methods
 
 	private boolean validateCancelRequest(OrderEntity orderToCancel) {
-		return orderToCancel.getOrderStatuses().equals(OrderStatuses.ORDER_PLACED);
+		return orderToCancel.getOrderStatus().equals(OrderStatus.ORDER_PLACED);
 	}
 
 	private void updateInventory(OrderEntity orderToCancel){
 
-			orderToCancel.setOrderStatuses(OrderStatuses.CANCELLED);
+			orderToCancel.setOrderStatus(OrderStatus.CANCELLED);
 			ProductEntity canceledItem = productService.getProductById(orderToCancel.getId());
 			LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, orderToCancel.getQuantity(),true);
 
@@ -121,7 +121,7 @@ public class OrderService {
 
 		}
 
-	private OrderEntity getOrderById(Long id) throws OrderNotFoundException {
+	public OrderEntity getOrderById(Long id) throws OrderNotFoundException {
 		return orderRepository.findById(id).orElseThrow(
 				OrderNotFoundException::new
 		);
@@ -181,7 +181,7 @@ public class OrderService {
 				orderEntity.getProductEntity().getProduct(),
 				orderEntity.getQuantity(),
 				orderEntity.getTotalPrice(),
-				orderEntity.getOrderStatuses()
+				orderEntity.getOrderStatus()
 		);
 	}
 

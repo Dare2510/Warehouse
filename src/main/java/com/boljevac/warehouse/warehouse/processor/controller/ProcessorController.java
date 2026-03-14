@@ -1,6 +1,6 @@
 package com.boljevac.warehouse.warehouse.processor.controller;
 
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatuses;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
 import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
@@ -24,13 +24,13 @@ public class ProcessorController {
 	@PostMapping
 	public ResponseEntity<List<ProcessorResponse>> getOrders(@RequestBody @Valid ProcessorRequest processorRequest) {
 
-		return ResponseEntity.status(HttpStatus.OK).body(processorService.getOrders(processorRequest));
+		return ResponseEntity.status(HttpStatus.OK).body(processorService.getListOfOrdersByStatus(processorRequest));
 	}
 
 	//Change status, sequence must be followed : ORDER_PLACED -> (CANCELLED)/PROCESSING -> PACKAGED -> SHIPPED
-	@PutMapping("/statusChange/{id}/{orderStatuses}")
-	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@PathVariable Long id, @PathVariable OrderStatuses orderStatuses) {
-		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeOrderStatus(id, orderStatuses));
+	@PutMapping("/statusChange/{id}/{orderStatus}")
+	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@PathVariable Long id, @PathVariable OrderStatus orderStatus) {
+		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeStatusOfOrder(id, orderStatus));
 	}
 
 	@DeleteMapping("/delete/{id}")
@@ -41,13 +41,13 @@ public class ProcessorController {
 
 	@GetMapping("/archive")
 	public ResponseEntity<Void> moveShippedOrders() {
-		processorService.moveShippedOrders();
+		processorService.archiveShippedOrders();
 		return ResponseEntity.ok().build();
 	}
 
 	@DeleteMapping("/deleteCancelled")
 	public ResponseEntity<Void> deleteCancelledOrders() {
-		processorService.deleteCancelledOrders();
+		processorService.deleteAllCancelledOrders();
 		return ResponseEntity.noContent().build();
 	}
 

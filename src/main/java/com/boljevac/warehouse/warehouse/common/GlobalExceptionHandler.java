@@ -141,20 +141,6 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
-	@ExceptionHandler(EmptyOrderRepositoryException.class)
-	public ResponseEntity<ErrorResponse> handleEmptyOrderRepositoryException(EmptyOrderRepositoryException ex,
-																			 HttpServletRequest request) {
-
-		ErrorResponse error = new ErrorResponse(
-				HttpStatus.NOT_FOUND.value(),
-				ex.getMessage(),
-				request.getRequestURI()
-		);
-
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-
-	}
-
 	@ExceptionHandler(NotSufficientStockToStoreException.class)
 	public ResponseEntity<ErrorResponse> handleNotSufficientStockToStoreException(NotSufficientStockToStoreException ex,
 																		   HttpServletRequest request) {

@@ -18,7 +18,7 @@ public class InventoryController {
 	}
 	@GetMapping("/{id}")
 	public  ResponseEntity<InventoryResponse> getStock(@PathVariable Long id) {
-		return ResponseEntity.ok(inventoryService.getStock(id));
+		return ResponseEntity.ok(inventoryService.getInventoryResponse(id));
 	}
 
 	@PostMapping

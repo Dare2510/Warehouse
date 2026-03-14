@@ -7,23 +7,23 @@ public class InventoryRequest {
 
 	@NotNull(message = "Product ID is required")
 	@Positive(message = "Product ID must be positive")
-	private Long id;
+	private Long productId;
 
 	@NotNull(message = "Quantity is required")
 	@Positive(message = "Quantity must be > 0")
 	private int quantity;
 
 	public InventoryRequest(Long productId,int quantity) {
-		this.id = productId;
+		this.productId = productId;
 		this.quantity = quantity;
 	}
 
 	public Long getProductId() {
-		return id;
+		return productId;
 	}
 
 	public void setProductId(Long productId) {
-		this.id = productId;
+		this.productId = productId;
 	}
 
 	public int getQuantity() {

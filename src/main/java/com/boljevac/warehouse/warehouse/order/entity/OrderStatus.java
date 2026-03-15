@@ -8,8 +8,27 @@ public enum OrderStatus {
 	CANCELLED;
 
 	//Validator for the correct sequence of order changes
-	public boolean validatorCorrectStatusChange(OrderEntity toChange, OrderStatus orderStatus)  {
-		return orderStatus == OrderStatus.PROCESSING || orderStatus == OrderStatus.CANCELLED;
+	public boolean validatorCorrectStatusChange(OrderEntity toChange, OrderStatus OrderStatus)  {
+		boolean validStatusChange = false;
+		switch(toChange.getOrderStatus()) {
+			case ORDER_PLACED:
+				if(OrderStatus == PROCESSING || OrderStatus == CANCELLED) {
+					validStatusChange = true;
+				}
+				break;
+			case PROCESSING:
+				if(OrderStatus == PACKAGED) {
+					validStatusChange = true;
+				}
+				break;
+			case PACKAGED:
+				if(OrderStatus == SHIPPED) {
+					validStatusChange = true;
+				}
+				break;
+
+		}
+		return validStatusChange;
 	}
 }
 

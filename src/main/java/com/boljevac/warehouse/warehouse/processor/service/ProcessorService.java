@@ -12,6 +12,8 @@ import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ public class ProcessorService {
 	public final OrderRepository orderRepository;
 	public final ShippedOrdersRepository shippedOrdersRepository;
 	public final OrderService orderService;
+	private final Logger logger = LoggerFactory.getLogger(ProcessorService.class);
 
 	public ProcessorService(OrderRepository orderRepository, ShippedOrdersRepository shippedOrdersRepository, OrderService orderService) {
 		this.orderRepository = orderRepository;
@@ -33,23 +36,24 @@ public class ProcessorService {
 	public List<ProcessorResponse> getListOfOrdersByStatus(ProcessorRequest processorRequest) {
 		OrderStatus orderStatus = processorRequest.getOrderStatus();
 
-		List<OrderEntity> orderEntityList = orderRepository.getByOrderStatus(orderStatus).stream().toList();
+		List<OrderEntity> listOfOrdersByStatus = orderRepository.getByOrderStatus(orderStatus).stream().toList();
+		boolean ordersExists = validateOrdersExist(listOfOrdersByStatus);
 
-		if (orderEntityList.isEmpty()) {
+		if (!ordersExists) {
 			throw new OrderNotFoundException();
 		}
 
-		List<ProcessorResponse> processorResponses = new ArrayList<>();
-		for (OrderEntity orderEntity : orderEntityList) {
-			processorResponses.add(new ProcessorResponse(
-					orderEntity.getProductEntity().getId(),
-					orderEntity.getProductEntity().getProduct(),
-					orderEntity.getQuantity(),
-					orderEntity.getOrderStatus()
+		List<ProcessorResponse> listOfOrdersResponse = new ArrayList<>();
+		for (OrderEntity existingOrder : listOfOrdersByStatus) {
+			listOfOrdersResponse.add(new ProcessorResponse(
+					existingOrder.getProductEntity().getId(),
+					existingOrder.getProductEntity().getProduct(),
+					existingOrder.getQuantity(),
+					existingOrder.getOrderStatus()
 			));
 		}
 
-		return processorResponses;
+		return listOfOrdersResponse;
 
 	}
 
@@ -66,6 +70,7 @@ public class ProcessorService {
 		}
 		orderToChangeStatus.setOrderStatus(newOrderStatus);
 		orderRepository.save(orderToChangeStatus);
+		logger.info("Order with Id {} has been changed", orderToChangeStatus.getId());
 
 		return new ProcessorResponse(
 				orderToChangeStatus.getProductEntity().getId(),
@@ -78,9 +83,10 @@ public class ProcessorService {
 	@Transactional
 	public void deleteOrderById(Long orderId) {
 		OrderEntity orderToDelete = orderService.getOrderById(orderId);
-		OrderStatus currentStatus = orderToDelete.getOrderStatus();
+		boolean deletionIsValid = validateToDeleteOrder(orderToDelete);
 
-		if (currentStatus.equals(OrderStatus.CANCELLED)) {
+		if(deletionIsValid) {
+			logger.info("Order with Id {} has been deleted", orderToDelete.getId());
 			orderRepository.delete(orderToDelete);
 		} else {
 			throw new OrderCancelNotPossibleException(orderId);
@@ -92,17 +98,21 @@ public class ProcessorService {
 
 		List<OrderEntity> listOfShippedOrders = orderRepository.getByOrderStatus(OrderStatus.SHIPPED);
 
-		if (listOfShippedOrders.isEmpty()) {
+		boolean shippedOrdersExists = validateOrdersExist(listOfShippedOrders);
+
+		if (!shippedOrdersExists) {
 			throw new OrderNotFoundException();
 		}
+
 		List<ShippedEntity> shippedEntities = new ArrayList<>();
+
 		for (OrderEntity orderEntity : listOfShippedOrders) {
 			shippedEntities.add(new ShippedEntity(
 					orderEntity
 			));
 
 		}
-
+		logger.info("Shipped orders have been archived");
 		shippedOrdersRepository.saveAll(shippedEntities);
 		orderRepository.deleteAll(listOfShippedOrders);
 
@@ -112,10 +122,24 @@ public class ProcessorService {
 	public void deleteAllCancelledOrders() {
 		List<OrderEntity> listOfCancelledOrders = orderRepository.getByOrderStatus(OrderStatus.CANCELLED);
 
-		if (listOfCancelledOrders.isEmpty()) {
+		boolean ordersToCancelExists = validateOrdersExist(listOfCancelledOrders);
+
+		if (!ordersToCancelExists) {
 			throw new OrderNotFoundException();
 		}
+		logger.info("Cancelled orders have been deleted");
 		orderRepository.deleteAll(listOfCancelledOrders);
+
+
+	}
+
+	private boolean validateOrdersExist(List<OrderEntity> listOfOrders) {
+		return listOfOrders.isEmpty()?false:true;
+
+	}
+
+	public boolean validateToDeleteOrder(OrderEntity orderToDelete) {
+		return orderToDelete.getOrderStatus().equals(OrderStatus.CANCELLED)?true:false;
 
 	}
 }

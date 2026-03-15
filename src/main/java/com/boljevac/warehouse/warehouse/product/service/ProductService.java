@@ -6,6 +6,8 @@ import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class ProductService {
 
 	ProductRepository productRepository;
+	private final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
 	public ProductService(ProductRepository productRepository) {
 		this.productRepository = productRepository;
@@ -37,6 +40,7 @@ public class ProductService {
 			throw new ProductDuplicateCreationException(newProduct);
 		}
 		productRepository.save(newProduct);
+		logger.info("New product with id {} created", newProduct.getId());
 
 		return new ProductResponse(
 				newProduct.getId(),
@@ -47,6 +51,7 @@ public class ProductService {
 
 	public void deleteProduct(Long id) {
 		ProductEntity toDelete = getProductById(id);
+		logger.info("Product with id {} has been deleted", toDelete.getId());
 		productRepository.delete(toDelete);
 	}
 
@@ -66,6 +71,7 @@ public class ProductService {
 		productToUpdate.setProduct(productRequest.getProduct());
 		productToUpdate.setPricePerPiece(productRequest.getValue());
 		productRepository.save(productToUpdate);
+		logger.info("Product with id {} has been updated", productToUpdate.getId());
 
 	}
 

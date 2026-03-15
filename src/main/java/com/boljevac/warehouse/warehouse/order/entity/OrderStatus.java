@@ -1,7 +1,5 @@
 package com.boljevac.warehouse.warehouse.order.entity;
 
-import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
-
 public enum OrderStatus {
 	ORDER_PLACED,
 	PROCESSING,

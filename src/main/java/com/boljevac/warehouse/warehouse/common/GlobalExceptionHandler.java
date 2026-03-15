@@ -10,6 +10,8 @@ import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepository
 import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +21,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 	//Exception handling for validation
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -30,6 +34,8 @@ public class GlobalExceptionHandler {
 				ex.getAllErrors().get(0).getDefaultMessage(),
 				request.getRequestURI()
 		);
+
+		logger.error(error.toString());
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
@@ -43,6 +49,7 @@ public class GlobalExceptionHandler {
 				request.getRequestURI()
 		);
 
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
@@ -56,6 +63,7 @@ public class GlobalExceptionHandler {
 				request.getRequestURI()
 		);
 
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 
 	}
@@ -70,6 +78,7 @@ public class GlobalExceptionHandler {
 				request.getRequestURI()
 		);
 
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -82,7 +91,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
@@ -96,6 +105,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
 	}
 
@@ -109,7 +119,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -123,7 +133,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
 	}
 
@@ -137,7 +147,7 @@ public class GlobalExceptionHandler {
 				"Order Status must be ORDER_PLACED|PACKAGED|PROCESSING|SHIPPED|CANCELLED",
 				request.getRequestURI()
 		);
-
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -149,7 +159,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
 	}
 
@@ -161,7 +171,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -173,7 +183,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 	//Maximum 300 locations
@@ -185,6 +195,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 	//Max weight per location = 1000
@@ -196,7 +207,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-
+		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 }

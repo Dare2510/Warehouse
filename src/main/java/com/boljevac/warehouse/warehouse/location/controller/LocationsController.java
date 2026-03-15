@@ -19,7 +19,7 @@ public class LocationsController {
 		this.locationService = locationService;
 	}
 
-	@GetMapping
+	@PutMapping
 	public ResponseEntity<Void> createLocation(){
 		locationService.createLocations();
 		return ResponseEntity.noContent().build();

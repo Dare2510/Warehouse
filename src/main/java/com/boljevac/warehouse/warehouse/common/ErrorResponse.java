@@ -33,5 +33,9 @@ public class ErrorResponse {
 		return timestamp;
 	}
 
-
+	@Override
+	public String toString() {
+		return "HttpStatusCode=" + httpStatusCode +
+				", message='" + message;
+	}
 }

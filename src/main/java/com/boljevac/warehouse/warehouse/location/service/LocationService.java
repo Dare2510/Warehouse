@@ -15,6 +15,8 @@ import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationExce
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class LocationService {
 	private static final double MAX_LOCATION_WEIGHT = 1000;
 	private final LocationsRepository locationsRepository;
 	private final InventoryRepository inventoryRepository;
+	private final Logger logger = LoggerFactory.getLogger(LocationService.class);
 
 	public LocationService(LocationsRepository locationsRepository, InventoryRepository inventoryRepository) {
 		this.locationsRepository = locationsRepository;
@@ -57,6 +60,7 @@ public class LocationService {
 				}
 			}
 		}
+		logger.info("Locations have been created");
 	}
 
 	@Transactional
@@ -153,24 +157,29 @@ public class LocationService {
 
 	private void updateFromInventory(double weightToStore, double toStoreFromWeight,
 									 int availableQuantity, int quantityToStore,
-									 InventoryEntity toStoreFrom, LocationEntity fromLocation) {
+									 InventoryEntity fromInventory, LocationEntity fromLocation) {
 
 		if (availableQuantity == quantityToStore) {
-			toStoreFrom.setTotalWeight(0);
-			toStoreFrom.setQuantity(0);
-			toStoreFrom.setProductEntity(null);
-			toStoreFrom.setLocationEntity(null);
+			fromInventory.setTotalWeight(0);
+			fromInventory.setQuantity(0);
+			fromInventory.setProductEntity(null);
+			fromInventory.setLocationEntity(null);
 
 			fromLocation.setLoaded(false);
 			fromLocation.setRemainingWeightToStore(MAX_LOCATION_WEIGHT);
 			fromLocation.setProductEntity(null);
 			fromLocation.setQuantity(0);
+
+			logger.info("Location Id {} and Inventory Id {} are now empty",
+					fromLocation.getId(),fromInventory.getId());
 			return;
 		}
-		toStoreFrom.setQuantity(availableQuantity - quantityToStore);
-		toStoreFrom.setTotalWeight(toStoreFromWeight - weightToStore);
+		fromInventory.setQuantity(availableQuantity - quantityToStore);
+		fromInventory.setTotalWeight(toStoreFromWeight - weightToStore);
 		fromLocation.setQuantity(fromLocation.getQuantity() - quantityToStore);
 		fromLocation.setRemainingWeightToStore(fromLocation.getRemainingWeightToStore() + weightToStore);
+		logger.info("Location with Id {} and Inventory with Id {} have been updated",
+				fromLocation.getId(),fromInventory.getId());
 	}
 
 	private void saveEntities(LocationEntity fromLocation, LocationEntity toStoreInLocation,

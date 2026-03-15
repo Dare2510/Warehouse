@@ -11,6 +11,8 @@ import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +21,7 @@ public class InventoryService {
 	private final InventoryRepository inventoryRepository;
 	private final LocationsRepository  locationsRepository;
 	private final ProductService productService;
+	private final Logger logger = LoggerFactory.getLogger(InventoryService.class);
 
 	public InventoryService(InventoryRepository inventoryRepository,
 							LocationsRepository locationsRepository, ProductService productService) {
@@ -26,14 +29,7 @@ public class InventoryService {
 		this.locationsRepository = locationsRepository;
 		this.productService = productService;
 	}
-
-	private InventoryEntity getInventoryEntity(Long id) {
-		return inventoryRepository.findById(id).orElseThrow(
-				() -> new InventoryNotFoundException(id)
-		);
-	}
-
-
+	@Transactional
 	public InventoryResponse getInventoryResponse(Long id) {
 		InventoryEntity inventory = getInventoryEntity(id);
 
@@ -46,24 +42,33 @@ public class InventoryService {
 	@Transactional
 	public InventoryResponse createStock(InventoryRequest inventoryRequest) {
 		ProductEntity product = productService.getProductById(inventoryRequest.getProductId());
-		InventoryEntity existingInventoryProduct = inventoryRepository.findById(product.getId()).orElse(null);
 
-		if (existingInventoryProduct != null) {
-			int currentQuantity = inventoryRepository.getByProductEntity(product).getQuantity();
-			existingInventoryProduct.setQuantity(currentQuantity + inventoryRequest.getQuantity());
-			inventoryRepository.save(existingInventoryProduct);
-		}
-		LocationEntity locationEntity = new LocationEntity(product,LocationType.BLOCK, inventoryRequest.getQuantity(), true);
+		LocationEntity newLocation = new LocationEntity(
+										product,
+										LocationType.BLOCK,
+										inventoryRequest.getQuantity(),
+										true);
 
-		locationsRepository.save(locationEntity);
+		locationsRepository.save(newLocation);
+
 		InventoryEntity newInventoryProduct = new InventoryEntity(
-				product, locationEntity, inventoryRequest.getQuantity(),locationEntity.toString()
+										product,
+										newLocation,
+										inventoryRequest.getQuantity(),
+										newLocation.toString()
 		);
-
 		inventoryRepository.save(newInventoryProduct);
+
+		logger.info("New Location with Id {} and new Inventory with Id {} have been created",
+				newLocation.getId(), newInventoryProduct.getId());
 
 		return new InventoryResponse(product.getProduct(), newInventoryProduct.getQuantity());
 
 	}
 
+	private InventoryEntity getInventoryEntity(Long id) {
+		return inventoryRepository.findById(id).orElseThrow(
+				() -> new InventoryNotFoundException(id)
+		);
+	}
 }

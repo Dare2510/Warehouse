@@ -32,15 +32,12 @@ public class ProductServiceTest {
 
 	@Test
 	public void test_double_createProduct() {
-		ProductEntity productEntity = new ProductEntity(
-				"TestProduct", BigDecimal.valueOf(300), 100
-		);
 		ProductRequest request = new ProductRequest(
 				"TestProduct",
 				BigDecimal.valueOf(300),
 				50
 		);
-		when(productRepository.findByProduct(request.getProduct())).thenReturn(productEntity);
+		when(productRepository.existsByProduct(request.getProduct())).thenReturn(true);
 
 		assertThrows(ProductDuplicateCreationException.class, () -> {
 			productService.createAndValidateNewProduct(request);
@@ -61,7 +58,7 @@ public class ProductServiceTest {
 		ProductEntity productEntity = new ProductEntity(
 				request.getProduct(),
 				request.getValue(),
-				request.getQuantity()
+				request.getWeight()
 		);
 
 		when(productRepository.save(any(ProductEntity.class))).thenReturn(productEntity);
@@ -70,35 +67,35 @@ public class ProductServiceTest {
 
 		verify(productRepository).save(any(ProductEntity.class));
 		assertEquals("TestProduct", response.name());
-		assertEquals(50, response.getQuantity());
+		assertEquals(BigDecimal.valueOf(300),response.price());
+		assertEquals(50, response.weight());
 
 	}
 
 	@Test
 	public void test_update_product() {
-		ProductRequest toUpdate = new ProductRequest(
+		ProductRequest newValues = new ProductRequest(
 				"TestNewNameProduct",
 				BigDecimal.valueOf(30),
-				5000
+				500
 		);
 
-		ProductEntity productEntity = new ProductEntity(
+		ProductEntity product = new ProductEntity(
 				"TestProduct",
 				BigDecimal.valueOf(30),
 				500
 		);
 
-		productRepository.save(productEntity);
-		Long id = productEntity.getId();
-		when(productRepository.findById(id)).thenReturn(Optional.of(productEntity));
+		Long id = product.getId();
+		when(productRepository.findById(id)).thenReturn(Optional.of(product));
 
-		productService.updateProduct(id, toUpdate);
+		productService.updateProduct(id, newValues);
 
-		assertEquals("TestNewNameProduct", productEntity.getProduct());
-		assertEquals(5000, productEntity.getQuantity());
-		assertEquals(BigDecimal.valueOf(30), productEntity.getPricePerPiece());
+		assertEquals("TestNewNameProduct", product.getProduct());
+		assertEquals(BigDecimal.valueOf(30), product.getPricePerPiece());
+		assertEquals(500, product.getWeightPerPiece());
 
-		verify(productRepository, times(2)).save(any(ProductEntity.class));
+		verify(productRepository).save(any(ProductEntity.class));
 
 	}
 

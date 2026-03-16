@@ -1,5 +1,10 @@
 package com.boljevac.warehouse.warehouse.service;
 
+import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
+import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
+import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
+import com.boljevac.warehouse.warehouse.location.entity.LocationType;
+import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
@@ -11,6 +16,7 @@ import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleEx
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
+import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,22 +37,37 @@ public class OrderServiceTest {
 	OrderRepository orderRepository;
 	@Mock
 	ProductRepository productRepository;
+	@Mock
+	InventoryRepository inventoryRepository;
+	@Mock
+	LocationsRepository locationsRepository;
+	@Mock
+	ProductService productService;
 
 	@InjectMocks
 	OrderService orderService;
 
 
-	public ProductEntity createProductHelper(String product, BigDecimal value, int quantity) {
-		return new ProductEntity(product, value, quantity);
+
+	private ProductEntity createProductHelper() {
+		return new ProductEntity("TestProduct", BigDecimal.TEN, 100);
+	}
+	private LocationEntity createLocationHelper(ProductEntity product) {
+		return new LocationEntity(product, LocationType.BLOCK,20,true);
+	}
+
+	private InventoryEntity createInventoryHelper(ProductEntity product, LocationEntity locationEntity, String location) {
+		return new InventoryEntity(product, locationEntity, 20, location);
 	}
 
 	@Test
 	public void order_exceedsStock_throws() {
-		ProductEntity product = createProductHelper(
-				"TestProduct", BigDecimal.valueOf(500), 10
-		);
+		ProductEntity product = createProductHelper();
+		LocationEntity locationEntity = createLocationHelper(product);
+		InventoryEntity orderedInventory = createInventoryHelper(product,locationEntity, locationEntity.toString());
 
-		when(productRepository.findById(1L)).thenReturn(java.util.Optional.of(product));
+		when(productService.getProductById(1L)).thenReturn(product);
+		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(orderedInventory));
 
 		assertThrows(OrderExceedsStockException.class,
 				() -> orderService.createOrder(new OrderRequest(1L, 30))
@@ -56,12 +78,10 @@ public class OrderServiceTest {
 	@Test
 	public void order_cancel_not_possible_throws() {
 		OrderEntity order = new OrderEntity(
-				new ProductEntity("TestProduct",
-						BigDecimal.valueOf(50),
-						100),
+				createProductHelper(),
 				30);
 
-		order.setStatus(OrderStatus.PROCESSING);
+		order.setOrderStatus(OrderStatus.PROCESSING);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
 
@@ -70,51 +90,51 @@ public class OrderServiceTest {
 		);
 		verify(orderRepository, never()).save(any());
 		verify(productRepository, never()).save(any());
+		verify(locationsRepository, never()).save(any());
 	}
 
 	@Test
 	public void order_cancel_successful() {
-		ProductEntity product = createProductHelper(
-				"TestProduct", BigDecimal.valueOf(500), 10
-		);
 		OrderEntity order = new OrderEntity(
-				product, 5);
+				createProductHelper(),
+				5);
+		ProductEntity product = createProductHelper();
+		LocationEntity locationEntity = createLocationHelper(product);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
-		when(productRepository.findByProduct("TestProduct")).thenReturn(product);
+		when(productService.getProductById(order.getProductEntity().getId())).thenReturn(order.getProductEntity());
 
 		orderService.cancelOrder(1L);
 
-		assertEquals(OrderStatus.CANCELLED, order.getStatus());
-		assertEquals(15, product.getQuantity());
-
-		verify(productRepository).save(product);
 		verify(orderRepository).save(order);
+		verify(locationsRepository).save(any(LocationEntity.class));
+		verify(inventoryRepository).save(any(InventoryEntity.class));
+
+		assertEquals(OrderStatus.CANCELLED, order.getOrderStatus());
 
 
 	}
 
 	@Test
 	public void test_create_Order() {
-		Long id = 1L;
-		ProductEntity product = createProductHelper(
-				"TestProduct", BigDecimal.valueOf(500), 10
-		);
+		ProductEntity product = createProductHelper();
+		LocationEntity locationEntity = createLocationHelper(product);
+		InventoryEntity orderedInventory = createInventoryHelper(product,locationEntity, locationEntity.toString());
 		OrderRequest orderRequest = new OrderRequest(
-				id,
+				1L,
 				1
 		);
-
-		when(productRepository.findById(id)).thenReturn(java.util.Optional.of(product));
+		when(productService.getProductById(1L)).thenReturn(product);
+		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(orderedInventory));
 
 		OrderResponse orderResponse = orderService.createOrder(orderRequest);
-		assertEquals(9, product.getQuantity());
+
+		verify(orderRepository).save(any(OrderEntity.class));
+		verify(inventoryRepository).save(any(InventoryEntity.class));
 
 		assertEquals(1, orderResponse.quantity());
 		assertEquals("TestProduct", orderResponse.product());
-		assertEquals(500, orderResponse.totalPrice().doubleValue());
-
-		verify(productRepository).save(product);
+		assertEquals(10, orderResponse.totalPrice().doubleValue());
 
 	}
 
@@ -122,10 +142,7 @@ public class OrderServiceTest {
 	public void get_order_by_id() {
 		Long id = 1L;
 		OrderEntity order = new OrderEntity(
-				new ProductEntity(
-						"TestProduct",
-						BigDecimal.valueOf(30),
-						1000),
+				createProductHelper(),
 				3
 		);
 		order.setId(id);
@@ -139,7 +156,7 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void get_order_by_product_id_throws() {
+	public void get_order_by_product_id() {
 
 		when(orderRepository.findById(anyLong())).thenThrow(OrderNotFoundException.class);
 

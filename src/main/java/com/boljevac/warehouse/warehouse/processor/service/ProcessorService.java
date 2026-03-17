@@ -134,12 +134,12 @@ public class ProcessorService {
 	}
 
 	private boolean validateOrdersExist(List<OrderEntity> listOfOrders) {
-		return listOfOrders.isEmpty()?false:true;
+		return !listOfOrders.isEmpty();
 
 	}
 
 	public boolean validateToDeleteOrder(OrderEntity orderToDelete) {
-		return orderToDelete.getOrderStatus().equals(OrderStatus.CANCELLED)?true:false;
+		return orderToDelete.getOrderStatus().equals(OrderStatus.CANCELLED);
 
 	}
 }

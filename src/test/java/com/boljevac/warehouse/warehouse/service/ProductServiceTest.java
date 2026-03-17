@@ -32,11 +32,8 @@ public class ProductServiceTest {
 
 	@Test
 	public void test_double_createProduct() {
-		ProductRequest request = new ProductRequest(
-				"TestProduct",
-				BigDecimal.valueOf(300),
-				50
-		);
+		ProductRequest request = new ProductRequest("TestProduct", BigDecimal.valueOf(300), 50);
+
 		when(productRepository.existsByProduct(request.getProduct())).thenReturn(true);
 
 		assertThrows(ProductDuplicateCreationException.class, () -> {
@@ -45,24 +42,14 @@ public class ProductServiceTest {
 
 		verify(productRepository, never()).save(any());
 
-
 	}
 
 	@Test
 	public void test_create_product_and_get_response() {
-		ProductRequest request = new ProductRequest(
-				"TestProduct",
-				BigDecimal.valueOf(300),
-				50
-		);
-		ProductEntity productEntity = new ProductEntity(
-				request.getProduct(),
-				request.getValue(),
-				request.getWeight()
-		);
+		ProductRequest request = new ProductRequest("TestProduct", BigDecimal.valueOf(300), 50);
+		ProductEntity productEntity = new ProductEntity(request.getProduct(), request.getValue(), request.getWeight());
 
 		when(productRepository.save(any(ProductEntity.class))).thenReturn(productEntity);
-
 		ProductResponse response = productService.createAndValidateNewProduct(request);
 
 		verify(productRepository).save(any(ProductEntity.class));
@@ -74,21 +61,11 @@ public class ProductServiceTest {
 
 	@Test
 	public void test_update_product() {
-		ProductRequest newValues = new ProductRequest(
-				"TestNewNameProduct",
-				BigDecimal.valueOf(30),
-				500
-		);
-
-		ProductEntity product = new ProductEntity(
-				"TestProduct",
-				BigDecimal.valueOf(30),
-				500
-		);
+		ProductRequest newValues = new ProductRequest("TestNewNameProduct", BigDecimal.valueOf(30), 500);
+		ProductEntity product = new ProductEntity("TestProduct", BigDecimal.valueOf(30), 500);
 
 		Long id = product.getId();
 		when(productRepository.findById(id)).thenReturn(Optional.of(product));
-
 		productService.updateProduct(id, newValues);
 
 		assertEquals("TestNewNameProduct", product.getProduct());

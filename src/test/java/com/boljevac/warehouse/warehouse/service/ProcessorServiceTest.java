@@ -1,265 +1,205 @@
-//package com.boljevac.warehouse.warehouse.service;
-//
-//import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
-//import com.boljevac.warehouse.warehouse.order.entity.ShippedEntity;
-//import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
-//import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
-//import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
-//import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
-//import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
-//import com.boljevac.warehouse.warehouse.order.repository.ShippedOrdersRepository;
-//import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
-//import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.ArgumentCaptor;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//import java.math.BigDecimal;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.Optional;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class ProcessorServiceTest {
-//
-//	@Mock
-//	private OrderRepository orderRepository;
-//
-//	@Mock
-//	private ShippedOrdersRepository shippedOrdersRepository;
-//
-//	@InjectMocks
-//	private ProcessorService processorService;
-//
-//	@Test
-//	public void change_Order_Status_Success() {
-//		OrderEntity orderWithValidStatus = new OrderEntity(
-//				new ProductEntity(
-//						"TestProduct",
-//						BigDecimal.valueOf(30),
-//						1000),
-//				3
-//		);
-//
-//		orderWithValidStatus.setStatus(OrderStatus.ORDER_PLACED);
-//
-//		Long id = 1L;
-//
-//		when(orderRepository.findById(id)).thenReturn(Optional.of(orderWithValidStatus));
-//
-//		processorService.changeStatusOfOrder(id, OrderStatus.CANCELLED);
-//
-//		assertEquals(OrderStatus.CANCELLED, orderWithValidStatus.getStatus());
-//
-//		verify(orderRepository).save(orderWithValidStatus);
-//	}
-//
-//	@Test
-//	public void change_Order_Status_Failure_throws() {
-//		OrderEntity orderWithInvalidStatus = new OrderEntity(
-//				new ProductEntity(
-//						"TestProduct",
-//						BigDecimal.valueOf(30),
-//						1000),
-//				3
-//		);
-//		Long id = 1L;
-//		orderWithInvalidStatus.setStatus(OrderStatus.ORDER_PLACED);
-//
-//		when(orderRepository.findById(id)).thenReturn(Optional.of(orderWithInvalidStatus));
-//
-//		assertThrows(StatusChangeInvalidOrderException.class, () -> {
-//			processorService.changeStatusOfOrder(id, OrderStatus.SHIPPED);
-//		});
-//
-//		assertEquals(OrderStatus.ORDER_PLACED, orderWithInvalidStatus.getStatus());
-//		verify(orderRepository, never()).save(any());
-//
-//	}
-//
-//	@Test
-//	public void delete_Order_by_id_Success() {
-//		Long id = 1L;
-//		OrderEntity cancelledOrder = new OrderEntity(
-//				new ProductEntity(
-//						"TestProduct",
-//						BigDecimal.valueOf(30),
-//						500
-//				), 30);
-//		cancelledOrder.setStatus(OrderStatus.CANCELLED);
-//		when(orderRepository.findById(id)).thenReturn(Optional.of(cancelledOrder));
-//
-//		processorService.deleteOrderById(id);
-//
-//		verify(orderRepository).delete(cancelledOrder);
-//		assertFalse(orderRepository.existsById(id));
-//	}
-//
-//	@Test
-//	public void delete_Order_by_id_Failure_throws() {
-//		Long id = 1L;
-//		OrderEntity processingOrder = new OrderEntity(
-//				new ProductEntity(
-//						"TestProduct",
-//						BigDecimal.valueOf(30),
-//						500
-//				), 30);
-//		processingOrder.setStatus(OrderStatus.PROCESSING);
-//		when(orderRepository.findById(id)).thenReturn(Optional.of(processingOrder));
-//
-//		assertThrows(OrderCancelNotPossibleException.class, () -> {
-//			processorService.deleteOrderById(id);
-//		});
-//
-//		verify(orderRepository, never()).deleteById(id);
-//	}
-//
-//	@Test
-//	public void move_shipped_Orders_Success() {
-//		OrderEntity shippedOrderA = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductA",
-//						BigDecimal.valueOf(30),
-//						500), 30);
-//
-//		OrderEntity shippedOrderB = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductB",
-//						BigDecimal.valueOf(50),
-//						600), 10);
-//
-//		shippedOrderA.setStatus(OrderStatus.SHIPPED);
-//		shippedOrderB.setStatus(OrderStatus.SHIPPED);
-//
-//		List<OrderEntity> shippedOrders = List.of(shippedOrderA, shippedOrderB);
-//		when(orderRepository.getByOrderStatus(OrderStatus.SHIPPED)).thenReturn(shippedOrders);
-//
-//		processorService.archiveShippedOrders();
-//
-//		verify(orderRepository).deleteAll(shippedOrders);
-//
-//		ArgumentCaptor<List<ShippedEntity>> orderEntityArgumentCaptor = ArgumentCaptor.forClass((Class) List.class);
-//		verify(shippedOrdersRepository).saveAll(orderEntityArgumentCaptor.capture());
-//
-//		List<ShippedEntity> saved = orderEntityArgumentCaptor.getValue();
-//		assertEquals(2, saved.size());
-//
-//	}
-//
-//	@Test
-//	public void move_shipped_Orders_throws() {
-//		OrderEntity cancelledOrder = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductA",
-//						BigDecimal.valueOf(30),
-//						500), 30);
-//
-//		OrderEntity processingOrder = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductB",
-//						BigDecimal.valueOf(50),
-//						600), 10);
-//
-//		cancelledOrder.setStatus(OrderStatus.CANCELLED);
-//		processingOrder.setStatus(OrderStatus.PROCESSING);
-//
-//		List<OrderEntity> orders = List.of(cancelledOrder, processingOrder);
-//		when(orderRepository.getByOrderStatus(OrderStatus.SHIPPED)).thenReturn(Collections.emptyList());
-//
-//		assertThrows(OrderNotFoundException.class, () -> {
-//			processorService.archiveShippedOrders();
-//		});
-//
-//		verify(orderRepository, never()).deleteAll(anyList());
-//		verify(orderRepository, never()).saveAll(orders);
-//
-//	}
-//
-//	@Test
-//	public void delete_cancelled_Order_by_id_success() {
-//		OrderEntity cancelledOrder = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductA",
-//						BigDecimal.valueOf(30),
-//						500), 30);
-//		cancelledOrder.setStatus(OrderStatus.CANCELLED);
-//		Long id = 1L;
-//		when(orderRepository.findById(id)).thenReturn(Optional.of(cancelledOrder));
-//		processorService.deleteOrderById(id);
-//
-//		verify(orderRepository).delete(cancelledOrder);
-//
-//	}
-//
-//	@Test
-//	public void delete_cancelled_Order_by_id_throws() {
-//		OrderEntity processingOrder = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductA",
-//						BigDecimal.valueOf(30),
-//						500), 30);
-//		processingOrder.setStatus(OrderStatus.PROCESSING);
-//		Long id = 1L;
-//		when(orderRepository.findById(id)).thenReturn(Optional.empty());
-//		assertThrows(OrderNotFoundException.class, () -> {
-//			processorService.deleteOrderById(id);
-//		});
-//		verify(orderRepository, never()).delete(processingOrder);
-//	}
-//
-//	@Test
-//	public void delete_all_cancelled_Orders_success() {
-//		OrderEntity cancelledOrderA = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductA",
-//						BigDecimal.valueOf(30),
-//						500), 30);
-//
-//		OrderEntity cancelledOrderB = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductB",
-//						BigDecimal.valueOf(50),
-//						600), 10);
-//
-//		cancelledOrderA.setStatus(OrderStatus.CANCELLED);
-//		cancelledOrderB.setStatus(OrderStatus.CANCELLED);
-//
-//		List<OrderEntity> cancelledOrders = List.of(cancelledOrderA, cancelledOrderB);
-//
-//		when(orderRepository.getByOrderStatus(OrderStatus.CANCELLED)).thenReturn(cancelledOrders);
-//		processorService.deleteAllCancelledOrders();
-//		verify(orderRepository).deleteAll(cancelledOrders);
-//	}
-//
-//	@Test
-//	public void delete_all_cancelled_Orders_throws() {
-//		OrderEntity processingOrder = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductA",
-//						BigDecimal.valueOf(30),
-//						500), 30);
-//
-//		OrderEntity shippedOrder = new OrderEntity(
-//				new ProductEntity(
-//						"TestProductB",
-//						BigDecimal.valueOf(50),
-//						600), 10);
-//		processingOrder.setStatus(OrderStatus.PROCESSING);
-//		processingOrder.setStatus(OrderStatus.SHIPPED);
-//
-//		List<OrderEntity> orders = List.of(processingOrder, shippedOrder);
-//
-//		when(orderRepository.getByOrderStatus(OrderStatus.CANCELLED)).thenReturn(Collections.emptyList());
-//
-//		assertThrows(OrderNotFoundException.class, () -> {
-//			processorService.deleteAllCancelledOrders();
-//		});
-//		verify(orderRepository, never()).deleteAll(orders);
-//	}
-//}
+package com.boljevac.warehouse.warehouse.service;
+
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.warehouse.order.entity.ShippedEntity;
+import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
+import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
+import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
+import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
+import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
+import com.boljevac.warehouse.warehouse.order.repository.ShippedOrdersRepository;
+import com.boljevac.warehouse.warehouse.order.service.OrderService;
+import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
+import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class ProcessorServiceTest {
+
+	@Mock
+	private OrderRepository orderRepository;
+
+	@Mock
+	private ShippedOrdersRepository shippedOrdersRepository;
+
+	@InjectMocks
+	private ProcessorService processorService;
+
+	@Mock
+	private OrderService orderService;
+
+	private ProductEntity createProductHelper() {
+		return new ProductEntity("TestProduct", BigDecimal.TEN, 100);
+	}
+
+	@Test
+	public void change_Order_Status_Success() {
+		OrderEntity orderWithValidStatus = new OrderEntity(createProductHelper(), 3);
+		orderWithValidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
+
+		when(orderService.getOrderById(1L)).thenReturn(orderWithValidStatus);
+		processorService.changeStatusOfOrder(1L, OrderStatus.PROCESSING);
+
+		assertEquals(OrderStatus.PROCESSING, orderWithValidStatus.getOrderStatus());
+
+		verify(orderRepository).save(orderWithValidStatus);
+	}
+
+	@Test
+	public void change_Order_Status_Failure_throws() {
+		OrderEntity orderWithInvalidStatus = new OrderEntity(createProductHelper(), 3);
+		orderWithInvalidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
+
+		when(orderService.getOrderById(1L)).thenReturn(orderWithInvalidStatus);
+
+		assertThrows(StatusChangeInvalidOrderException.class, () -> {
+			processorService.changeStatusOfOrder(1L, OrderStatus.SHIPPED);
+		});
+
+		assertEquals(OrderStatus.ORDER_PLACED, orderWithInvalidStatus.getOrderStatus());
+
+		verify(orderRepository, never()).save(any());
+
+	}
+
+	@Test
+	public void delete_Order_by_id_Success() {
+		OrderEntity cancelledOrder = new OrderEntity(createProductHelper(), 30);
+		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
+
+		when(orderService.getOrderById(1L)).thenReturn(cancelledOrder);
+		processorService.deleteOrderById(1L);
+
+		verify(orderRepository).delete(cancelledOrder);
+		assertFalse(orderRepository.existsById(1L));
+	}
+
+	@Test
+	public void delete_Order_by_id_Failure_throws() {
+		OrderEntity processingOrder = new OrderEntity(createProductHelper(), 30);
+		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
+
+		when(orderService.getOrderById(1L)).thenReturn(processingOrder);
+
+		assertThrows(OrderCancelNotPossibleException.class, () -> {
+			processorService.deleteOrderById(1L);
+		});
+		verify(orderRepository, never()).deleteById(1L);
+	}
+
+	@Test
+	public void move_shipped_Orders_Success() {
+		OrderEntity shippedOrderA = new OrderEntity(createProductHelper(), 30);
+		OrderEntity shippedOrderB = new OrderEntity(createProductHelper(), 10);
+
+		shippedOrderA.setOrderStatus(OrderStatus.SHIPPED);
+		shippedOrderB.setOrderStatus(OrderStatus.SHIPPED);
+
+		List<OrderEntity> shippedOrders = List.of(shippedOrderA, shippedOrderB);
+		when(orderRepository.getByOrderStatus(OrderStatus.SHIPPED)).thenReturn(shippedOrders);
+
+		processorService.archiveShippedOrders();
+
+		verify(orderRepository).deleteAll(shippedOrders);
+
+		ArgumentCaptor<List<ShippedEntity>> orderEntityArgumentCaptor = ArgumentCaptor.forClass((Class) List.class);
+		verify(shippedOrdersRepository).saveAll(orderEntityArgumentCaptor.capture());
+
+		List<ShippedEntity> saved = orderEntityArgumentCaptor.getValue();
+		assertEquals(2, saved.size());
+
+	}
+
+	@Test
+	public void move_shipped_Orders_throws() {
+		OrderEntity cancelledOrder = new OrderEntity(createProductHelper(), 30);
+
+		OrderEntity processingOrder = new OrderEntity(createProductHelper(), 10);
+
+		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
+		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
+
+		List<OrderEntity> orders = List.of(cancelledOrder, processingOrder);
+		when(orderRepository.getByOrderStatus(OrderStatus.SHIPPED)).thenReturn(Collections.emptyList());
+
+		assertThrows(OrderNotFoundException.class, () -> {
+			processorService.archiveShippedOrders();
+		});
+
+		verify(orderRepository, never()).deleteAll(anyList());
+		verify(orderRepository, never()).saveAll(orders);
+
+	}
+
+	@Test
+	public void delete_cancelled_Order_by_id_success() {
+		OrderEntity cancelledOrder = new OrderEntity(createProductHelper(), 30);
+		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
+
+		when(orderService.getOrderById(1L)).thenReturn(cancelledOrder);
+
+		processorService.deleteOrderById(1L);
+
+		verify(orderRepository).delete(cancelledOrder);
+
+	}
+
+	@Test
+	public void delete_cancelled_Order_by_id_throws() {
+		OrderEntity processingOrder = new OrderEntity(createProductHelper(), 30);
+		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
+
+		when(orderService.getOrderById(1L)).thenReturn(processingOrder);
+
+		assertThrows(OrderCancelNotPossibleException.class, () -> {
+			processorService.deleteOrderById(1L);
+		});
+
+		verify(orderRepository, never()).delete(processingOrder);
+	}
+
+	@Test
+	public void delete_all_cancelled_Orders_success() {
+		OrderEntity cancelledOrderA = new OrderEntity(createProductHelper(), 30);
+		OrderEntity cancelledOrderB = new OrderEntity(createProductHelper(), 10);
+
+		cancelledOrderA.setOrderStatus(OrderStatus.CANCELLED);
+		cancelledOrderB.setOrderStatus(OrderStatus.CANCELLED);
+
+		List<OrderEntity> cancelledOrders = List.of(cancelledOrderA, cancelledOrderB);
+
+		when(orderRepository.getByOrderStatus(OrderStatus.CANCELLED)).thenReturn(cancelledOrders);
+		processorService.deleteAllCancelledOrders();
+		verify(orderRepository).deleteAll(cancelledOrders);
+	}
+
+	@Test
+	public void delete_all_cancelled_Orders_throws() {
+		OrderEntity processingOrder = new OrderEntity(createProductHelper(), 30);
+		OrderEntity shippedOrder = new OrderEntity(createProductHelper(), 10);
+
+		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
+		processingOrder.setOrderStatus(OrderStatus.SHIPPED);
+
+		List<OrderEntity> orders = List.of(processingOrder, shippedOrder);
+
+		when(orderRepository.getByOrderStatus(OrderStatus.CANCELLED)).thenReturn(Collections.emptyList());
+
+		assertThrows(OrderNotFoundException.class, () -> {
+			processorService.deleteAllCancelledOrders();
+		});
+		verify(orderRepository, never()).deleteAll(orders);
+	}
+}

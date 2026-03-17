@@ -77,10 +77,7 @@ public class OrderServiceTest {
 
 	@Test
 	public void order_cancel_not_possible_throws() {
-		OrderEntity order = new OrderEntity(
-				createProductHelper(),
-				30);
-
+		OrderEntity order = new OrderEntity(createProductHelper(), 30);
 		order.setOrderStatus(OrderStatus.PROCESSING);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
@@ -95,11 +92,7 @@ public class OrderServiceTest {
 
 	@Test
 	public void order_cancel_successful() {
-		OrderEntity order = new OrderEntity(
-				createProductHelper(),
-				5);
-		ProductEntity product = createProductHelper();
-		LocationEntity locationEntity = createLocationHelper(product);
+		OrderEntity order = new OrderEntity(createProductHelper(), 5);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
 		when(productService.getProductById(order.getProductEntity().getId())).thenReturn(order.getProductEntity());
@@ -120,10 +113,8 @@ public class OrderServiceTest {
 		ProductEntity product = createProductHelper();
 		LocationEntity locationEntity = createLocationHelper(product);
 		InventoryEntity orderedInventory = createInventoryHelper(product,locationEntity, locationEntity.toString());
-		OrderRequest orderRequest = new OrderRequest(
-				1L,
-				1
-		);
+		OrderRequest orderRequest = new OrderRequest(1L, 1);
+
 		when(productService.getProductById(1L)).thenReturn(product);
 		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(orderedInventory));
 
@@ -140,24 +131,18 @@ public class OrderServiceTest {
 
 	@Test
 	public void get_order_by_id() {
-		Long id = 1L;
-		OrderEntity order = new OrderEntity(
-				createProductHelper(),
-				3
-		);
-		order.setId(id);
+		OrderEntity order = new OrderEntity(createProductHelper(), 3);
 
-		when(orderRepository.findById(id)).thenReturn(java.util.Optional.of(order));
-		orderService.getOrderById(id);
+		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
+		orderService.getOrderById(1L);
 
-		verify(orderRepository).findById(id);
-		assertEquals(order, orderService.getOrderById(id));
+		verify(orderRepository).findById(1L);
+		assertEquals(order, orderService.getOrderById(1L));
 
 	}
 
 	@Test
 	public void get_order_by_product_id() {
-
 		when(orderRepository.findById(anyLong())).thenThrow(OrderNotFoundException.class);
 
 		assertThrows(OrderNotFoundException.class,

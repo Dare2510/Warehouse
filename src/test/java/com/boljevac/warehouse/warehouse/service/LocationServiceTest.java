@@ -7,6 +7,7 @@ import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationLoadLimitExceededException;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationsAlreadyCreatedException;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.location.service.LocationService;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
@@ -51,6 +52,15 @@ public class LocationServiceTest {
 	public void create_locations_success() {
 		locationService.createLocations();
 		verify(locationsRepository, times(300)).save(any());
+	}
+
+	@Test
+	public void create_locations_throws() {
+		when(locationsRepository.count()).thenReturn(5L);
+		assertThrows(LocationsAlreadyCreatedException.class,
+				() -> locationService.createLocations());
+
+		verify(locationsRepository, never()).save(any());
 	}
 
 	@Test

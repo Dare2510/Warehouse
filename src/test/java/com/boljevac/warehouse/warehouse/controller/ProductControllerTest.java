@@ -67,10 +67,10 @@ public class ProductControllerTest {
 						BigDecimal.valueOf(500),
 						100));
 
-		mockMvc.perform(post("/api/warehouse/products/receipt")
+		mockMvc.perform(post("/api/warehouse/products/create")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{ "product" : "TestProduct", "value" : 500, "quantity" : 100 }
+								{ "product" : "TestProduct", "value" : 500, "weight" : 100 }
 								""")).
 				andExpect(status().isCreated());
 
@@ -87,10 +87,10 @@ public class ProductControllerTest {
 						BigDecimal.valueOf(500),
 						100));
 
-		mockMvc.perform(post("/api/warehouse/products/receipt")
+		mockMvc.perform(post("/api/warehouse/products/create")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{ "productName" : "TestProduct", "value" : 500, "quantity" : 100 }
+								{ "productName" : "TestProduct", "value" : 500, "weight" : 100 }
 								"""))
 				.andExpect(status().isBadRequest());
 

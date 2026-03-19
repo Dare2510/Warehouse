@@ -61,13 +61,13 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void order_exceedsStock_throws() {
+	public void order_exceeds_stock_throws() {
 		ProductEntity product = createProductHelper();
-		LocationEntity locationEntity = createLocationHelper(product);
-		InventoryEntity orderedInventory = createInventoryHelper(product,locationEntity, locationEntity.toString());
+		LocationEntity location = createLocationHelper(product);
+		InventoryEntity inventory = createInventoryHelper(product,location, location.toString());
 
 		when(productService.getProductById(1L)).thenReturn(product);
-		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(orderedInventory));
+		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventory));
 
 		assertThrows(OrderExceedsStockException.class,
 				() -> orderService.createOrder(new OrderRequest(1L, 30))
@@ -91,7 +91,7 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void order_cancel_successful() {
+	public void order_cancel_success() {
 		OrderEntity order = new OrderEntity(createProductHelper(), 5);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
@@ -109,16 +109,16 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void test_create_Order() {
+	public void test_create_Order_success() {
 		ProductEntity product = createProductHelper();
-		LocationEntity locationEntity = createLocationHelper(product);
-		InventoryEntity orderedInventory = createInventoryHelper(product,locationEntity, locationEntity.toString());
-		OrderRequest orderRequest = new OrderRequest(1L, 1);
+		LocationEntity location = createLocationHelper(product);
+		InventoryEntity inventory = createInventoryHelper(product,location, location.toString());
+		OrderRequest request = new OrderRequest(1L, 1);
 
 		when(productService.getProductById(1L)).thenReturn(product);
-		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(orderedInventory));
+		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventory));
 
-		OrderResponse orderResponse = orderService.createOrder(orderRequest);
+		OrderResponse orderResponse = orderService.createOrder(request);
 
 		verify(orderRepository).save(any(OrderEntity.class));
 		verify(inventoryRepository).save(any(InventoryEntity.class));
@@ -143,8 +143,6 @@ public class OrderServiceTest {
 
 	@Test
 	public void get_order_by_product_id() {
-		when(orderRepository.findById(anyLong())).thenThrow(OrderNotFoundException.class);
-
 		assertThrows(OrderNotFoundException.class,
 				() -> orderService.getOrderById(1L));
 

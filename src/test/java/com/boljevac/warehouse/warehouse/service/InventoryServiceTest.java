@@ -66,7 +66,6 @@ public class InventoryServiceTest {
 
 	@Test
 	public void get_inventory_by_id_throws() {
-		ProductEntity product = createProductHelper();
 
 		when(inventoryRepository.findById(1L)).thenReturn(Optional.empty());
 

@@ -1,10 +1,12 @@
 package com.boljevac.warehouse.warehouse.service;
 
 import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
+import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationLoadLimitExceededException;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.location.service.LocationService;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
@@ -25,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LocationServiceTest {
 
 	@Mock
-	private LocationsRepository  locationsRepository;
+	private LocationsRepository locationsRepository;
 
 	@Mock
 	private InventoryRepository inventoryRepository;
@@ -36,8 +38,9 @@ public class LocationServiceTest {
 	private ProductEntity createProductHelper() {
 		return new ProductEntity("TestProduct", BigDecimal.TEN, 10);
 	}
+
 	private LocationEntity createLocationHelper(ProductEntity product) {
-		return new LocationEntity(product, LocationType.BLOCK,20,true);
+		return new LocationEntity(product, LocationType.BLOCK, 20, true);
 	}
 
 	private InventoryEntity createInventoryHelper(ProductEntity product, LocationEntity locationEntity, String location) {
@@ -54,15 +57,14 @@ public class LocationServiceTest {
 	public void store_subset_success() {
 
 		locationService.createLocations();
-		LocationsRequest request = new LocationsRequest(1L,5);
+		LocationsRequest request = new LocationsRequest(1L, 5);
 
 		ProductEntity product = createProductHelper();
 		LocationEntity toStoreFromLocation = createLocationHelper(product);
-		InventoryEntity toStoreFromInventory = createInventoryHelper(product,toStoreFromLocation,toStoreFromLocation.toString());
+		InventoryEntity toStoreFromInventory = createInventoryHelper(product, toStoreFromLocation, toStoreFromLocation.toString());
 		toStoreFromLocation.setLocationType(LocationType.STORAGE);
 		toStoreFromLocation.setId(5L);
 		toStoreFromLocation.setRemainingWeightToStore(800);
-
 
 		Long toStoreInId = 10L;
 		LocationEntity toStoreInLocation = createLocationHelper(product);
@@ -78,21 +80,121 @@ public class LocationServiceTest {
 		verify(inventoryRepository, times(2)).save(any());
 		verify(locationsRepository, times(302)).save(any());
 
-		assertEquals(5L,toStoreFromInventory.getLocationEntity().getId());
-		assertEquals(15,toStoreFromInventory.getQuantity());
+		assertEquals(5L, toStoreFromInventory.getLocationEntity().getId());
+		assertEquals(15, toStoreFromInventory.getQuantity());
 		assertEquals("TestProduct", toStoreFromInventory.getProductEntity().getProduct());
 
-		assertEquals(850,toStoreFromLocation.getRemainingWeightToStore());
-		assertEquals(15,toStoreFromLocation.getQuantity());
+		assertEquals(850, toStoreFromLocation.getRemainingWeightToStore());
+		assertEquals(15, toStoreFromLocation.getQuantity());
 		assertEquals("TestProduct", toStoreFromLocation.getProductEntity().getProduct());
 
 		assertTrue(toStoreInLocation.isLoaded());
-		assertEquals(950,toStoreInLocation.getRemainingWeightToStore());
+		assertEquals(950, toStoreInLocation.getRemainingWeightToStore());
 		assertEquals("TestProduct", toStoreInLocation.getProductEntity().getProduct());
-		assertEquals(5,toStoreInLocation.getQuantity());
+		assertEquals(5, toStoreInLocation.getQuantity());
+	}
+
+	@Test
+	public void store_complete_inventory_success() {
+
+		locationService.createLocations();
+		LocationsRequest request = new LocationsRequest(1L, 5);
+
+		ProductEntity product = createProductHelper();
+		LocationEntity toStoreFromLocation = createLocationHelper(product);
+		InventoryEntity toStoreFromInventory = createInventoryHelper(product, toStoreFromLocation, toStoreFromLocation.toString());
+		toStoreFromLocation.setQuantity(5);
+		toStoreFromLocation.setLocationType(LocationType.STORAGE);
+		toStoreFromLocation.setId(5L);
+		toStoreFromLocation.setRemainingWeightToStore(800);
+		toStoreFromInventory.setQuantity(5);
+
+		Long toStoreInId = 10L;
+		LocationEntity toStoreInLocation = createLocationHelper(product);
+		toStoreInLocation.setId(toStoreInId);
+		toStoreInLocation.setRemainingWeightToStore(1000);
+
+		when(inventoryRepository.findById(1L)).thenReturn(Optional.of(toStoreFromInventory));
+		when(locationsRepository.findAll()).thenReturn(Collections.singletonList(toStoreInLocation));
+		when(locationsRepository.getLocationById(toStoreInLocation.getId())).thenReturn(toStoreInLocation);
+
+		locationService.storeInventory(request);
+
+		verify(inventoryRepository, times(2)).save(any());
+		verify(locationsRepository, times(302)).save(any());
+
+		assertNull(toStoreFromInventory.getLocationEntity());
+		assertEquals(0, toStoreFromInventory.getQuantity());
+		assertNull(toStoreFromInventory.getProductEntity());
+
+		assertEquals(1000, toStoreFromLocation.getRemainingWeightToStore());
+		assertEquals(0, toStoreFromLocation.getQuantity());
+		assertNull(toStoreFromLocation.getProductEntity());
+		assertFalse(toStoreFromLocation.isLoaded());
+
+		assertTrue(toStoreInLocation.isLoaded());
+		assertEquals(950, toStoreInLocation.getRemainingWeightToStore());
+		assertEquals("TestProduct", toStoreInLocation.getProductEntity().getProduct());
+		assertEquals(5, toStoreInLocation.getQuantity());
+	}
+
+	@Test
+	public void store_inventory_validateAvailableQuantity_throwsException() {
+
+		locationService.createLocations();
+		LocationsRequest request = new LocationsRequest(1L, 10);
+
+		ProductEntity product = createProductHelper();
+		LocationEntity toStoreFromLocation = createLocationHelper(product);
+		InventoryEntity toStoreFromInventory = createInventoryHelper(product, toStoreFromLocation, toStoreFromLocation.toString());
+		toStoreFromLocation.setQuantity(5);
+		toStoreFromLocation.setLocationType(LocationType.STORAGE);
+		toStoreFromLocation.setId(5L);
+		toStoreFromLocation.setRemainingWeightToStore(800);
+		toStoreFromInventory.setQuantity(5);
+
+		Long toStoreInId = 10L;
+		LocationEntity toStoreInLocation = createLocationHelper(product);
+		toStoreInLocation.setId(toStoreInId);
+		toStoreInLocation.setRemainingWeightToStore(1000);
+
+		when(inventoryRepository.findById(1L)).thenReturn(Optional.of(toStoreFromInventory));
+		when(locationsRepository.findAll()).thenReturn(Collections.singletonList(toStoreInLocation));
+		when(locationsRepository.getLocationById(toStoreInLocation.getId())).thenReturn(toStoreInLocation);
+
+		assertThrows(NotSufficientStockToStoreException.class,
+				() -> locationService.storeInventory(request));
+
+		verify(locationsRepository, never()).save(toStoreInLocation);
+	}
+
+	@Test
+	public void store_inventory_validateLocationWeight_throwsException() {
+
+		locationService.createLocations();
+		LocationsRequest request = new LocationsRequest(1L, 5);
+
+		ProductEntity product = createProductHelper();
+		LocationEntity toStoreFromLocation = createLocationHelper(product);
+		InventoryEntity toStoreFromInventory = createInventoryHelper(product, toStoreFromLocation, toStoreFromLocation.toString());
+		toStoreFromLocation.setLocationType(LocationType.STORAGE);
+		toStoreFromLocation.setId(5L);
+		toStoreFromLocation.setRemainingWeightToStore(800);
+
+		Long toStoreInId = 10L;
+		LocationEntity toStoreInLocation = createLocationHelper(product);
+		toStoreInLocation.setId(toStoreInId);
+		toStoreInLocation.setRemainingWeightToStore(0);
+
+		when(inventoryRepository.findById(1L)).thenReturn(Optional.of(toStoreFromInventory));
+		when(locationsRepository.findAll()).thenReturn(Collections.singletonList(toStoreInLocation));
+		when(locationsRepository.getLocationById(toStoreInLocation.getId())).thenReturn(toStoreInLocation);
+
+		assertThrows(LocationLoadLimitExceededException.class,
+				() -> locationService.storeInventory(request));
+
+		verify(locationsRepository, never()).save(toStoreInLocation);
 
 
 	}
-
-
 }

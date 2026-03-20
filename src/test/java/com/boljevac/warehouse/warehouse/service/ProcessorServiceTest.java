@@ -2,7 +2,7 @@ package com.boljevac.warehouse.warehouse.service;
 
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.entity.ShippedEntity;
-import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
+import com.boljevac.warehouse.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
@@ -45,7 +45,7 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void change_Order_Status_Success() {
+	public void changeStatusOfOrder_whenRequestedStatusIsValid_returnsProcessorResponse() {
 		OrderEntity orderWithValidStatus = new OrderEntity(createProductHelper(), 3);
 		orderWithValidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
 
@@ -58,7 +58,7 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void change_Order_Status_Failure_throws() {
+	public void changeStatusOfOrder_whenRequestedStatusIsNotValid_throwsStatusChangeInvalidOrderException() {
 		OrderEntity orderWithInvalidStatus = new OrderEntity(createProductHelper(), 3);
 		orderWithInvalidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
 
@@ -75,7 +75,7 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void delete_Order_by_id_Success() {
+	public void deleteOrderById_whenOrderStatusIsCancelled_returnsProcessorResponse() {
 		OrderEntity cancelledOrder = new OrderEntity(createProductHelper(), 30);
 		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
 
@@ -87,20 +87,20 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void delete_Order_by_id_Failure_throws() {
+	public void deleteOrderById_whenOrderStatusIsNotQualifiedForDeletion_throwsOrderCancelOrDeleteNotPossibleException() {
 		OrderEntity processingOrder = new OrderEntity(createProductHelper(), 30);
 		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
 
 		when(orderService.getOrderById(1L)).thenReturn(processingOrder);
 
-		assertThrows(OrderCancelNotPossibleException.class, () -> {
+		assertThrows(OrderCancelOrDeleteNotPossibleException.class, () -> {
 			processorService.deleteOrderById(1L);
 		});
 		verify(orderRepository, never()).deleteById(1L);
 	}
 
 	@Test
-	public void move_shipped_Orders_Success() {
+	public void archiveShippedOrders_whenOrdersWithStatusShippedAvailable_returnsProcessorResponse() {
 		OrderEntity shippedOrderA = new OrderEntity(createProductHelper(), 30);
 		OrderEntity shippedOrderB = new OrderEntity(createProductHelper(), 10);
 
@@ -123,7 +123,7 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void move_shipped_Orders_throws() {
+	public void archiveShippedOrders_whenNoOrdersWithStatusShipped_throwsOrderNotFoundException() {
 		OrderEntity cancelledOrder = new OrderEntity(createProductHelper(), 30);
 
 		OrderEntity processingOrder = new OrderEntity(createProductHelper(), 10);
@@ -144,7 +144,7 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void delete_cancelled_Order_by_id_success() {
+	public void deleteOrdersById_whenOrderWithStatusCancelledFound_returnsProcessorResponse() {
 		OrderEntity cancelledOrder = new OrderEntity(createProductHelper(), 30);
 		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
 
@@ -157,13 +157,13 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void delete_cancelled_Order_by_id_throws() {
+	public void deleteOrderById_whenTheOrderHasNotStatusCancelled_throwsOrderCancelOrDeleteNotPossibleException() {
 		OrderEntity processingOrder = new OrderEntity(createProductHelper(), 30);
 		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
 
 		when(orderService.getOrderById(1L)).thenReturn(processingOrder);
 
-		assertThrows(OrderCancelNotPossibleException.class, () -> {
+		assertThrows(OrderCancelOrDeleteNotPossibleException.class, () -> {
 			processorService.deleteOrderById(1L);
 		});
 
@@ -171,7 +171,7 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void delete_all_cancelled_Orders_success() {
+	public void deleteAllCancelledOrders_whenOrdersWithStatusCancelledAvailable_returnsProcessorResponse() {
 		OrderEntity cancelledOrderA = new OrderEntity(createProductHelper(), 30);
 		OrderEntity cancelledOrderB = new OrderEntity(createProductHelper(), 10);
 
@@ -186,7 +186,7 @@ public class ProcessorServiceTest {
 	}
 
 	@Test
-	public void delete_all_cancelled_Orders_throws() {
+	public void deleteAllCancelledOrders_whenNoOrdersWithStatusCancelledAvailable_throwsOrderNotFoundException() {
 		OrderEntity processingOrder = new OrderEntity(createProductHelper(), 30);
 		OrderEntity shippedOrder = new OrderEntity(createProductHelper(), 10);
 

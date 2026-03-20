@@ -29,14 +29,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ProductController.class)
 @AutoConfigureMockMvc(addFilters = false)
 
-//Product Controller Tests
-
 public class ProductControllerTest {
 
 	@Autowired
 	MockMvc mockMvc;
 
-	//Mocked JWT
 	@MockitoBean
 	ProductService productService;
 	@MockitoBean
@@ -47,7 +44,7 @@ public class ProductControllerTest {
 	UserDetailsService userDetailsService;
 
 	@Test
-	void getProducts_expecting_200() throws Exception {
+	void getAllProducts_returns200() throws Exception {
 
 		when(productService.getAllProducts(any(Pageable.class))).thenReturn(Page.empty());
 
@@ -59,7 +56,7 @@ public class ProductControllerTest {
 	}
 
 	@Test
-	void createProduct_expecting_201() throws Exception {
+	void createAndValidateNewProduct_whenRequestIsValid_returns201() throws Exception {
 		when(productService.createAndValidateNewProduct(any(ProductRequest.class)))
 				.thenReturn(new ProductResponse(
 						1L,
@@ -79,7 +76,7 @@ public class ProductControllerTest {
 
 	//Validation Test , invalid Json -> Response Bad Request
 	@Test
-	void createProduct_expecting_400() throws Exception {
+	void createAndValidateNewProduct_whenRequestIsInvalid_returns400() throws Exception {
 		when(productService.createAndValidateNewProduct(any(ProductRequest.class)))
 				.thenReturn(new ProductResponse(
 						1L,

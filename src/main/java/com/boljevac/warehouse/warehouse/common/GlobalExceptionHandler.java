@@ -124,8 +124,8 @@ public class GlobalExceptionHandler {
 	}
 
 	//To cancel an order it must have status Order placed
-	@ExceptionHandler(OrderCancelNotPossibleException.class)
-	public ResponseEntity<ErrorResponse> handleOrderCancelNotPossibleException(OrderCancelNotPossibleException ex,
+	@ExceptionHandler(OrderCancelOrDeleteNotPossibleException.class)
+	public ResponseEntity<ErrorResponse> handleOrderCancelNotPossibleException(OrderCancelOrDeleteNotPossibleException ex,
 																			   HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(

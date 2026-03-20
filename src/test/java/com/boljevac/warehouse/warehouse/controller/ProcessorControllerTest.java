@@ -50,7 +50,7 @@ public class ProcessorControllerTest {
 
 
 	@Test
-	public void get_open_orders_expecting_200() throws Exception {
+	public void getListOfOrdersByStatus_whenOrdersAreFound_returns200() throws Exception {
 		when(processorService.getListOfOrdersByStatus(any(ProcessorRequest.class)))
 				.thenReturn(List.of(new ProcessorResponse(
 						1L,
@@ -71,7 +71,7 @@ public class ProcessorControllerTest {
 	}
 
 	@Test
-	public void get_open_orders_expecting_404() throws Exception {
+	public void getOpenOrders_whenNoOrderWithRequestedStatusWasFound_returns404() throws Exception {
 		when(processorService.getListOfOrdersByStatus(any(ProcessorRequest.class)))
 				.thenThrow(new OrderNotFoundException());
 
@@ -89,7 +89,7 @@ public class ProcessorControllerTest {
 	}
 
 	@Test
-	public void change_order_status_expecting_200() throws Exception {
+	public void changeStatusOfOrder_whenRequestedStatusIsValidNextStatus_returns200() throws Exception {
 		when(processorService.changeStatusOfOrder(1L, OrderStatus.PROCESSING))
 				.thenReturn(new ProcessorResponse(
 						1L,
@@ -106,7 +106,7 @@ public class ProcessorControllerTest {
 	}
 
 	@Test
-	public void change_order_status_expecting_400() throws Exception {
+	public void changeStatusOfOrder_whenRequestedStatusIsNotValidNextStatus_returns400() throws Exception {
 		when(processorService.changeStatusOfOrder(1L, OrderStatus.SHIPPED))
 				.thenThrow(new StatusChangeInvalidOrderException());
 
@@ -119,7 +119,7 @@ public class ProcessorControllerTest {
 
 	//change Order status with not available status -> Response bad Request
 	@Test
-	public void change_order_withInvalidStatus_expecting_400() throws Exception {
+	public void changeStatusOfOrder_whenRequestedStatusIsNotAvailable_returns400() throws Exception {
 		when(processorService.changeStatusOfOrder(1L, OrderStatus.ORDER_PLACED))
 				.thenThrow(new StatusChangeInvalidOrderException());
 

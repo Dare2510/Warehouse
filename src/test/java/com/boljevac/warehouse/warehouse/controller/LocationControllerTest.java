@@ -1,9 +1,9 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.inventory.controller.InventoryController;
-import com.boljevac.warehouse.warehouse.inventory.dto.InventoryRequest;
-import com.boljevac.warehouse.warehouse.inventory.dto.InventoryResponse;
-import com.boljevac.warehouse.warehouse.inventory.service.InventoryService;
+import com.boljevac.warehouse.warehouse.location.controller.LocationsController;
+import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
+import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
+import com.boljevac.warehouse.warehouse.location.service.LocationService;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
 import org.junit.jupiter.api.Test;
@@ -21,15 +21,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(InventoryController.class)
+@WebMvcTest(LocationsController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class InventoryControllerTest {
+public class LocationControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockitoBean
-	InventoryService inventoryService;
+	LocationService locationService;
 	@MockitoBean
 	JwtToken jwtToken;
 	@MockitoBean
@@ -37,20 +37,27 @@ public class InventoryControllerTest {
 	@MockitoBean
 	UserDetailsService userDetailsService;
 
-
 	@Test
-	void createStock_whenRequestIsValid_returns200() throws Exception {
-		when(inventoryService.createStock(any(InventoryRequest.class))).thenReturn(
-				new InventoryResponse(
-						"TestProduct" , 50
+	public void storeInventory_whenRequestIsValid_returns200() throws Exception{
+		LocationsRequest request = new LocationsRequest(1L,5);
+		when(locationService.storeInventory(request)).thenReturn(
+				new LocationsResponse(
+						1L,
+						"TestProduct",
+						50.00,
+						500.00,
+						"Location"
 				)
 		);
-		mockMvc.perform(post("/api/warehouse/inventory")
+
+		mockMvc.perform(post("/api/warehouse/locations")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
-						{"productId" : 1, "quantity" : 5}
-						"""))
-				.andExpect(status().isOk());
-		verify(inventoryService).createStock(any(InventoryRequest.class));
+						{"inventoryId": 1 , "quantity": 5}
+						"""
+				)
+		).andExpect(status().isOk());
+
+		verify(locationService).storeInventory(any(LocationsRequest.class));
 	}
 }

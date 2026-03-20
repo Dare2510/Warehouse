@@ -49,13 +49,13 @@ public class LocationServiceTest {
 	}
 
 	@Test
-	public void create_locations_success() {
+	public void createLocations_whenLocationsAreFirstTimeCreated_creates300Locations() {
 		locationService.createLocations();
 		verify(locationsRepository, times(300)).save(any());
 	}
 
 	@Test
-	public void create_locations_throws() {
+	public void createLocations_whenLocationsAlreadyExist_throwsLocationsAlreadyCreatedException() {
 		when(locationsRepository.count()).thenReturn(5L);
 		assertThrows(LocationsAlreadyCreatedException.class,
 				() -> locationService.createLocations());
@@ -64,7 +64,7 @@ public class LocationServiceTest {
 	}
 
 	@Test
-	public void store_subset_success() {
+	public void storeInventory_whenSubsetToStoreMeetsAllRequirements_returnsLocationsResponse() {
 
 		locationService.createLocations();
 		LocationsRequest request = new LocationsRequest(1L, 5);
@@ -105,7 +105,7 @@ public class LocationServiceTest {
 	}
 
 	@Test
-	public void store_complete_inventory_success() {
+	public void storeInventory_whenEntireStorageUnitMeetsAllRequirements_returnsLocationsResponse() {
 
 		locationService.createLocations();
 		LocationsRequest request = new LocationsRequest(1L, 5);
@@ -149,7 +149,7 @@ public class LocationServiceTest {
 	}
 
 	@Test
-	public void store_inventory_validateAvailableQuantity_throwsException() {
+	public void storeInventory_whenStockIsNotSufficient_throwsNotSufficientStockToStoreException() {
 
 		locationService.createLocations();
 		LocationsRequest request = new LocationsRequest(1L, 10);
@@ -179,7 +179,7 @@ public class LocationServiceTest {
 	}
 
 	@Test
-	public void store_inventory_validateLocationWeight_throwsException() {
+	public void storeInventory_whenLocationsRemainingWeightToStoreIsNotEnough_throwsLocationLoadLimitExceededException() {
 
 		locationService.createLocations();
 		LocationsRequest request = new LocationsRequest(1L, 5);

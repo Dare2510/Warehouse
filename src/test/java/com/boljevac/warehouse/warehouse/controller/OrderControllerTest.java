@@ -5,7 +5,7 @@ import com.boljevac.warehouse.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
-import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
+import com.boljevac.warehouse.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
 import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepositoryException;
@@ -51,7 +51,7 @@ public class OrderControllerTest {
 	ProcessorService processorService;
 
 	@Test
-	public void createOrder_expecting_201() throws Exception {
+	public void createOrder_whenRequestIsValid_returns201() throws Exception {
 		when(orderService.createOrder(any(OrderRequest.class)))
 				.thenReturn(new OrderResponse("Item",
 						3, BigDecimal.valueOf(30),
@@ -68,9 +68,8 @@ public class OrderControllerTest {
 
 	}
 
-	//Test Order exceeding Stock -> Response is not acceptable
 	@Test
-	public void createOrder_expecting_406() throws Exception {
+	public void createOrder_whenRequestExceedsStock_returns406() throws Exception {
 		when(orderService.createOrder(any(OrderRequest.class)))
 				.thenThrow(new OrderExceedsStockException());
 
@@ -86,7 +85,7 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void createOrder_expecting_400() throws Exception {
+	public void createOrder_whenRequestIsNotValid_returns400() throws Exception {
 		mockMvc
 				.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +97,7 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void cancelOrder_expecting_200() throws Exception {
+	public void cancelOrder_whenRequestIsValid_returns200() throws Exception {
 		when(orderService.cancelOrder(1L))
 				.thenReturn(new OrderResponse("Item",
 						3, BigDecimal.valueOf(30),
@@ -112,12 +111,11 @@ public class OrderControllerTest {
 
 	}
 
-	//Test to unsuccessfully cancel Order (status != Order_Placed)-> Response not acceptable
 	@Test
-	public void cancelOrder_expecting_406() throws Exception {
+	public void cancelOrder_whenOrderStatusIsNotOrderPlaced_returns406() throws Exception {
 
 		when(orderService.cancelOrder(1L))
-				.thenThrow(new OrderCancelNotPossibleException(1L));
+				.thenThrow(new OrderCancelOrDeleteNotPossibleException(1L));
 
 		mockMvc
 				.perform(patch("/api/warehouse/orders/1/cancel"))
@@ -127,7 +125,7 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void getProducts_expecting_200() throws Exception {
+	public void getListOfProducts_whenProductRepositoryContainsProducts_returns200() throws Exception {
 		when(orderService.getListOfProducts()).thenReturn(Collections.emptyList());
 
 		mockMvc
@@ -138,7 +136,7 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void getProducts_expecting_404() throws Exception {
+	public void getProducts_whenProductRepositoryIsEmpty_returns404() throws Exception {
 		when(orderService.getListOfProducts()).thenThrow(EmptyProductRepositoryException.class);
 
 		mockMvc

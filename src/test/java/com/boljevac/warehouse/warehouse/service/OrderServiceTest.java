@@ -12,7 +12,7 @@ import com.boljevac.warehouse.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
-import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
+import com.boljevac.warehouse.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
@@ -61,7 +61,7 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void order_exceeds_stock_throws() {
+	public void createOrder_whenOrderRequestExceedsStock_throwsOrderExceedsStockException() {
 		ProductEntity product = createProductHelper();
 		LocationEntity location = createLocationHelper(product);
 		InventoryEntity inventory = createInventoryHelper(product,location, location.toString());
@@ -76,13 +76,13 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void order_cancel_not_possible_throws() {
+	public void cancelOrder_whenOrderStatusIsNotValidForCancel_throwsOrderCancelNotPossibleException() {
 		OrderEntity order = new OrderEntity(createProductHelper(), 30);
 		order.setOrderStatus(OrderStatus.PROCESSING);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
 
-		assertThrows(OrderCancelNotPossibleException.class,
+		assertThrows(OrderCancelOrDeleteNotPossibleException.class,
 				() -> orderService.cancelOrder(1L)
 		);
 		verify(orderRepository, never()).save(any());
@@ -91,7 +91,7 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void order_cancel_success() {
+	public void cancelOrder_whenStatusIsValidForCancel_returnsOrderResponse() {
 		OrderEntity order = new OrderEntity(createProductHelper(), 5);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
@@ -109,7 +109,7 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void test_create_Order_success() {
+	public void createOrder_whenAllRequirementsAreMet_returnsOrderResponse() {
 		ProductEntity product = createProductHelper();
 		LocationEntity location = createLocationHelper(product);
 		InventoryEntity inventory = createInventoryHelper(product,location, location.toString());
@@ -130,7 +130,7 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void get_order_by_id() {
+	public void getOrderById_whenOrderIsAvailable_returnsOrderResponse() {
 		OrderEntity order = new OrderEntity(createProductHelper(), 3);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
@@ -142,7 +142,7 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void get_order_by_product_id() {
+	public void getOrderById_whenOrderIsNotAvailable_throwsOrderNotFoundException() {
 		assertThrows(OrderNotFoundException.class,
 				() -> orderService.getOrderById(1L));
 

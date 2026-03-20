@@ -51,7 +51,7 @@ public class InventoryServiceTest {
 	}
 
 	@Test
-	public void get_inventory_by_id() {
+	public void getInventoryResponse_whenIdIsAvailable_returnsInventoryResponse() {
 		ProductEntity product = createProductHelper();
 		LocationEntity locationEntity = createLocationHelper(product);
 		InventoryEntity inventory = createInventoryHelper(product,locationEntity,locationEntity.toString());
@@ -65,7 +65,7 @@ public class InventoryServiceTest {
 	}
 
 	@Test
-	public void get_inventory_by_id_throws() {
+	public void getInventoryResponse_whenIdIsNotAvailable_throwsInventoryNotFoundException() {
 
 		when(inventoryRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -76,7 +76,7 @@ public class InventoryServiceTest {
 	}
 
 	@Test
-	public void create_stock(){
+	public void createStock_whenAllRequirementsAreMet_returnsInventoryResponse() {
 		InventoryRequest request = new InventoryRequest(1L,20);
 		ProductEntity product = createProductHelper();
 		when(productService.getProductById(1L)).thenReturn(product);

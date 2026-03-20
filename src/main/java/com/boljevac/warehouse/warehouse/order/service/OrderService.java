@@ -9,7 +9,7 @@ import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
-import com.boljevac.warehouse.warehouse.order.exception.OrderCancelNotPossibleException;
+import com.boljevac.warehouse.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
@@ -96,7 +96,7 @@ public class OrderService {
 			updateInventory(orderToCancel);
 			logger.info("Order with Id {} has been cancelled", orderToCancel.getId());
 		} else {
-				throw new OrderCancelNotPossibleException(orderToCancel.getId());
+				throw new OrderCancelOrDeleteNotPossibleException(orderToCancel.getId());
 			}
 		return mapToResponse(orderToCancel);
 	}

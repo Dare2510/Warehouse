@@ -32,7 +32,7 @@ public class ProductServiceTest {
 
 
 	@Test
-	public void test_create_product_fails_throws_duplicate_exception() {
+	public void createAndValidateNewProduct_whenProductAlreadyExists_throwsProductAlreadyExistsException() {
 		ProductRequest request = new ProductRequest("TestProduct", BigDecimal.valueOf(300), 50);
 
 		when(productRepository.existsByProduct(request.getProduct())).thenReturn(true);
@@ -46,7 +46,7 @@ public class ProductServiceTest {
 	}
 
 	@Test
-	public void test_create_product_success() {
+	public void createAndValidateNewProduct_whenRequestIsValid_returnsProductResponse() {
 		ProductRequest request = new ProductRequest("TestProduct", BigDecimal.valueOf(300), 50);
 		ProductEntity productEntity = new ProductEntity(request.getProduct(), request.getValue(), request.getWeight());
 
@@ -61,7 +61,7 @@ public class ProductServiceTest {
 	}
 
 	@Test
-	public void test_update_product_success() {
+	public void updateProduct_whenRequestIsValid_returnsProductResponse() {
 		ProductRequest newValues = new ProductRequest("TestNewNameProduct", BigDecimal.valueOf(30), 500);
 		ProductEntity product = new ProductEntity("TestProduct", BigDecimal.valueOf(30), 500);
 
@@ -78,7 +78,7 @@ public class ProductServiceTest {
 	}
 
 	@Test
-	public void test_product_update_fails_product_not_found_throws_exception() {
+	public void updateProduct_whenProductDoesNotExist_throwsProductNotFoundException() {
 		ProductRequest newValues = new ProductRequest("TestNewNameProduct", BigDecimal.valueOf(30), 500);
 
 		when(productRepository.findById(anyLong())).thenReturn(Optional.empty());

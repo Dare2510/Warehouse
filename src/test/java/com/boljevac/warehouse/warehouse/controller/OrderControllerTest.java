@@ -69,14 +69,14 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void createOrder_whenRequestExceedsStock_returns406() throws Exception {
+	public void createOrder_whenRequestExceedsStock_returns400() throws Exception {
 		doThrow(new OrderExceedsStockException()).when(orderService).createOrder(any(OrderRequest.class));
 		mockMvc.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{"productId":1,"quantity":3}
 								"""))
-				.andExpect(status().isNotAcceptable());
+				.andExpect(status().isBadRequest());
 
 		verify(orderService).createOrder(any(OrderRequest.class));
 
@@ -110,11 +110,11 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void cancelOrder_whenOrderStatusIsNotOrderPlaced_returns406() throws Exception {
+	public void cancelOrder_whenOrderStatusIsNotOrderPlaced_returns400() throws Exception {
 		doThrow(new OrderCancelOrDeleteNotPossibleException(1L)).when(orderService).cancelOrder(1L);
 		mockMvc
 				.perform(patch("/api/warehouse/orders/1/cancel"))
-				.andExpect(status().isNotAcceptable());
+				.andExpect(status().isBadRequest());
 
 		verify(orderService).cancelOrder(1L);
 	}

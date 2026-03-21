@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+//Run with Environment variables
 @SpringBootTest(properties = "app.jwt.secret=dGhpcy1pcy1qdXN0LWEtdGVzdC1zZWNyZXQtbG9uZy1lbm91Z2g=")
 @AutoConfigureMockMvc
 public class JwtFlowTest {
@@ -54,12 +55,12 @@ public class JwtFlowTest {
 	}
 
 	@Test
-	void getOrders_withoutLogin_expecting401() throws Exception {
+	void getOrders_withoutLogin_returns401() throws Exception {
 		mockMvc.perform(get("/api/warehouse/orders")).andExpect(status().isUnauthorized());
 	}
 
 	@Test
-	void getOrders_withClerkLogin_expecting403() throws Exception {
+	void getOrders_withClerkLogin_returns403() throws Exception {
 		when(orderService.getListOfProducts())
 				.thenReturn(List.of(new ProductResponse(
 						1L,
@@ -75,7 +76,7 @@ public class JwtFlowTest {
 	}
 
 	@Test
-	void getOrders_withClerkLogin_expecting200() throws Exception {
+	void getOrders_withClerkLogin_returns200() throws Exception {
 		when(orderService.getListOfProducts()).thenReturn(
 				List.of(new ProductResponse(
 						1L,

@@ -3,6 +3,7 @@ package com.boljevac.warehouse.warehouse.common;
 import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationLoadLimitExceededException;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationsAlreadyCreatedException;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationsNotCreatedException;
 import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationException;
 import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.order.exception.*;
@@ -73,13 +74,13 @@ public class GlobalExceptionHandler {
 																			  HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
-				HttpStatus.BAD_REQUEST.value(),
+				HttpStatus.CONFLICT.value(),
 				ex.getMessage(),
 				request.getRequestURI()
 		);
 
 		logger.error(error.toString());
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
 	}
 
 	@ExceptionHandler(OrderNotFoundException.class)
@@ -100,12 +101,12 @@ public class GlobalExceptionHandler {
 																		  HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
-				HttpStatus.NOT_ACCEPTABLE.value(),
+				HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(),
 				request.getRequestURI()
 		);
 		logger.error(error.toString());
-		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
 	//Sequence of status changes must be: ORDER_PLACED -> (CANCELLED)/PROCESSING -> PACKAGED -> SHIPPED
@@ -128,12 +129,12 @@ public class GlobalExceptionHandler {
 																			   HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
-				HttpStatus.NOT_ACCEPTABLE.value(),
+				HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(),
 				request.getRequestURI()
 		);
 		logger.error(error.toString());
-		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
 	//If trying to set the status to a status that is not available
@@ -154,24 +155,24 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleNotSufficientStockToStoreException(NotSufficientStockToStoreException ex,
 																		   HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
-				HttpStatus.NOT_ACCEPTABLE.value(),
-				ex.getMessage(),
-				request.getRequestURI()
-		);
-		logger.error(error.toString());
-		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
-	}
-
-	@ExceptionHandler(NoUnusedLocationException.class)
-	public ResponseEntity<ErrorResponse>  handleNoUnusedLocationException(NoUnusedLocationException ex,
-																		  HttpServletRequest request) {
-		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(),
 				request.getRequestURI()
 		);
 		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
+	@ExceptionHandler(NoUnusedLocationException.class)
+	public ResponseEntity<ErrorResponse>  handleNoUnusedLocationException(NoUnusedLocationException ex,
+																		  HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.NOT_FOUND.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+		logger.error(error.toString());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
 	@ExceptionHandler(InventoryNotFoundException.class)
@@ -190,12 +191,12 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleLocationsAlreadyCreatedException(LocationsAlreadyCreatedException ex,
 																		   HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
-				HttpStatus.BAD_REQUEST.value(),
+				HttpStatus.CONFLICT.value(),
 				ex.getMessage(),
 				request.getRequestURI()
 		);
 		logger.error(error.toString());
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
 	}
 	//Max weight per location = 1000
 	@ExceptionHandler(LocationLoadLimitExceededException.class)
@@ -208,5 +209,17 @@ public class GlobalExceptionHandler {
 		);
 		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
+	@ExceptionHandler(LocationsNotCreatedException.class)
+	public ResponseEntity<ErrorResponse> handleLocationsNotCreatedException(LocationsNotCreatedException ex,
+																			HttpServletRequest request){
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+		logger.error(error.toString());
+		return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 }

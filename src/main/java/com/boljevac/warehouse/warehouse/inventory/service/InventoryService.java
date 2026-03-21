@@ -7,6 +7,7 @@ import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundEx
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationsNotCreatedException;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.service.ProductService;
@@ -41,6 +42,9 @@ public class InventoryService {
 
 	@Transactional
 	public InventoryResponse createStock(InventoryRequest inventoryRequest) {
+		//First creation of Locations is needed
+		validateLocationsExists();
+
 		ProductEntity product = productService.getProductById(inventoryRequest.getProductId());
 
 		LocationEntity newLocation = new LocationEntity(
@@ -70,5 +74,14 @@ public class InventoryService {
 		return inventoryRepository.findById(id).orElseThrow(
 				() -> new InventoryNotFoundException(id)
 		);
+	}
+
+	//Helper Methods
+	private boolean validateLocationsExists() {
+		boolean locationsExists = true;
+		if(locationsRepository.count()<1){
+			throw new LocationsNotCreatedException();
+		};
+		return locationsExists;
 	}
 }

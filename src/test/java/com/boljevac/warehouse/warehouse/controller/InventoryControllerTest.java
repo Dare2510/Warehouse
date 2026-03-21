@@ -5,6 +5,7 @@ import com.boljevac.warehouse.warehouse.inventory.dto.InventoryRequest;
 import com.boljevac.warehouse.warehouse.inventory.dto.InventoryResponse;
 import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
 import com.boljevac.warehouse.warehouse.inventory.service.InventoryService;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationsNotCreatedException;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
@@ -67,6 +68,20 @@ public class InventoryControllerTest {
 						{"productId" : 1, "quantity" : 5}
 						"""))
 				.andExpect(status().isNotFound());
+
+		verify(inventoryService).createStock(any(InventoryRequest.class));
+	}
+
+	@Test
+	void createStock_whenLocationsNotExist_returns400() throws Exception {
+		doThrow(new LocationsNotCreatedException()).when(inventoryService).createStock(any(InventoryRequest.class));
+
+		mockMvc.perform(post("/api/warehouse/inventory")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+						{"productId" : 1, "quantity" : 5}
+						"""))
+				.andExpect(status().isBadRequest());
 
 		verify(inventoryService).createStock(any(InventoryRequest.class));
 	}

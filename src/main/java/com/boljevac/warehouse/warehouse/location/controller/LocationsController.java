@@ -3,6 +3,7 @@ package com.boljevac.warehouse.warehouse.location.controller;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
 import com.boljevac.warehouse.warehouse.location.service.LocationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class LocationsController {
 	@PutMapping
 	public ResponseEntity<Void> createLocation(){
 		locationService.createLocations();
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@PostMapping

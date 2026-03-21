@@ -138,7 +138,7 @@ public class LocationService {
 
 	private void validateLocationWeight(double weightToStore, double availableWeightToStore, Long locationId) {
 		if (weightToStore > availableWeightToStore) {
-			throw new LocationLoadLimitExceededException(locationId);
+			throw new LocationLoadLimitExceededException();
 		}
 	}
 

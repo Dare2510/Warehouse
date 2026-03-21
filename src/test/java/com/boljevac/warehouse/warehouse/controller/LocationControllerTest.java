@@ -1,8 +1,10 @@
 package com.boljevac.warehouse.warehouse.controller;
 
+import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.location.controller.LocationsController;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationLoadLimitExceededException;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationsAlreadyCreatedException;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.location.service.LocationService;
@@ -42,15 +44,15 @@ public class LocationControllerTest {
 	UserDetailsService userDetailsService;
 
 	@Test
-	public void createLocations_whenCreatingFirstTime_returnsNoContent() throws Exception {
-		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isNoContent());
+	public void createLocations_whenCreatingFirstTime_returns201() throws Exception {
+		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isCreated());
 		verify(locationService).createLocations();
 	}
 
 	@Test
-	public void createLocations_whenLocationsAlreadyCreated_throwsLocationsAlreadyCreatedException() throws Exception {
+	public void createLocations_whenLocationsAlreadyCreated_returns409() throws Exception {
 		doThrow(new LocationsAlreadyCreatedException()).when(locationService).createLocations();
-		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isBadRequest());
+		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isConflict());
 		verify(locationService).createLocations();
 	}
 
@@ -74,6 +76,36 @@ public class LocationControllerTest {
 						"""
 				)
 		).andExpect(status().isOk());
+
+		verify(locationService).storeInventory(any(LocationsRequest.class));
+	}
+
+	@Test
+	public void storeInventory_whenValidateAvailableQuantityFailed_returns400() throws Exception {
+		doThrow(new NotSufficientStockToStoreException(50)).when(locationService).storeInventory(any(LocationsRequest.class));
+
+		mockMvc.perform(post("/api/warehouse/locations")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{"inventoryId": 1 , "quantity": 50}
+						"""
+				)
+		).andExpect(status().isBadRequest());
+
+		verify(locationService).storeInventory(any(LocationsRequest.class));
+	}
+
+	@Test
+	public void storeInventory_whenValidateAvailableWeightOnLocationFailed_returns400() throws Exception {
+		doThrow(new LocationLoadLimitExceededException()).when(locationService).storeInventory(any(LocationsRequest.class));
+
+		mockMvc.perform(post("/api/warehouse/locations")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{"inventoryId": 1 , "quantity": 50}
+						"""
+				)
+		).andExpect(status().isBadRequest());
 
 		verify(locationService).storeInventory(any(LocationsRequest.class));
 	}

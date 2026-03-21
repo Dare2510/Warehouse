@@ -8,6 +8,7 @@ import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository
 import com.boljevac.warehouse.warehouse.inventory.service.InventoryService;
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationsNotCreatedException;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.service.ProductService;
@@ -21,10 +22,9 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class InventoryServiceTest {
@@ -79,12 +79,26 @@ public class InventoryServiceTest {
 	public void createStock_whenAllRequirementsAreMet_returnsInventoryResponse() {
 		InventoryRequest request = new InventoryRequest(1L,20);
 		ProductEntity product = createProductHelper();
+
+		when(locationsRepository.count()).thenReturn(5L);
 		when(productService.getProductById(1L)).thenReturn(product);
 
 		inventoryService.createStock(request);
 
 		verify(locationsRepository).save(any(LocationEntity.class));
 		verify(inventoryRepository).save(any(InventoryEntity.class));
+
+	}
+
+	@Test
+	public void createStock_whenLocationsNotExist_throwsLocationsNotCreatedException() {
+		InventoryRequest request = new InventoryRequest(1L,20);
+
+		assertThrows(LocationsNotCreatedException.class,
+				() ->inventoryService.createStock(request)
+		);
+		verify(locationsRepository, never()).save(any(LocationEntity.class));
+		verify(inventoryRepository, never()).save(any(InventoryEntity.class));
 
 	}
 

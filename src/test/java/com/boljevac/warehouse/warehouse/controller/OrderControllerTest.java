@@ -60,7 +60,7 @@ public class OrderControllerTest {
 		mockMvc.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"id":1,"quantity":3}
+								{"productId":1,"quantity":3}
 								"""))
 				.andExpect(status().isCreated());
 
@@ -74,7 +74,7 @@ public class OrderControllerTest {
 		mockMvc.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"id":1,"quantity":3}
+								{"productId":1,"quantity":3}
 								"""))
 				.andExpect(status().isNotAcceptable());
 
@@ -88,7 +88,7 @@ public class OrderControllerTest {
 				.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"id": -1, "quantity":3}
+								{"productId": -1, "quantity":3}
 								"""))
 				.andExpect(status().isBadRequest());
 		verify(orderService, never()).createOrder(any(OrderRequest.class));

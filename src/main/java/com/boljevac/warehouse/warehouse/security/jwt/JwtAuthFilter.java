@@ -33,6 +33,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
 			String token = authHeader.substring(7);
+			if(!jwtToken.validateToken(token)) {
+				logger.warn("Invalid JWT Token");
+			}
 			if (jwtToken.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
 				String username = jwtToken.getUsernameFromToken(token);
 				if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

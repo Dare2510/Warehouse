@@ -17,7 +17,7 @@ public class ProductRequest {
 
 	@NotNull(message = "weight is required")
 	@Positive(message = "weight must be >0")
-	private double weight;
+	private Double weight;
 
 	public ProductRequest(String product, BigDecimal value, double weight) {
 		this.product = product;

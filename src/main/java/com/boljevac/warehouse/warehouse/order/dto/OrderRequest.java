@@ -12,7 +12,7 @@ public class OrderRequest {
 
 	@Positive(message = "quantity must be positive")
 	@NotNull(message = "quantity must not be null")
-	private int quantity;
+	private Integer quantity;
 
 	public OrderRequest(Long productId, int quantity) {
 		this.productId = productId;

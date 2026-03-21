@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -221,5 +222,17 @@ public class GlobalExceptionHandler {
 		);
 		logger.error(error.toString());
 		return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<ErrorResponse> handleNotReadableException(HttpMessageNotReadableException ex,
+																		   HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				"Request body is invalid or contains missing/incorrect field values",
+				request.getRequestURI()
+		);
+		logger.error(error.toString());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 }

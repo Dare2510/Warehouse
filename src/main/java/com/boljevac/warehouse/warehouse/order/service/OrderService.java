@@ -110,7 +110,7 @@ public class OrderService {
 	private void updateInventory(OrderEntity orderToCancel){
 
 			orderToCancel.setOrderStatus(OrderStatus.CANCELLED);
-			ProductEntity canceledItem = productService.getProductById(orderToCancel.getId());
+			ProductEntity canceledItem = productService.getProductById(orderToCancel.getProductEntity().getId());
 			LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, orderToCancel.getQuantity(),true);
 
 			InventoryEntity canceledQuantity = new InventoryEntity(

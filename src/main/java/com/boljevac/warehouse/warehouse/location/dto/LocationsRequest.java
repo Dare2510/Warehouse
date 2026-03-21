@@ -10,7 +10,7 @@ public class LocationsRequest {
 
 	@NotNull(message = "quantity is required")
 	@Positive(message = "quantity must be > 0")
-	private int quantity;
+	private Integer quantity;
 
 	public LocationsRequest(Long inventoryId, int quantity) {
 		this.inventoryId = inventoryId;

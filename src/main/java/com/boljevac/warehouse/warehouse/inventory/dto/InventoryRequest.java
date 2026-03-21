@@ -11,7 +11,7 @@ public class InventoryRequest {
 
 	@NotNull(message = "Quantity is required")
 	@Positive(message = "Quantity must be > 0")
-	private int quantity;
+	private Integer quantity;
 
 	public InventoryRequest(Long productId,int quantity) {
 		this.productId = productId;

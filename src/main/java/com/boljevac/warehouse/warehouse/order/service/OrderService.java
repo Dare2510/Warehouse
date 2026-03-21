@@ -69,7 +69,7 @@ public class OrderService {
 	@Transactional
 	public OrderResponse createOrder(OrderRequest orderRequest) {
 
-		ProductEntity orderedItem = productService.getProductById(orderRequest.getId());
+		ProductEntity orderedItem = productService.getProductById(orderRequest.getProductId());
 		List<InventoryEntity> inventories = inventoryRepository.getAllByProductEntity(orderedItem);
 
 		int totalAvailableQuantity = inventories.stream().mapToInt(InventoryEntity::getQuantity).sum();

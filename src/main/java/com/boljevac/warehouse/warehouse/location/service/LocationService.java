@@ -32,7 +32,7 @@ public class LocationService {
 		this.locationsRepository = locationsRepository;
 		this.inventoryRepository = inventoryRepository;
 	}
-
+	//Storage Location creation -> only once, all new Locations created via create Stock go directly to Block
 	public void createLocations() {
 		final int firstRack = 1;
 		final int lastRack = 10;
@@ -81,6 +81,7 @@ public class LocationService {
 		validateAvailableQuantity(quantityToStore, availableQuantity);
 		validateLocationWeight(weightToStore, availableWeightOnLocation, toStoreInLocation.getId());
 
+		//Updating Locations
 		updateFromInventory(weightToStore, toStoreFromWeight, availableQuantity, quantityToStore, toStoreFrom, fromLocation);
 		updateTargetLocation(quantityToStore, weightToStore, product, toStoreInLocation);
 

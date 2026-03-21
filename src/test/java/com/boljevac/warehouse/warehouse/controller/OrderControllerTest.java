@@ -70,9 +70,7 @@ public class OrderControllerTest {
 
 	@Test
 	public void createOrder_whenRequestExceedsStock_returns406() throws Exception {
-		when(orderService.createOrder(any(OrderRequest.class)))
-				.thenThrow(new OrderExceedsStockException());
-
+		doThrow(new OrderExceedsStockException()).when(orderService).createOrder(any(OrderRequest.class));
 		mockMvc.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
@@ -113,10 +111,7 @@ public class OrderControllerTest {
 
 	@Test
 	public void cancelOrder_whenOrderStatusIsNotOrderPlaced_returns406() throws Exception {
-
-		when(orderService.cancelOrder(1L))
-				.thenThrow(new OrderCancelOrDeleteNotPossibleException(1L));
-
+		doThrow(new OrderCancelOrDeleteNotPossibleException(1L)).when(orderService).cancelOrder(1L);
 		mockMvc
 				.perform(patch("/api/warehouse/orders/1/cancel"))
 				.andExpect(status().isNotAcceptable());
@@ -137,8 +132,7 @@ public class OrderControllerTest {
 
 	@Test
 	public void getProducts_whenProductRepositoryIsEmpty_returns404() throws Exception {
-		when(orderService.getListOfProducts()).thenThrow(EmptyProductRepositoryException.class);
-
+		doThrow(new EmptyProductRepositoryException()).when(orderService).getListOfProducts();
 		mockMvc
 				.perform(get("/api/warehouse/orders/products"))
 				.andExpect(status().isNotFound());

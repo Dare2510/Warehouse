@@ -3,6 +3,8 @@ package com.boljevac.warehouse.warehouse.controller;
 import com.boljevac.warehouse.warehouse.location.controller.LocationsController;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
+import com.boljevac.warehouse.warehouse.location.exceptions.LocationsAlreadyCreatedException;
+import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.location.service.LocationService;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
@@ -16,9 +18,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(LocationsController.class)
@@ -31,11 +33,26 @@ public class LocationControllerTest {
 	@MockitoBean
 	LocationService locationService;
 	@MockitoBean
+	LocationsRepository locationsRepository;
+	@MockitoBean
 	JwtToken jwtToken;
 	@MockitoBean
 	JwtAuthFilter jwtAuthFilter;
 	@MockitoBean
 	UserDetailsService userDetailsService;
+
+	@Test
+	public void createLocations_whenCreatingFirstTime_returnsNoContent() throws Exception {
+		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isNoContent());
+		verify(locationService).createLocations();
+	}
+
+	@Test
+	public void createLocations_whenLocationsAlreadyCreated_throwsLocationsAlreadyCreatedException() throws Exception {
+		doThrow(new LocationsAlreadyCreatedException()).when(locationService).createLocations();
+		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isBadRequest());
+		verify(locationService).createLocations();
+	}
 
 	@Test
 	public void storeInventory_whenRequestIsValid_returns200() throws Exception{

@@ -26,13 +26,12 @@ public class OrderController {
 		return ResponseEntity.ok(orderService.getListOfProducts());
 	}
 
-	//Required are product id and order quantity
 	@PostMapping
 	public ResponseEntity<OrderResponse> createOrder(@RequestBody @Valid OrderRequest orderRequest) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderRequest));
 	}
 
-	//Cancel only possibly if status ist order placed
+	//Cancel only possibly if status is Order_Placed
 	@PatchMapping("/{id}/cancel")
 	public ResponseEntity<OrderResponse> cancelOrderById(@PathVariable Long id) {
 		return ResponseEntity.status(HttpStatus.OK).body(orderService.cancelOrder(id));

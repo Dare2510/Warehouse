@@ -129,13 +129,11 @@ public class LocationEntity {
 
 	public void setLocationType(LocationType locationType) {
 		if(locationType == LocationType.BLOCK) {
-		//	setLocationType(LocationType.BLOCK);
 			setAisle(Aisle.Floor.toString());
 			setLevel(0);
 			setRack(0);
 		}
 		if(locationType==LocationType.STORAGE){
-		//	setLocationType(LocationType.STORAGE);
 			setAisle(this.aisle);
 			setLevel(this.level);
 			setRack(this.rack);

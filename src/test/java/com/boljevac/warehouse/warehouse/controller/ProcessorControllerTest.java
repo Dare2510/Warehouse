@@ -72,9 +72,8 @@ public class ProcessorControllerTest {
 
 	@Test
 	public void getOpenOrders_whenNoOrderWithRequestedStatusWasFound_returns404() throws Exception {
-		when(processorService.getListOfOrdersByStatus(any(ProcessorRequest.class)))
-				.thenThrow(new OrderNotFoundException());
-
+		doThrow(new OrderNotFoundException()).when(processorService).getListOfOrdersByStatus(any(ProcessorRequest.class));
+		
 		mockMvc
 				.perform(post("/api/warehouse/processing")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -107,8 +106,7 @@ public class ProcessorControllerTest {
 
 	@Test
 	public void changeStatusOfOrder_whenRequestedStatusIsNotValidNextStatus_returns400() throws Exception {
-		when(processorService.changeStatusOfOrder(1L, OrderStatus.SHIPPED))
-				.thenThrow(new StatusChangeInvalidOrderException());
+		doThrow(new StatusChangeInvalidOrderException()).when(processorService).changeStatusOfOrder(1L, OrderStatus.SHIPPED);
 
 		mockMvc.perform(
 						put("/api/warehouse/processing/statusChange/1/SHIPPED"))
@@ -120,8 +118,7 @@ public class ProcessorControllerTest {
 	//change Order status with not available status -> Response bad Request
 	@Test
 	public void changeStatusOfOrder_whenRequestedStatusIsNotAvailable_returns400() throws Exception {
-		when(processorService.changeStatusOfOrder(1L, OrderStatus.ORDER_PLACED))
-				.thenThrow(new StatusChangeInvalidOrderException());
+		doThrow(new StatusChangeInvalidOrderException()).when(processorService).changeStatusOfOrder(1L, OrderStatus.ORDER_PLACED);
 
 		mockMvc
 				.perform(put("/api/warehouse/processing/statusChange/1/PLANNED"))

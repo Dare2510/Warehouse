@@ -7,7 +7,7 @@ public enum OrderStatus {
 	SHIPPED,
 	CANCELLED;
 
-	//Validator for the correct sequence of order changes
+	//Validator for the correct sequence of order status changes
 	public boolean validatorCorrectStatusChange(OrderEntity toChange, OrderStatus OrderStatus)  {
 		boolean validStatusChange = false;
 		switch(toChange.getOrderStatus()) {

@@ -7,7 +7,8 @@ import java.math.BigDecimal;
 public class ProductRequest {
 
 	@NotBlank(message = "product is required")
-	@Pattern(regexp = "^[A-Za-z]{4,30}$", message = "Not a valid Product name, only Characters allowed")
+	@Pattern(regexp = "^[A-Za-z]{4,30}$", message = "Product name -> only Characters allowed, " +
+			"minimum length=4 and maximum length=30")
 	private String product;
 
 	@NotNull(message = "value is required")
@@ -22,7 +23,6 @@ public class ProductRequest {
 		this.product = product;
 		this.value = value;
 		this.weight = weight;
-	//	this.quantity = quantity;
 	}
 
 	public String getProduct() {
@@ -32,10 +32,6 @@ public class ProductRequest {
 	public BigDecimal getValue() {
 		return value;
 	}
-
-//	public int getQuantity() {
-//		return quantity;
-//	}
 
 	public void setProduct(String product) {
 		this.product = product;
@@ -52,8 +48,4 @@ public class ProductRequest {
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
-
-//	public void setQuantity(int quantity) {
-//		this.quantity = quantity;
-//	}
 }

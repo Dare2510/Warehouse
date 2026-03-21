@@ -13,6 +13,4 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 	List<OrderEntity> getByOrderStatus(OrderStatus orderStatus);
 
 	OrderEntity getOrderById(Long id);
-
-	//List<OrderEntity> getOrderByStatus(OrderStatus orderStatus);
 }

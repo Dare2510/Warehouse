@@ -32,13 +32,13 @@ public class ProcessorController {
 	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@PathVariable Long id, @PathVariable OrderStatus orderStatus) {
 		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeStatusOfOrder(id, orderStatus));
 	}
-
+	//Only canceled orders
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteOrderById(@PathVariable Long id) {
 		processorService.deleteOrderById(id);
 		return ResponseEntity.noContent().build();
 	}
-
+	//Only shipped orders
 	@GetMapping("/archive")
 	public ResponseEntity<Void> moveShippedOrders() {
 		processorService.archiveShippedOrders();

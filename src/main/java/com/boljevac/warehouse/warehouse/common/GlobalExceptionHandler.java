@@ -95,7 +95,6 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
-	//Order quantity must be <= product stock
 	@ExceptionHandler(OrderExceedsStockException.class)
 	public ResponseEntity<ErrorResponse> handleOrderExceedsStockException(OrderExceedsStockException ex,
 																		  HttpServletRequest request) {
@@ -123,7 +122,7 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
-	//To cancel an order it must have status Order placed
+	//To cancel an order it must have status Order_Placed
 	@ExceptionHandler(OrderCancelOrDeleteNotPossibleException.class)
 	public ResponseEntity<ErrorResponse> handleOrderCancelNotPossibleException(OrderCancelOrDeleteNotPossibleException ex,
 																			   HttpServletRequest request) {
@@ -137,7 +136,7 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
 	}
 
-	//If trying to set the status to a staus that is not available
+	//If trying to set the status to a status that is not available
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex,
 																				   HttpServletRequest request) {

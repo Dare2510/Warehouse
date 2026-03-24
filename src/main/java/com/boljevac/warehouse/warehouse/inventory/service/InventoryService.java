@@ -81,7 +81,7 @@ public class InventoryService {
 		boolean locationsExists = true;
 		if(locationsRepository.count()<1){
 			throw new LocationsNotCreatedException();
-		};
+		}
 		return locationsExists;
 	}
 }

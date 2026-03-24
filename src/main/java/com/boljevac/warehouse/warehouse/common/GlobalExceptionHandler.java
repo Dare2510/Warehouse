@@ -154,7 +154,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(NotSufficientStockToStoreException.class)
 	public ResponseEntity<ErrorResponse> handleNotSufficientStockToStoreException(NotSufficientStockToStoreException ex,
-																		   HttpServletRequest request) {
+																				  HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(),
@@ -165,8 +165,8 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(NoUnusedLocationException.class)
-	public ResponseEntity<ErrorResponse>  handleNoUnusedLocationException(NoUnusedLocationException ex,
-																		  HttpServletRequest request) {
+	public ResponseEntity<ErrorResponse> handleNoUnusedLocationException(NoUnusedLocationException ex,
+																		 HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
 				ex.getMessage(),
@@ -177,8 +177,8 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(InventoryNotFoundException.class)
-	public ResponseEntity<ErrorResponse>  handleInventoryNotFoundException(InventoryNotFoundException ex,
-																		   HttpServletRequest request) {
+	public ResponseEntity<ErrorResponse> handleInventoryNotFoundException(InventoryNotFoundException ex,
+																		  HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
 				ex.getMessage(),
@@ -187,10 +187,11 @@ public class GlobalExceptionHandler {
 		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
+
 	//Maximum 300 locations
 	@ExceptionHandler(LocationsAlreadyCreatedException.class)
 	public ResponseEntity<ErrorResponse> handleLocationsAlreadyCreatedException(LocationsAlreadyCreatedException ex,
-																		   HttpServletRequest request) {
+																				HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.CONFLICT.value(),
 				ex.getMessage(),
@@ -199,6 +200,7 @@ public class GlobalExceptionHandler {
 		logger.error(error.toString());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
 	}
+
 	//Max weight per location = 1000
 	@ExceptionHandler(LocationLoadLimitExceededException.class)
 	public ResponseEntity<ErrorResponse> handleLocationLoadLimitExceededException(LocationLoadLimitExceededException ex,
@@ -214,19 +216,19 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(LocationsNotCreatedException.class)
 	public ResponseEntity<ErrorResponse> handleLocationsNotCreatedException(LocationsNotCreatedException ex,
-																			HttpServletRequest request){
+																			HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(),
 				request.getRequestURI()
 		);
 		logger.error(error.toString());
-		return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ErrorResponse> handleNotReadableException(HttpMessageNotReadableException ex,
-																		   HttpServletRequest request) {
+																	HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				"Request body is invalid or contains missing/incorrect field values",

@@ -32,7 +32,7 @@ and role-based access control.
 
     Controller → Security Layer(JWT) → Service → Repository → Database
     
-  Additional Components
+ ### Additional Components
   1. GlobalExceptionHandler
   2. ErrorResponse DTO
   3. JWT Security Filter
@@ -43,7 +43,7 @@ and role-based access control.
 
   Authentication is handled using JWT tokens.
   
-  Roles
+###  Roles
   1. USER – can create and cancel orders
   2. CLERK – can manage products and update order status
   3. ADMIN – full system access
@@ -52,16 +52,24 @@ and role-based access control.
 
 ## Database
 
-  MySQL
+###  MySQL
   hibernate.ddl-auto=update
   
-  Relationships
-  OrderEntity → ProductEntity
+  ### Relationships
+
+  
+  OrderEntity -> ProductEntity
   (ManyToOne)
+
+  
   LocationEntity -> ProductEntity
   (ManyToOne)
+
+  
   InventoryEntity -> LocationEntity
   (OneToOne)
+
+  
   InventoryEntity -> ProductEntity
   (ManyToOne)
 
@@ -75,7 +83,7 @@ and role-based access control.
     JWT_SECRET
     JWT_EXPIRATION_MS
 
-Example (local setup)
+### Example (local setup)
 
     DB_URL=jdbc:mysql://localhost:3306/warehouse
     DB_USERNAME=warehouse
@@ -83,7 +91,7 @@ Example (local setup)
     JWT_SECRET=your-very-long-secret-key
     JWT_EXPIRATION_MS=3600000
 
-Example (docker setup)
+### Example (docker setup)
 
     DB_URL=jdbc:mysql://db:3306/warehouse
     DB_USERNAME=warehouse
@@ -93,7 +101,7 @@ Example (docker setup)
 
 ## Running the Application 
 
-local:
+### local:
 
 
   Make sure MySQL is running
@@ -105,16 +113,15 @@ local:
 
   or start the application via your IDE.
   
-via docker:
+### via docker:
 
 
   Make sure Docker Desktop is running
   Set the required environment variables, if needed make changes in the Docker-compose.yml file
 
   Run:
-  '''bash
+  
     cd docker
-    
     ./docker compose up -d
 
 

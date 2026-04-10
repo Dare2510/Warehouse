@@ -19,14 +19,14 @@ import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepository
 import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class OrderService {
 
 	private final OrderRepository orderRepository;
@@ -34,7 +34,6 @@ public class OrderService {
 	private final ProductRepository productRepository;
 	private final LocationsRepository locationsRepository;
 	private final ProductService productService;
-	private final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
 
 	public OrderService(OrderRepository orderRepository,
@@ -80,7 +79,7 @@ public class OrderService {
 
 		OrderEntity fulfilledOrder = getQuantitiesAndReturnOrder(orderedItem, remainingToFulfill, inventories);
 		orderRepository.save(fulfilledOrder);
-		logger.info("New Order with Id {} has been created", fulfilledOrder.getId());
+		log.info("New Order with Id {} has been created", fulfilledOrder.getId());
 
 		return mapToResponse(fulfilledOrder);
 
@@ -94,7 +93,7 @@ public class OrderService {
 
 		if (cancelIsValid) {
 			updateInventory(orderToCancel);
-			logger.info("Order with Id {} has been cancelled", orderToCancel.getId());
+			log.info("Order with Id {} has been cancelled", orderToCancel.getId());
 		} else {
 				throw new OrderCancelOrDeleteNotPossibleException(orderToCancel.getId());
 			}

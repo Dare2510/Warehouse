@@ -1,7 +1,10 @@
 package com.boljevac.warehouse.warehouse.common;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public class ErrorResponse {
 
 	private final int httpStatusCode;
@@ -15,22 +18,6 @@ public class ErrorResponse {
 		this.message = message;
 		this.path = path;
 		this.timestamp = LocalDateTime.now();
-	}
-
-	public int getHttpStatusCode() {
-		return httpStatusCode;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public LocalDateTime getTimestamp() {
-		return timestamp;
 	}
 
 	@Override

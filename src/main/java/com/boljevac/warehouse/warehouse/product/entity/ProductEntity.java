@@ -1,11 +1,17 @@
 package com.boljevac.warehouse.warehouse.product.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "Products")
+@Getter
+@Setter
+@NoArgsConstructor
 public class ProductEntity {
 
 	@Id
@@ -24,37 +30,6 @@ public class ProductEntity {
 	public ProductEntity(String product, BigDecimal pricePerPiece, double weightPerPiece ) {
 		this.product = product;
 		this.pricePerPiece = pricePerPiece;
-		this.weightPerPiece = weightPerPiece;
-	}
-
-	public ProductEntity() {
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getProduct() {
-		return product;
-	}
-
-	public BigDecimal getPricePerPiece() {
-		return pricePerPiece;
-	}
-
-	public void setProduct(String product) {
-		this.product = product;
-	}
-
-	public void setPricePerPiece(BigDecimal pricePerPiece) {
-		this.pricePerPiece = pricePerPiece;
-	}
-
-	public double getWeightPerPiece() {
-		return weightPerPiece;
-	}
-
-	public void setWeightPerPiece(double weightPerPiece) {
 		this.weightPerPiece = weightPerPiece;
 	}
 

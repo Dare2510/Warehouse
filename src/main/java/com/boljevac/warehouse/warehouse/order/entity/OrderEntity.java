@@ -2,11 +2,17 @@ package com.boljevac.warehouse.warehouse.order.entity;
 
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "Orders")
+@Getter
+@Setter
+@NoArgsConstructor
 public class OrderEntity {
 
 	@Id
@@ -32,50 +38,5 @@ public class OrderEntity {
 		this.quantity = quantity;
 		this.totalPrice = BigDecimal.valueOf(quantity).multiply(productEntity.getPricePerPiece());
 		this.orderStatus = OrderStatus.ORDER_PLACED;
-	}
-
-	public OrderEntity() {
-	}
-
-
-	public int getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
-
-	public BigDecimal getTotalPrice() {
-		return totalPrice;
-	}
-
-	public void setTotalPrice(BigDecimal totalPrice) {
-		this.totalPrice = totalPrice;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-
-	public ProductEntity getProductEntity() {
-		return productEntity;
-	}
-
-	public void setProductEntity(ProductEntity productEntity) {
-		this.productEntity = productEntity;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public OrderStatus getOrderStatus() {
-		return orderStatus;
-	}
-
-	public void setOrderStatus(OrderStatus orderStatus) {
-		this.orderStatus = orderStatus;
 	}
 }

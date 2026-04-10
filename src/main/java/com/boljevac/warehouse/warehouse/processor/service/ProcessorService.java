@@ -12,20 +12,19 @@ import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ProcessorService {
 
 	public final OrderRepository orderRepository;
 	public final ShippedOrdersRepository shippedOrdersRepository;
 	public final OrderService orderService;
-	private final Logger logger = LoggerFactory.getLogger(ProcessorService.class);
 
 	public ProcessorService(OrderRepository orderRepository, ShippedOrdersRepository shippedOrdersRepository, OrderService orderService) {
 		this.orderRepository = orderRepository;
@@ -70,7 +69,7 @@ public class ProcessorService {
 		}
 		orderToChangeStatus.setOrderStatus(newOrderStatus);
 		orderRepository.save(orderToChangeStatus);
-		logger.info("Order with Id {} has been changed", orderToChangeStatus.getId());
+		log.info("Order with Id {} has been changed", orderToChangeStatus.getId());
 
 		return new ProcessorResponse(
 				orderToChangeStatus.getProductEntity().getId(),
@@ -86,7 +85,7 @@ public class ProcessorService {
 		boolean deletionIsValid = validateToDeleteOrder(orderToDelete);
 
 		if(deletionIsValid) {
-			logger.info("Order with Id {} has been deleted", orderToDelete.getId());
+			log.info("Order with Id {} has been deleted", orderToDelete.getId());
 			orderRepository.delete(orderToDelete);
 		} else {
 			throw new OrderCancelOrDeleteNotPossibleException(orderId);
@@ -112,7 +111,7 @@ public class ProcessorService {
 			));
 
 		}
-		logger.info("Shipped orders have been archived");
+		log.info("Shipped orders have been archived");
 		shippedOrdersRepository.saveAll(shippedEntities);
 		orderRepository.deleteAll(listOfShippedOrders);
 
@@ -127,7 +126,7 @@ public class ProcessorService {
 		if (!ordersToCancelExists) {
 			throw new OrderNotFoundException();
 		}
-		logger.info("Cancelled orders have been deleted");
+		log.info("Cancelled orders have been deleted");
 		orderRepository.deleteAll(listOfCancelledOrders);
 
 

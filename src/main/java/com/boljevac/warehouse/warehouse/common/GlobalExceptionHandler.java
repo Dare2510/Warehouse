@@ -11,8 +11,7 @@ import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepository
 import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -22,9 +21,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-
-	private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 	//Exception handling for validation
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -37,7 +35,7 @@ public class GlobalExceptionHandler {
 				request.getRequestURI()
 		);
 
-		logger.error(error.toString());
+		log.error(error.toString());
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
@@ -51,7 +49,7 @@ public class GlobalExceptionHandler {
 				request.getRequestURI()
 		);
 
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
@@ -65,7 +63,7 @@ public class GlobalExceptionHandler {
 				request.getRequestURI()
 		);
 
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 
 	}
@@ -80,7 +78,7 @@ public class GlobalExceptionHandler {
 				request.getRequestURI()
 		);
 
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
 	}
 
@@ -93,7 +91,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
@@ -106,7 +104,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -120,7 +118,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -134,7 +132,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -148,7 +146,7 @@ public class GlobalExceptionHandler {
 				"Order Status must be ORDER_PLACED|PACKAGED|PROCESSING|SHIPPED|CANCELLED",
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -160,7 +158,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -172,7 +170,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
@@ -184,7 +182,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
@@ -197,7 +195,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
 	}
 
@@ -210,7 +208,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -222,7 +220,7 @@ public class GlobalExceptionHandler {
 				ex.getMessage(),
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
@@ -234,7 +232,7 @@ public class GlobalExceptionHandler {
 				"Request body is invalid or contains missing/incorrect field values",
 				request.getRequestURI()
 		);
-		logger.error(error.toString());
+		log.error(error.toString());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 }

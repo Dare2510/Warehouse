@@ -2,7 +2,11 @@ package com.boljevac.warehouse.warehouse.location.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class LocationsRequest {
 	@NotNull(message = "inventoryId is required")
 	@Positive(message = "inventoryId must be > 0")
@@ -16,21 +20,5 @@ public class LocationsRequest {
 		this.inventoryId = inventoryId;
 		this.quantity = quantity;
 
-	}
-
-	public Long getInventoryId() {
-		return inventoryId;
-	}
-
-	public void setInventoryId(Long inventoryId) {
-		this.inventoryId = inventoryId;
-	}
-
-	public int getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
 	}
 }

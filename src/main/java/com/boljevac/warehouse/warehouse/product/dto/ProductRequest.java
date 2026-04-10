@@ -1,9 +1,12 @@
 package com.boljevac.warehouse.warehouse.product.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
-
+@Getter
+@Setter
 public class ProductRequest {
 
 	@NotBlank(message = "product is required")
@@ -22,30 +25,6 @@ public class ProductRequest {
 	public ProductRequest(String product, BigDecimal value, double weight) {
 		this.product = product;
 		this.value = value;
-		this.weight = weight;
-	}
-
-	public String getProduct() {
-		return product;
-	}
-
-	public BigDecimal getValue() {
-		return value;
-	}
-
-	public void setProduct(String product) {
-		this.product = product;
-	}
-
-	public void setValue(BigDecimal value) {
-		this.value = value;
-	}
-
-	public double getWeight() {
-		return weight;
-	}
-
-	public void setWeight(double weight) {
 		this.weight = weight;
 	}
 }

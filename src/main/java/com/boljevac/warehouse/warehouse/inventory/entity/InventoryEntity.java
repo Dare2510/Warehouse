@@ -4,9 +4,15 @@ import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "Inventory")
+@Getter
+@Setter
+@NoArgsConstructor
 public class InventoryEntity {
 
 	@Id
@@ -42,62 +48,5 @@ public class InventoryEntity {
 		this.location = location;
 	}
 
-	public InventoryEntity() {
-	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public ProductEntity getProductEntity() {
-		return productEntity;
-	}
-
-	public void setProductEntity(ProductEntity productEntity) {
-		this.productEntity = productEntity;
-	}
-
-	public int getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
-
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
-	public double getTotalWeight() {
-		return totalWeight;
-	}
-
-	public void setTotalWeight(double totalWeight) {
-		this.totalWeight = totalWeight;
-	}
-
-	public LocationEntity getLocationEntity() {
-		return locationEntity;
-	}
-
-	public void setLocationEntity(LocationEntity locationEntity) {
-		this.locationEntity = locationEntity;
-	}
-
-	public LocationType getLocationType() {
-		return locationType;
-	}
-
-	public void setLocationType(LocationType locationType) {
-		this.locationType = locationType;
-	}
 }

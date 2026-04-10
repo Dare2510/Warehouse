@@ -12,17 +12,16 @@ import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class InventoryService {
 
 	private final InventoryRepository inventoryRepository;
 	private final LocationsRepository  locationsRepository;
 	private final ProductService productService;
-	private final Logger logger = LoggerFactory.getLogger(InventoryService.class);
 
 	public InventoryService(InventoryRepository inventoryRepository,
 							LocationsRepository locationsRepository, ProductService productService) {
@@ -63,7 +62,7 @@ public class InventoryService {
 		);
 		inventoryRepository.save(newInventoryProduct);
 
-		logger.info("New Location with Id {} and new Inventory with Id {} have been created",
+		log.info("New Location with Id {} and new Inventory with Id {} have been created",
 				newLocation.getId(), newInventoryProduct.getId());
 
 		return new InventoryResponse(product.getProduct(), newInventoryProduct.getQuantity());

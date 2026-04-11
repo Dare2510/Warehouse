@@ -22,12 +22,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +43,9 @@ public class OrderServiceTest {
 	LocationsRepository locationsRepository;
 	@Mock
 	ProductService productService;
+	@Mock
+	ModelMapper modelMapper;
+
 
 	@InjectMocks
 	OrderService orderService;
@@ -109,23 +112,78 @@ public class OrderServiceTest {
 	}
 
 	@Test
-	public void createOrder_whenAllRequirementsAreMet_returnsOrderResponse() {
+	public void createOrder_whenOrderQuantityIsMoreThanAvailableQuantity_throwsOrderExceedsStockException() {
+		OrderRequest orderRequest = new OrderRequest(1L, 30);
 		ProductEntity product = createProductHelper();
 		LocationEntity location = createLocationHelper(product);
 		InventoryEntity inventory = createInventoryHelper(product,location, location.toString());
-		OrderRequest request = new OrderRequest(1L, 1);
+		inventory.setQuantity(20);
 
 		when(productService.getProductById(1L)).thenReturn(product);
 		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventory));
 
-		OrderResponse orderResponse = orderService.createOrder(request);
+		assertThrows(OrderExceedsStockException.class,
+				() -> orderService.createOrder(orderRequest));
+
+		verify(orderRepository, never()).save(any());
+		verify(locationsRepository, never()).save(any(LocationEntity.class));
+		verify(inventoryRepository, never()).save(any(InventoryEntity.class));
+
+		assertEquals(20,inventory.getQuantity());
+
+
+	}
+
+	@Test
+	public void createOrder_whenAllRequirementsAreMetAndOnlyOneLocationIsNeeded_returnsOrderResponse() {
+		ProductEntity product = createProductHelper();
+		LocationEntity location = createLocationHelper(product);
+		InventoryEntity inventory = createInventoryHelper(product,location, location.toString());
+		OrderRequest request = new OrderRequest(1L, 1);
+		OrderEntity order = new OrderEntity(product,request.getQuantity());
+
+		when(productService.getProductById(1L)).thenReturn(product);
+		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventory));
+
+		orderService.createOrder(request);
 
 		verify(orderRepository).save(any(OrderEntity.class));
 		verify(inventoryRepository).save(any(InventoryEntity.class));
 
-		assertEquals(1, orderResponse.quantity());
-		assertEquals("TestProduct", orderResponse.product());
-		assertEquals(10, orderResponse.totalPrice().doubleValue());
+		assertEquals(1, order.getQuantity());
+		assertEquals("TestProduct", order.getProductEntity().getProduct());
+		assertEquals(BigDecimal.TEN, order.getTotalPrice());
+
+	}
+	@Test
+	public void createOrder_whenAllRequirementsAreMetAndTwoLocationsAreNeeded_returnsOrderResponse() {
+		ProductEntity product = createProductHelper();
+		LocationEntity locationA = createLocationHelper(product);
+		LocationEntity locationB = createLocationHelper(product);
+		InventoryEntity inventoryA = createInventoryHelper(product,locationA, locationA.toString());
+		InventoryEntity inventoryB = createInventoryHelper(product,locationB, locationA.toString());
+		inventoryA.setQuantity(20);inventoryB.setQuantity(20);
+
+		OrderRequest request = new OrderRequest(1L, 30);
+		OrderEntity order = new OrderEntity(product,request.getQuantity());
+
+		when(productService.getProductById(1L)).thenReturn(product);
+		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventoryA, inventoryB));
+
+		orderService.createOrder(request);
+
+		verify(orderRepository).save(any(OrderEntity.class));
+		verify(inventoryRepository, times(2)).save(any(InventoryEntity.class));
+
+		assertEquals(0,inventoryA.getQuantity());
+		assertEquals(10,inventoryB.getQuantity());
+		assertEquals(0,locationA.getQuantity());
+		assertEquals(10,locationB.getQuantity());
+
+		assertEquals(30, order.getQuantity());
+		assertEquals("TestProduct", order.getProductEntity().getProduct());
+		assertEquals(BigDecimal.valueOf(300), order.getTotalPrice());
+
 
 	}
 

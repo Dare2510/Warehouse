@@ -20,6 +20,7 @@ import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,16 +35,18 @@ public class OrderService {
 	private final ProductRepository productRepository;
 	private final LocationsRepository locationsRepository;
 	private final ProductService productService;
+	private final ModelMapper modelMapper;
 
 
 	public OrderService(OrderRepository orderRepository,
 						InventoryRepository inventoryRepository,
-						ProductRepository productRepository, LocationsRepository locationsRepository, ProductService productService) {
+						ProductRepository productRepository, LocationsRepository locationsRepository, ProductService productService, ModelMapper modelMapper) {
 		this.orderRepository = orderRepository;
 		this.inventoryRepository = inventoryRepository;
 		this.productRepository = productRepository;
 		this.locationsRepository = locationsRepository;
 		this.productService = productService;
+		this.modelMapper = modelMapper;
 	}
 
 	public List<ProductResponse> getListOfProducts() {
@@ -180,12 +183,8 @@ public class OrderService {
 	}
 
 	private OrderResponse mapToResponse(OrderEntity orderEntity) {
-		return new OrderResponse(
-				orderEntity.getProductEntity().getProduct(),
-				orderEntity.getQuantity(),
-				orderEntity.getTotalPrice(),
-				orderEntity.getOrderStatus()
-		);
+		return modelMapper.map(orderEntity,OrderResponse.class);
+
 	}
 
 }

@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -33,6 +34,9 @@ public class ProcessorServiceTest {
 
 	@Mock
 	private ShippedOrdersRepository shippedOrdersRepository;
+
+	@Mock
+	ModelMapper modelMapper;
 
 	@InjectMocks
 	private ProcessorService processorService;

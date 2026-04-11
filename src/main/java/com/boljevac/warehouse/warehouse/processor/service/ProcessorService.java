@@ -13,6 +13,7 @@ import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
 import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,11 +26,13 @@ public class ProcessorService {
 	public final OrderRepository orderRepository;
 	public final ShippedOrdersRepository shippedOrdersRepository;
 	public final OrderService orderService;
+	private final ModelMapper modelMapper;
 
-	public ProcessorService(OrderRepository orderRepository, ShippedOrdersRepository shippedOrdersRepository, OrderService orderService) {
+	public ProcessorService(OrderRepository orderRepository, ShippedOrdersRepository shippedOrdersRepository, OrderService orderService, ModelMapper modelMapper) {
 		this.orderRepository = orderRepository;
 		this.shippedOrdersRepository = shippedOrdersRepository;
 		this.orderService = orderService;
+		this.modelMapper = modelMapper;
 	}
 
 	public List<ProcessorResponse> getListOfOrdersByStatus(ProcessorRequest processorRequest) {
@@ -42,19 +45,11 @@ public class ProcessorService {
 			throw new OrderNotFoundException();
 		}
 
-		List<ProcessorResponse> listOfOrdersResponse = new ArrayList<>();
-		for (OrderEntity existingOrder : listOfOrdersByStatus) {
-			listOfOrdersResponse.add(new ProcessorResponse(
-					existingOrder.getProductEntity().getId(),
-					existingOrder.getProductEntity().getProduct(),
-					existingOrder.getQuantity(),
-					existingOrder.getOrderStatus()
-			));
+		return listOfOrdersByStatus.stream().filter(
+				status -> status.getOrderStatus().equals(orderStatus)).map(
+				status -> modelMapper.map(status, ProcessorResponse.class)).toList();
 		}
 
-		return listOfOrdersResponse;
-
-	}
 
 	public ProcessorResponse changeStatusOfOrder(Long orderId, OrderStatus newOrderStatus) {
 
@@ -71,12 +66,14 @@ public class ProcessorService {
 		orderRepository.save(orderToChangeStatus);
 		log.info("Order with Id {} has been changed", orderToChangeStatus.getId());
 
-		return new ProcessorResponse(
-				orderToChangeStatus.getProductEntity().getId(),
-				orderToChangeStatus.getProductEntity().getProduct(),
-				orderToChangeStatus.getQuantity(),
-				orderToChangeStatus.getOrderStatus()
-		);
+		return modelMapper.map(orderToChangeStatus,ProcessorResponse.class);
+
+//		return new ProcessorResponse(
+//				orderToChangeStatus.getProductEntity().getId(),
+//				orderToChangeStatus.getProductEntity().getProduct(),
+//				orderToChangeStatus.getQuantity(),
+//				orderToChangeStatus.getOrderStatus()
+//		);
 	}
 
 	@Transactional

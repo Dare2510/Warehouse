@@ -1,6 +1,7 @@
 package com.boljevac.warehouse.warehouse.service;
 
 import com.boljevac.warehouse.warehouse.inventory.entity.InventoryEntity;
+import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
 import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
@@ -205,6 +206,17 @@ public class LocationServiceTest {
 
 		verify(locationsRepository, never()).save(toStoreInLocation);
 
+	}
+
+	@Test
+	public void storeInventory_whenInventoryWasNotFound_throwsInventoryNotFoundException() {
+
+		locationService.createLocations();
+		LocationsRequest request = new LocationsRequest(1L, 5);
+		assertThrows(InventoryNotFoundException.class, ()
+				-> locationService.storeInventory(request));
+
+		verify(inventoryRepository, times(1)).findById(anyLong());
 
 	}
 }

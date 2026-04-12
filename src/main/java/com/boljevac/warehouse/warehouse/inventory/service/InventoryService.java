@@ -42,7 +42,10 @@ public class InventoryService {
 	@Transactional
 	public InventoryResponse createStock(InventoryRequest inventoryRequest) {
 		//First creation of Locations is needed
-		validateLocationsExists();
+		if(!validateLocationsExists()){
+			log.warn("Locations not created");
+			throw new LocationsNotCreatedException();
+		};
 
 		ProductEntity product = productService.getProductById(inventoryRequest.getProductId());
 
@@ -77,10 +80,6 @@ public class InventoryService {
 
 	//Helper Methods
 	private boolean validateLocationsExists() {
-		boolean locationsExists = true;
-		if(locationsRepository.count()<1){
-			throw new LocationsNotCreatedException();
-		}
-		return locationsExists;
+		return locationsRepository.count() < 1 ? false : true;
 	}
 }

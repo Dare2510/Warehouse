@@ -2,21 +2,22 @@
 
 A Spring Boot backend application for managing warehouse operations,
 including product management, inventory tracking, order processing,
-and role-based access control. 
+and role-based access control.
 
 ## Features
 
- 1. Product creation, update, and validation
- 2. Order creation and cancellation
- 3. Inventory creation for stock creation and overview
- 4. Location service, for stock storing
- 5. Automatic stock management (creating/cancelling an order decreases/increases stock on Locations and inventory)
- 6. Order status management (e.g. ORDER_PLACED, SHIPPED)
- 8. Global exception handling with structured error responses
- 9. Custom domain exceptions (e.g. DuplicateProductException, OrderNotFoundException)
- 10. MySQL database integration using JPA/Hibernate
- 11. JWT authentication with role-based authorization (USER, CLERK, ADMIN)
- 12. Unit and integration tests
+1. Product creation, update, and validation
+2. Order creation and cancellation
+3. Inventory creation for stock creation and overview
+4. Location management for product storage
+5. Automatic stock updates when orders are created or canceled
+6. Order status management (e.g. `ORDER_PLACED`, `SHIPPED`)
+7. Global exception handling with structured error responses
+8. Custom domain exceptions (e.g. `DuplicateProductException`, `OrderNotFoundException`)
+9. MySQL database integration using JPA/Hibernate
+10. JWT authentication with role-based authorization (`USER`, `CLERK`, `ADMIN`)
+11. Unit and integration tests
+12. Docker / Docker Compose support
 
 ## Tech Stack
 
@@ -24,131 +25,124 @@ and role-based access control.
 - Spring Boot
 - Spring Security (JWT)
 - MySQL
-- Docker / Docker Compose     
+- Docker / Docker Compose
 
 ## Architecture
 
-  The application follows a clean layered architecture:
+The application follows a layered architecture:
 
-    Controller → Security Layer(JWT) → Service → Repository → Database
-    
- ### Additional Components
-  1. GlobalExceptionHandler
-  2. ErrorResponse DTO
-  3. JWT Security Filter
-  4. Custom domain exceptions
-  5. Validation using Jakarta Bean Validation
+`Controller -> Security -> Service -> Repository -> Database`
+
+### Additional Components
+
+- GlobalExceptionHandler
+- ErrorResponse
+- JWT filter
+- Custom domain exceptions
+- Jakarta Bean Validation
 
 ## Security
 
-  Authentication is handled using JWT tokens.
-  
-###  Roles
-  1. USER – can create and cancel orders
-  2. CLERK – can manage products and update order status
-  3. ADMIN – full system access
+Authentication is handled using JWT tokens.
 
-  JWT configuration is externalized via environment variables.
+### Roles
+
+- `USER` – can create and cancel orders
+- `CLERK` – can manage products and update order status
+- `ADMIN` – full system access
+
+JWT configuration is externalized via environment variables.
 
 ## Database
 
-###  MySQL
-  hibernate.ddl-auto=update
-  
-  ### Relationships
+The application uses MySQL with:
 
-  
-  OrderEntity -> ProductEntity
-  (ManyToOne)
+- `spring.jpa.hibernate.ddl-auto=update`
 
-  
-  LocationEntity -> ProductEntity
-  (ManyToOne)
+### Main Relationships
 
-  
-  InventoryEntity -> LocationEntity
-  (OneToOne)
-
-  
-  InventoryEntity -> ProductEntity
-  (ManyToOne)
+- `OrderEntity -> ProductEntity` (`ManyToOne`)
+- `LocationEntity -> ProductEntity` (`ManyToOne`)
+- `InventoryEntity -> LocationEntity` (`OneToOne`)
+- `InventoryEntity -> ProductEntity` (`ManyToOne`)
 
 ## Configuration
 
-  The application uses the following environment variables:
+The application uses the following environment variables:
 
-    DB_URL
-    DB_USERNAME
-    DB_PASSWORD
-    JWT_SECRET
-    JWT_EXPIRATION_MS
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `JWT_EXPIRATION_MS`
 
-### Example (local setup)
+### Example `.env`
 
-    DB_URL=jdbc:mysql://localhost:3306/warehouse
-    DB_USERNAME=warehouse
-    DB_PASSWORD=warehouse
-    JWT_SECRET=your-very-long-secret-key
-    JWT_EXPIRATION_MS=3600000
+```env
+DB_URL=jdbc:mysql://localhost:3306/warehouse
+DB_USERNAME=warehouse
+DB_PASSWORD=warehouse
+JWT_SECRET=replace-with-a-long-secret
+JWT_EXPIRATION_MS=3600000
+```
+JWT_EXPIRATION_MS is optional and defaults to 3600000.
 
-### Example (docker setup)
+**Running locally**
 
-    DB_URL=jdbc:mysql://db:3306/warehouse
-    DB_USERNAME=warehouse
-    DB_PASSWORD=warehouse
-    JWT_SECRET=your-very-long-secret-key
-    JWT_EXPIRATION_MS=3600000
+Make sure MySQL is running and that a database named warehouse exists.
 
-## Running the Application 
+Create a .env file based on .env.example, then run:
+```
+./mvnw spring-boot:run
+```
+**Running with Docker Compose**
 
-### local:
+From the docker directory run:
+```
+docker compose up --build
+```
+This starts:
 
+MySQL on port 3308
+the Spring Boot application on port 8080
 
-  Make sure MySQL is running
-  Set the required environment variables
-  
-  Run:
-
-    ./mvnw spring-boot:run
-
-  or start the application via your IDE.
-  
-### via docker:
-
-
-  Make sure Docker Desktop is running
-  Set the required environment variables, if needed make changes in the Docker-compose.yml file
-
-  Run:
-  
-    cd docker
-    ./docker compose up -d
-
-
+The application container is configured with:
+```
+DB_URL=jdbc:mysql://db:3306/warehouse
+DB_USERNAME=warehouse
+DB_PASSWORD=warehouse
+JWT_SECRET=...
+JWT_EXPIRATION_MS=3600000
+```
 ## Testing
 
-  The project includes:
-  1. Controller tests using MockMvc
-  2. Service layer tests
-  3. Security flow tests
-  4. Validation tests
-  Run tests with:
+The project includes:
 
-    ./mvnw test
+* controller tests using MockMvc
+* service layer tests
+* security flow tests
+* validation tests
 
+**Run tests with:**
+```
+./mvnw test
+```
 ## Learning Goals
 
-  This project was built to:
-  1. Deepen understanding of Spring Boot architecture
-  2. Implement JWT-based security from scratch
-  3. Work with JPA entity relationships
-  4. Implement structured and centralized error handling
-  5. Improve testing strategy (unit & integration testing)
-  6. Improve code quality
-  7. Learn Docker
-  8. Practice clean commit structure and incremental improvements
-  
+**This project was built to:**
+
+* Deepen understanding of Spring Boot architecture
+* Implement JWT-based security from scratch
+* Work with JPA entity relationships
+* Implement centralized error handling
+* Improve testing strategy
+* Improve code quality
+* Learn Docker
+* Practice clean commit structure and incremental improvements
 
 
+## Known limitations
 
-
+The project uses ddl-auto=update instead of database migrations
+The focus is on backend business logic and API design
+JWT authentication is implemented, but the project is not positioned as a production-ready deployment template

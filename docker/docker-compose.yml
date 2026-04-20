@@ -28,13 +28,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/warehouse
-      SPRING_DATASOURCE_USERNAME: warehouse
-      SPRING_DATASOURCE_PASSWORD: warehouse
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_SHOW_SQL: "false"
+      DB_URL: jdbc:mysql://db:3306/warehouse
+      DB_USERNAME: warehouse
+      DB_PASSWORD: warehouse
       JWT_SECRET: super-secret-key-which-is-long-enough
-      JWT_EXPIRATION: 3600000
+      JWT_EXPIRATION_MS: 3600000
 
 volumes:
   mysql_data:

@@ -1,8 +1,17 @@
 package com.boljevac.warehouse.warehouse.security.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class AuthRequest {
 
+	@NotBlank(message = "Username is required")
 	private String username;
+
+	@NotBlank(message = "Password is required")
 	private String password;
 
 	public AuthRequest(String username, String password) {
@@ -10,21 +19,5 @@ public class AuthRequest {
 		this.password = password;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-
-	public String getPassword() {
-		return password;
-	}
 
 }

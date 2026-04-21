@@ -3,6 +3,7 @@ package com.boljevac.warehouse.warehouse.inventory.controller;
 import com.boljevac.warehouse.warehouse.inventory.dto.InventoryRequest;
 import com.boljevac.warehouse.warehouse.inventory.dto.InventoryResponse;
 import com.boljevac.warehouse.warehouse.inventory.service.InventoryService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class InventoryController {
 	}
 
 	@PostMapping
-	public ResponseEntity<InventoryResponse> addStock(@RequestBody InventoryRequest inventoryRequest) {
+	public ResponseEntity<InventoryResponse> addStock(@RequestBody @Valid InventoryRequest inventoryRequest) {
 		return ResponseEntity.ok(inventoryService.createStock(inventoryRequest));
 	}
 

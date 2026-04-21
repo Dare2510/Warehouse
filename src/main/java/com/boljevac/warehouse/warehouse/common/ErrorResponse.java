@@ -19,10 +19,4 @@ public class ErrorResponse {
 		this.path = path;
 		this.timestamp = LocalDateTime.now();
 	}
-
-	@Override
-	public String toString() {
-		return "HttpStatusCode=" + httpStatusCode +
-				", message='" + message;
-	}
 }

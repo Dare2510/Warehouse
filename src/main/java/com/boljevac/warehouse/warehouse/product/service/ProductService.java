@@ -69,6 +69,7 @@ public class ProductService {
 		ProductEntity productToUpdate = getProductById(id);
 		productToUpdate.setProduct(productRequest.getProduct());
 		productToUpdate.setPricePerPiece(productRequest.getValue());
+		productToUpdate.setWeightPerPiece(productRequest.getWeight());
 		productRepository.save(productToUpdate);
 		log.info("Product with id {} has been updated", productToUpdate.getId());
 

@@ -3,6 +3,7 @@ package com.boljevac.warehouse.warehouse.security.controller;
 import com.boljevac.warehouse.warehouse.security.dto.AuthRequest;
 import com.boljevac.warehouse.warehouse.security.dto.AuthResponse;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +26,7 @@ public class SecurityController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+	public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
 						request.getUsername(),

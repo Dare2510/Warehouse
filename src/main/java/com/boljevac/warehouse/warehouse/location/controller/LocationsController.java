@@ -3,6 +3,7 @@ package com.boljevac.warehouse.warehouse.location.controller;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
 import com.boljevac.warehouse.warehouse.location.service.LocationService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class LocationsController {
 	}
 
 	@PostMapping
-	public ResponseEntity<LocationsResponse> storeProduct(@RequestBody LocationsRequest locationsRequest) {
+	public ResponseEntity<LocationsResponse> storeProduct(@RequestBody @Valid LocationsRequest locationsRequest) {
 		return ResponseEntity.ok(locationService.storeInventory(locationsRequest));
 	}
 

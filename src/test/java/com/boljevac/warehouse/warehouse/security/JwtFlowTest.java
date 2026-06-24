@@ -3,6 +3,7 @@ package com.boljevac.warehouse.warehouse.security;
 import com.boljevac.warehouse.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,10 +29,11 @@ public class JwtFlowTest {
 	@Autowired
 	MockMvc mockMvc;
 
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
 	@MockitoBean
 	OrderService orderService;
+
+	@Autowired
+	ObjectMapper objectMapper;
 
 	//Helper for Login and get Token
 	public String loginAndGetToken(String username, String password) throws Exception {

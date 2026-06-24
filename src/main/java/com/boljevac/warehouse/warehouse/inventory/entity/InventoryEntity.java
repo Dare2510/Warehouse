@@ -33,7 +33,7 @@ public class InventoryEntity {
 	@Column(name = "quantity", nullable = false)
 	private int quantity;
 
-	@Column(name="total_weight", nullable = false)
+	@Column(name = "total_weight", nullable = false)
 	private double totalWeight;
 
 	@Column(name = "location")
@@ -44,7 +44,7 @@ public class InventoryEntity {
 		this.locationEntity = locationEntity;
 		this.locationType = locationEntity.getLocationType();
 		this.quantity = quantity;
-		this.totalWeight = quantity* productEntity.getWeightPerPiece();
+		this.totalWeight = quantity * productEntity.getWeightPerPiece();
 		this.location = location;
 	}
 

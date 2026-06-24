@@ -1,8 +1,8 @@
 package com.boljevac.warehouse.warehouse.product.controller;
 
-import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
+import com.boljevac.warehouse.warehouse.product.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +38,7 @@ public class ProductController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Void> updateItem(@PathVariable Long id,
-										   @RequestBody @Valid ProductRequest productRequest) {
+	                                       @RequestBody @Valid ProductRequest productRequest) {
 		service.updateProduct(id, productRequest);
 		return ResponseEntity.ok().build();
 	}

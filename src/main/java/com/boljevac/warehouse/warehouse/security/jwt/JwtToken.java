@@ -8,32 +8,31 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtToken {
 
-	private final Key key;
+	private final SecretKey key;
 	private final long duration;
 
 	public JwtToken(@Value("${app.jwt.secret}") String secret,
-					@Value("${app.jwt.expiration-ms}") long duration) {
-
+	                @Value("${app.jwt.expiration-ms}") long duration) {
 		this.duration = duration;
 		this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
 
 	public Jws<Claims> parseToken(String token) {
-		return Jwts.parserBuilder()
-				.setSigningKey(key)
+		return Jwts.parser()
+				.verifyWith(key)
 				.build()
-				.parseClaimsJws(token);
+				.parseSignedClaims(token);
 	}
 
 	public String getUsernameFromToken(String token) {
-		return parseToken(token).getBody().getSubject();
+		return parseToken(token).getPayload().getSubject();
 	}
 
 	public boolean validateToken(String token) {
@@ -50,13 +49,10 @@ public class JwtToken {
 		Date expiration = new Date(now.getTime() + duration);
 
 		return Jwts.builder()
-				.setSubject(username)
-				.setIssuedAt(now)
-				.setExpiration(expiration)
+				.subject(username)
+				.issuedAt(now)
+				.expiration(expiration)
 				.signWith(key)
 				.compact();
-
 	}
-
-
 }

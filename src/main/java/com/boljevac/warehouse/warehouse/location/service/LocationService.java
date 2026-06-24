@@ -31,6 +31,7 @@ public class LocationService {
 		this.locationsRepository = locationsRepository;
 		this.inventoryRepository = inventoryRepository;
 	}
+
 	//Storage Location creation -> only once, all new Locations created via create Stock go directly to Block
 	public void createLocations() {
 		final int firstRack = 1;
@@ -142,7 +143,7 @@ public class LocationService {
 	}
 
 	private void updateTargetLocation(int quantityToStore, double weightToStore, ProductEntity product,
-									  LocationEntity toStoreInLocation) {
+	                                  LocationEntity toStoreInLocation) {
 		toStoreInLocation.setLoaded(true);
 		toStoreInLocation.setProductEntity(product);
 		toStoreInLocation.setQuantity(quantityToStore);
@@ -156,8 +157,8 @@ public class LocationService {
 	}
 
 	private void updateFromInventory(double weightToStore, double toStoreFromWeight,
-									 int availableQuantity, int quantityToStore,
-									 InventoryEntity fromInventory, LocationEntity fromLocation) {
+	                                 int availableQuantity, int quantityToStore,
+	                                 InventoryEntity fromInventory, LocationEntity fromLocation) {
 
 		if (availableQuantity == quantityToStore) {
 			fromInventory.setTotalWeight(0);
@@ -171,7 +172,7 @@ public class LocationService {
 			fromLocation.setQuantity(0);
 
 			log.info("Location Id {} and Inventory Id {} are now empty",
-					fromLocation.getId(),fromInventory.getId());
+					fromLocation.getId(), fromInventory.getId());
 			return;
 		}
 		fromInventory.setQuantity(availableQuantity - quantityToStore);
@@ -179,11 +180,11 @@ public class LocationService {
 		fromLocation.setQuantity(fromLocation.getQuantity() - quantityToStore);
 		fromLocation.setRemainingWeightToStore(fromLocation.getRemainingWeightToStore() + weightToStore);
 		log.info("Location with Id {} and Inventory with Id {} have been updated",
-				fromLocation.getId(),fromInventory.getId());
+				fromLocation.getId(), fromInventory.getId());
 	}
 
 	private void saveEntities(LocationEntity fromLocation, LocationEntity toStoreInLocation,
-							  InventoryEntity toStoreFrom, InventoryEntity storedInventory) {
+	                          InventoryEntity toStoreFrom, InventoryEntity storedInventory) {
 		locationsRepository.save(fromLocation);
 		locationsRepository.save(toStoreInLocation);
 		inventoryRepository.save(toStoreFrom);
@@ -191,7 +192,7 @@ public class LocationService {
 	}
 
 	private LocationsResponse mapToResponse(LocationEntity location,
-											ProductEntity product, int quantityToStore) {
+	                                        ProductEntity product, int quantityToStore) {
 		return new LocationsResponse(
 				location.getId(),
 				product.toString(),

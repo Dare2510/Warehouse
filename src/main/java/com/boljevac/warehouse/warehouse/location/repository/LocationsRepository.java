@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface LocationsRepository extends JpaRepository<LocationEntity, Long> {
 
 	LocationEntity getLocationById(Long locationId);
+
 	Page<LocationEntity> findByProductEntityIsNotNull(Pageable pageable);
+
 	InventoryEntity findInventoryEntityById(Long inventoryId);
 }

@@ -12,5 +12,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
 	@Override
 	Page<ProductEntity> findAll(Pageable pageable);
+
 	boolean existsByProduct(String productName);
 }

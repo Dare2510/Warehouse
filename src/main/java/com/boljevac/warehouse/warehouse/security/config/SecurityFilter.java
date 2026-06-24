@@ -1,7 +1,7 @@
 package com.boljevac.warehouse.warehouse.security.config;
 
-import com.boljevac.warehouse.warehouse.security.handler.RestAuthFailedHandler;
 import com.boljevac.warehouse.warehouse.security.handler.RestAccessDeniedHandler;
+import com.boljevac.warehouse.warehouse.security.handler.RestAuthFailedHandler;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityFilter {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http,
-												   RestAuthFailedHandler restAuthFailedHandler,
-												   RestAccessDeniedHandler restAccessDeniedHandler,
-												   JwtAuthFilter jwtAuthFilter) throws Exception {
+	                                               RestAuthFailedHandler restAuthFailedHandler,
+	                                               RestAccessDeniedHandler restAccessDeniedHandler,
+	                                               JwtAuthFilter jwtAuthFilter) throws Exception {
 
 		http
 				.csrf(AbstractHttpConfigurer::disable)
@@ -33,6 +33,13 @@ public class SecurityFilter {
 						.accessDeniedHandler(restAccessDeniedHandler))
 				.authorizeHttpRequests(authorizeRequests
 						-> authorizeRequests
+						.requestMatchers(
+								"/swagger-ui/**",
+								"/swagger-ui.html",
+								"/v3/api-docs/**",
+								"/swagger-resources/**",
+								"/webjars/**"
+						).permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/warehouse/login").permitAll()
 						.requestMatchers("/api/warehouse/products/**").hasAnyRole("ADMIN", "CLERK")
 						.requestMatchers("/api/warehouse/orders/**").hasAnyRole("ADMIN", "USER")

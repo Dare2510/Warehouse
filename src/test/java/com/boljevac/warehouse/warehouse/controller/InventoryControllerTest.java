@@ -9,6 +9,7 @@ import com.boljevac.warehouse.warehouse.location.exceptions.LocationsNotCreatedE
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
 import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -30,6 +31,8 @@ public class InventoryControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@MockitoBean
 	InventoryService inventoryService;

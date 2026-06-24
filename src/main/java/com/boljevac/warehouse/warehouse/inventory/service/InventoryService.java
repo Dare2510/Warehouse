@@ -20,15 +20,16 @@ import org.springframework.stereotype.Service;
 public class InventoryService {
 
 	private final InventoryRepository inventoryRepository;
-	private final LocationsRepository  locationsRepository;
+	private final LocationsRepository locationsRepository;
 	private final ProductService productService;
 
 	public InventoryService(InventoryRepository inventoryRepository,
-							LocationsRepository locationsRepository, ProductService productService) {
+	                        LocationsRepository locationsRepository, ProductService productService) {
 		this.inventoryRepository = inventoryRepository;
 		this.locationsRepository = locationsRepository;
 		this.productService = productService;
 	}
+
 	@Transactional
 	public InventoryResponse getInventoryResponse(Long id) {
 		InventoryEntity inventory = getInventoryEntity(id);
@@ -42,26 +43,27 @@ public class InventoryService {
 	@Transactional
 	public InventoryResponse createStock(InventoryRequest inventoryRequest) {
 		//First creation of Locations is needed
-		if(!validateLocationsExists()){
+		if (!validateLocationsExists()) {
 			log.warn("Locations not created");
 			throw new LocationsNotCreatedException();
-		};
+		}
+		;
 
 		ProductEntity product = productService.getProductById(inventoryRequest.getProductId());
 
 		LocationEntity newLocation = new LocationEntity(
-										product,
-										LocationType.BLOCK,
-										inventoryRequest.getQuantity(),
-										true);
+				product,
+				LocationType.BLOCK,
+				inventoryRequest.getQuantity(),
+				true);
 
 		locationsRepository.save(newLocation);
 
 		InventoryEntity newInventoryProduct = new InventoryEntity(
-										product,
-										newLocation,
-										inventoryRequest.getQuantity(),
-										newLocation.toString()
+				product,
+				newLocation,
+				inventoryRequest.getQuantity(),
+				newLocation.toString()
 		);
 		inventoryRepository.save(newInventoryProduct);
 

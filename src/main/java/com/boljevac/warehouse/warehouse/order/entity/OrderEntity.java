@@ -23,14 +23,14 @@ public class OrderEntity {
 	@JoinColumn(name = "product_entity_id")
 	private ProductEntity productEntity;
 
-	@Column(name="order_quantity",nullable = false)
+	@Column(name = "order_quantity", nullable = false)
 	private int quantity;
 
-	@Column(name="order_total_price",nullable = false)
+	@Column(name = "order_total_price", nullable = false)
 	private BigDecimal totalPrice;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name="order_status",nullable = false)
+	@Column(name = "order_status", nullable = false)
 	private OrderStatus orderStatus;
 
 	public OrderEntity(ProductEntity productEntity, int quantity) {

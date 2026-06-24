@@ -22,8 +22,8 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
 	@Override
 	public void handle(HttpServletRequest request,
-					   HttpServletResponse response,
-					   AccessDeniedException accessDeniedException) throws IOException {
+	                   HttpServletResponse response,
+	                   AccessDeniedException accessDeniedException) throws IOException {
 
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpServletResponse.SC_FORBIDDEN,

@@ -2,15 +2,15 @@ package com.boljevac.warehouse.warehouse.processor.service;
 
 import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
-import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
-import com.boljevac.warehouse.warehouse.order.repository.ShippedOrdersRepository;
+import com.boljevac.warehouse.warehouse.order.entity.ShippedEntity;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
-import com.boljevac.warehouse.warehouse.order.entity.ShippedEntity;
+import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
+import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
+import com.boljevac.warehouse.warehouse.order.repository.ShippedOrdersRepository;
 import com.boljevac.warehouse.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
-import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -48,7 +48,7 @@ public class ProcessorService {
 		return listOfOrdersByStatus.stream().filter(
 				status -> status.getOrderStatus().equals(orderStatus)).map(
 				status -> modelMapper.map(status, ProcessorResponse.class)).toList();
-		}
+	}
 
 
 	public ProcessorResponse changeStatusOfOrder(Long orderId, OrderStatus newOrderStatus) {
@@ -59,14 +59,14 @@ public class ProcessorService {
 		//Validation if the required sequence of statusToChange changes is met
 		boolean validStatusChange = statusToChange.validatorCorrectStatusChange(orderToChangeStatus, newOrderStatus);
 
-		if(!validStatusChange) {
+		if (!validStatusChange) {
 			throw new StatusChangeInvalidOrderException();
 		}
 		orderToChangeStatus.setOrderStatus(newOrderStatus);
 		orderRepository.save(orderToChangeStatus);
 		log.info("Order with Id {} has been changed", orderToChangeStatus.getId());
 
-		return modelMapper.map(orderToChangeStatus,ProcessorResponse.class);
+		return modelMapper.map(orderToChangeStatus, ProcessorResponse.class);
 
 //		return new ProcessorResponse(
 //				orderToChangeStatus.getProductEntity().getId(),
@@ -81,7 +81,7 @@ public class ProcessorService {
 		OrderEntity orderToDelete = orderService.getOrderById(orderId);
 		boolean deletionIsValid = validateToDeleteOrder(orderToDelete);
 
-		if(deletionIsValid) {
+		if (deletionIsValid) {
 			log.info("Order with Id {} has been deleted", orderToDelete.getId());
 			orderRepository.delete(orderToDelete);
 		} else {

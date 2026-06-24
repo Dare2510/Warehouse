@@ -18,16 +18,16 @@ public class ProductEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name="product_name",nullable = false)
+	@Column(name = "product_name", nullable = false)
 	private String product;
 
-	@Column(name="price_per_piece",nullable = false)
+	@Column(name = "price_per_piece", nullable = false)
 	private BigDecimal pricePerPiece;
 
-	@Column(name="weight_per_piece", nullable = false)
+	@Column(name = "weight_per_piece", nullable = false)
 	private double weightPerPiece;
 
-	public ProductEntity(String product, BigDecimal pricePerPiece, double weightPerPiece ) {
+	public ProductEntity(String product, BigDecimal pricePerPiece, double weightPerPiece) {
 		this.product = product;
 		this.pricePerPiece = pricePerPiece;
 		this.weightPerPiece = weightPerPiece;
@@ -52,6 +52,6 @@ public class ProductEntity {
 
 	@Override
 	public String toString() {
-		return " "+product;
+		return " " + product;
 	}
 }

@@ -1,12 +1,15 @@
 package com.boljevac.warehouse.warehouse.common;
 
 import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
+import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationLoadLimitExceededException;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationsAlreadyCreatedException;
 import com.boljevac.warehouse.warehouse.location.exceptions.LocationsNotCreatedException;
 import com.boljevac.warehouse.warehouse.location.exceptions.NoUnusedLocationException;
-import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
-import com.boljevac.warehouse.warehouse.order.exception.*;
+import com.boljevac.warehouse.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
+import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
+import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
+import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
 import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
@@ -42,7 +45,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(EmptyProductRepositoryException.class)
 	public ResponseEntity<ErrorResponse> handleEmptyProductRepositoryException(EmptyProductRepositoryException ex,
-																			   HttpServletRequest request) {
+	                                                                           HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
 				ex.getMessage(),
@@ -55,7 +58,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ProductNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException ex,
-																		HttpServletRequest request) {
+	                                                                    HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
@@ -70,7 +73,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ProductDuplicateCreationException.class)
 	public ResponseEntity<ErrorResponse> handleProductDoubleCreationException(ProductDuplicateCreationException ex,
-																			  HttpServletRequest request) {
+	                                                                          HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.CONFLICT.value(),
@@ -84,7 +87,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(OrderNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleOrderNotFoundException(OrderNotFoundException ex,
-																	  HttpServletRequest request) {
+	                                                                  HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
@@ -97,7 +100,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(OrderExceedsStockException.class)
 	public ResponseEntity<ErrorResponse> handleOrderExceedsStockException(OrderExceedsStockException ex,
-																		  HttpServletRequest request) {
+	                                                                      HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
@@ -111,7 +114,7 @@ public class GlobalExceptionHandler {
 	//Sequence of status changes must be: ORDER_PLACED -> (CANCELLED)/PROCESSING -> PACKAGED -> SHIPPED
 	@ExceptionHandler(StatusChangeInvalidOrderException.class)
 	public ResponseEntity<ErrorResponse> handleInvalidStatusException(StatusChangeInvalidOrderException ex,
-																	  HttpServletRequest request) {
+	                                                                  HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
@@ -125,7 +128,7 @@ public class GlobalExceptionHandler {
 	//To cancel an order it must have status Order_Placed
 	@ExceptionHandler(OrderCancelOrDeleteNotPossibleException.class)
 	public ResponseEntity<ErrorResponse> handleOrderCancelNotPossibleException(OrderCancelOrDeleteNotPossibleException ex,
-																			   HttpServletRequest request) {
+	                                                                           HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
@@ -139,7 +142,7 @@ public class GlobalExceptionHandler {
 	//If trying to set the status to a status that is not available
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex,
-																				   HttpServletRequest request) {
+	                                                                               HttpServletRequest request) {
 
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
@@ -152,7 +155,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(NotSufficientStockToStoreException.class)
 	public ResponseEntity<ErrorResponse> handleNotSufficientStockToStoreException(NotSufficientStockToStoreException ex,
-																				  HttpServletRequest request) {
+	                                                                              HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(),
@@ -164,7 +167,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(NoUnusedLocationException.class)
 	public ResponseEntity<ErrorResponse> handleNoUnusedLocationException(NoUnusedLocationException ex,
-																		 HttpServletRequest request) {
+	                                                                     HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
 				ex.getMessage(),
@@ -176,7 +179,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(InventoryNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleInventoryNotFoundException(InventoryNotFoundException ex,
-																		  HttpServletRequest request) {
+	                                                                      HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
 				ex.getMessage(),
@@ -189,7 +192,7 @@ public class GlobalExceptionHandler {
 	//Maximum 300 locations
 	@ExceptionHandler(LocationsAlreadyCreatedException.class)
 	public ResponseEntity<ErrorResponse> handleLocationsAlreadyCreatedException(LocationsAlreadyCreatedException ex,
-																				HttpServletRequest request) {
+	                                                                            HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.CONFLICT.value(),
 				ex.getMessage(),
@@ -202,7 +205,7 @@ public class GlobalExceptionHandler {
 	//Max weight per location = 1000
 	@ExceptionHandler(LocationLoadLimitExceededException.class)
 	public ResponseEntity<ErrorResponse> handleLocationLoadLimitExceededException(LocationLoadLimitExceededException ex,
-																				  HttpServletRequest request) {
+	                                                                              HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(),
@@ -214,7 +217,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(LocationsNotCreatedException.class)
 	public ResponseEntity<ErrorResponse> handleLocationsNotCreatedException(LocationsNotCreatedException ex,
-																			HttpServletRequest request) {
+	                                                                        HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				ex.getMessage(),
@@ -226,7 +229,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ErrorResponse> handleNotReadableException(HttpMessageNotReadableException ex,
-																	HttpServletRequest request) {
+	                                                                HttpServletRequest request) {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				"Request body is invalid or contains missing/incorrect field values",

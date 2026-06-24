@@ -17,8 +17,9 @@ public class InventoryController {
 	public InventoryController(InventoryService inventoryService) {
 		this.inventoryService = inventoryService;
 	}
+
 	@GetMapping("/{id}")
-	public  ResponseEntity<InventoryResponse> getStock(@PathVariable Long id) {
+	public ResponseEntity<InventoryResponse> getStock(@PathVariable Long id) {
 		return ResponseEntity.ok(inventoryService.getInventoryResponse(id));
 	}
 

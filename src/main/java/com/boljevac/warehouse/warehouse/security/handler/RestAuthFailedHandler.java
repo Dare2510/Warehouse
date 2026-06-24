@@ -22,8 +22,8 @@ public class RestAuthFailedHandler implements AuthenticationEntryPoint {
 
 	@Override
 	public void commence(HttpServletRequest request,
-						 HttpServletResponse response,
-						 AuthenticationException authException) throws IOException {
+	                     HttpServletResponse response,
+	                     AuthenticationException authException) throws IOException {
 
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpServletResponse.SC_UNAUTHORIZED,

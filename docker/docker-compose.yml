@@ -1,38 +1,32 @@
-services:
-  db:
-    image: mysql:8.4
-    container_name: warehouse-database
-    environment:
-      MYSQL_DATABASE: warehouse
-      MYSQL_USER: warehouse
-      MYSQL_PASSWORD: warehouse
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3308:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
+name: warehouse
 
+services:
   app:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: warehouse-app
-    ports:
-      - "8080:8080"
+    container_name: warehouse
     depends_on:
-      db:
-        condition: service_healthy
+      - postgres
+    env_file:
+      - ../.env
+    ports:
+      - "8081:8080"
+
+  postgres:
+    image: postgres:17
+    container_name: db-warehouse
+    restart: unless-stopped
+    env_file:
+      - ../.env
     environment:
-      DB_URL: jdbc:mysql://db:3306/warehouse
-      DB_USERNAME: warehouse
-      DB_PASSWORD: warehouse
-      JWT_SECRET: super-secret-key-which-is-long-enough
-      JWT_EXPIRATION_MS: 3600000
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "54433:5432"
+    volumes:
+      - warehouse_postgres_data:/var/lib/postgresql/data
 
 volumes:
-  mysql_data:
+  warehouse_postgres_data:

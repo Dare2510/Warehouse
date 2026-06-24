@@ -5,14 +5,14 @@ import com.boljevac.warehouse.warehouse.inventory.repository.InventoryRepository
 import com.boljevac.warehouse.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
-import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
+import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
+import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
-import com.boljevac.warehouse.warehouse.order.entity.OrderEntity;
+import com.boljevac.warehouse.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepositoryException;
@@ -39,8 +39,8 @@ public class OrderService {
 
 
 	public OrderService(OrderRepository orderRepository,
-						InventoryRepository inventoryRepository,
-						ProductRepository productRepository, LocationsRepository locationsRepository, ProductService productService, ModelMapper modelMapper) {
+	                    InventoryRepository inventoryRepository,
+	                    ProductRepository productRepository, LocationsRepository locationsRepository, ProductService productService, ModelMapper modelMapper) {
 		this.orderRepository = orderRepository;
 		this.inventoryRepository = inventoryRepository;
 		this.productRepository = productRepository;
@@ -98,8 +98,8 @@ public class OrderService {
 			updateInventory(orderToCancel);
 			log.info("Order with Id {} has been cancelled", orderToCancel.getId());
 		} else {
-				throw new OrderCancelOrDeleteNotPossibleException(orderToCancel.getId());
-			}
+			throw new OrderCancelOrDeleteNotPossibleException(orderToCancel.getId());
+		}
 		return mapToResponse(orderToCancel);
 	}
 
@@ -109,23 +109,23 @@ public class OrderService {
 		return orderToCancel.getOrderStatus().equals(OrderStatus.ORDER_PLACED);
 	}
 
-	private void updateInventory(OrderEntity orderToCancel){
+	private void updateInventory(OrderEntity orderToCancel) {
 
-			orderToCancel.setOrderStatus(OrderStatus.CANCELLED);
-			ProductEntity canceledItem = productService.getProductById(orderToCancel.getProductEntity().getId());
-			LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, orderToCancel.getQuantity(),true);
+		orderToCancel.setOrderStatus(OrderStatus.CANCELLED);
+		ProductEntity canceledItem = productService.getProductById(orderToCancel.getProductEntity().getId());
+		LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, orderToCancel.getQuantity(), true);
 
-			InventoryEntity canceledQuantity = new InventoryEntity(
-					canceledItem,
-					newLocation,
-					orderToCancel.getQuantity(),
-					newLocation.toString());
+		InventoryEntity canceledQuantity = new InventoryEntity(
+				canceledItem,
+				newLocation,
+				orderToCancel.getQuantity(),
+				newLocation.toString());
 
-			inventoryRepository.save(canceledQuantity);
-			orderRepository.save(orderToCancel);
-			locationsRepository.save(newLocation);
+		inventoryRepository.save(canceledQuantity);
+		orderRepository.save(orderToCancel);
+		locationsRepository.save(newLocation);
 
-		}
+	}
 
 	public OrderEntity getOrderById(Long id) throws OrderNotFoundException {
 		return orderRepository.findById(id).orElseThrow(
@@ -139,18 +139,18 @@ public class OrderService {
 		}
 	}
 
-	private OrderEntity getQuantitiesAndReturnOrder(ProductEntity product,int remaining,List<InventoryEntity> inventories) {
+	private OrderEntity getQuantitiesAndReturnOrder(ProductEntity product, int remaining, List<InventoryEntity> inventories) {
 
 		int orderedQuantity = remaining;
 
-		for(InventoryEntity inventoryEntity : inventories) {
-			if(remaining <=0) {
+		for (InventoryEntity inventoryEntity : inventories) {
+			if (remaining <= 0) {
 				break;
 			}
 
 			int available = inventoryEntity.getQuantity();
 
-			if(available <= remaining) {
+			if (available <= remaining) {
 				remaining -= available;
 				inventoryEntity.getLocationEntity().setLoaded(false);
 				inventoryEntity.getLocationEntity().setQuantity(0);
@@ -163,27 +163,26 @@ public class OrderService {
 				inventoryEntity.setProductEntity(null);
 
 
-
 			} else {
 				inventoryEntity.setQuantity(inventoryEntity.getQuantity() - remaining);
 				inventoryEntity.setTotalWeight(inventoryEntity.getTotalWeight()
-						- (inventoryEntity.getProductEntity().getWeightPerPiece()*remaining));
+						- (inventoryEntity.getProductEntity().getWeightPerPiece() * remaining));
 
 				inventoryEntity.getLocationEntity().setQuantity(inventoryEntity.getLocationEntity().getQuantity() - remaining);
 				inventoryEntity.getLocationEntity().setRemainingWeightToStore(inventoryEntity.getLocationEntity().getRemainingWeightToStore()
-						+(inventoryEntity.getProductEntity().getWeightPerPiece()*remaining));
+						+ (inventoryEntity.getProductEntity().getWeightPerPiece() * remaining));
 				remaining = 0;
 			}
 			inventoryRepository.save(inventoryEntity);
 
 		}
 
-		return new OrderEntity(product,orderedQuantity);
+		return new OrderEntity(product, orderedQuantity);
 
 	}
 
 	private OrderResponse mapToResponse(OrderEntity orderEntity) {
-		return modelMapper.map(orderEntity,OrderResponse.class);
+		return modelMapper.map(orderEntity, OrderResponse.class);
 
 	}
 

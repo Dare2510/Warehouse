@@ -14,7 +14,7 @@ and role-based access control.
 6. Order status management (e.g. `ORDER_PLACED`, `SHIPPED`)
 7. Global exception handling with structured error responses
 8. Custom domain exceptions (e.g. `DuplicateProductException`, `OrderNotFoundException`)
-9. MySQL database integration using JPA/Hibernate
+9. PostgreSQL database integration using JPA/Hibernate
 10. JWT authentication with role-based authorization (`USER`, `CLERK`, `ADMIN`)
 11. Unit and integration tests
 12. Docker / Docker Compose support
@@ -24,7 +24,7 @@ and role-based access control.
 - Java 17
 - Spring Boot
 - Spring Security (JWT)
-- MySQL
+- PostgreSQL
 - Docker / Docker Compose
 
 ## Architecture
@@ -55,7 +55,7 @@ JWT configuration is externalized via environment variables.
 
 ## Database
 
-The application uses MySQL with:
+The application uses PostgreSQL with:
 
 - `spring.jpa.hibernate.ddl-auto=update`
 
@@ -79,7 +79,7 @@ The application uses the following environment variables:
 ### Example `.env`
 
 ```env
-DB_URL=jdbc:mysql://localhost:3306/warehouse
+DB_URL=jdbc:postgresql://localhost:5432/warehouse
 DB_USERNAME=warehouse
 DB_PASSWORD=warehouse
 JWT_SECRET=replace-with-a-long-secret
@@ -89,7 +89,7 @@ JWT_EXPIRATION_MS is optional and defaults to 3600000.
 
 **Running locally**
 
-Make sure MySQL is running and that a database named warehouse exists.
+Make sure PostgreSQL is running and that a database named warehouse exists.
 
 Create a .env file based on .env.example, then run:
 ```
@@ -103,12 +103,13 @@ docker compose up --build
 ```
 This starts:
 
-MySQL on port 3308
+PostgreSQL on port 5432
 the Spring Boot application on port 8080
 
 The application container is configured with:
 ```
-DB_URL=jdbc:mysql://db:3306/warehouse
+DB_URL=jdbc:postgresql://postgres:5432/warehouse
+DB_NAME=warehouse
 DB_USERNAME=warehouse
 DB_PASSWORD=warehouse
 JWT_SECRET=...

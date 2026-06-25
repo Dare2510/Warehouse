@@ -84,9 +84,9 @@ The application uses the following environment variables:
 
 - JWT_SECRE`
 - JWT_EXPIRATION_MS
+```
 
 ### Example `.env`
-```
 
 ```env
 DB_HOST=postgres

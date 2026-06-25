@@ -21,11 +21,15 @@ and role-based access control.
 
 ## Tech Stack
 
-- Java 17
-- Spring Boot
-- Spring Security (JWT)
-- PostgreSQL
-- Docker / Docker Compose
+* Java
+* Spring Boot
+* Spring Data JPA / Hibernate
+* PostgreSQL
+* Maven
+* JUnit / Mockito
+* JWT Security
+* Swagger
+* Docker
 
 ## Architecture
 
@@ -51,7 +55,9 @@ Authentication is handled using JWT tokens.
 - `CLERK` – can manage products and update order status
 - `ADMIN` – full system access
 
-JWT configuration is externalized via environment variables.
+### Users
+currently is no user creation supported, users are created via InMemoryUserDetails 
+in `AppUserConfig.class`
 
 ## Database
 
@@ -70,22 +76,28 @@ The application uses PostgreSQL with:
 
 The application uses the following environment variables:
 
-- `DB_URL`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `JWT_SECRET`
-- `JWT_EXPIRATION_MS`
+```
+- DB_HOST
+- DB_NAME
+- DB_USERNAME
+- DB_PASSWORD
+
+- JWT_SECRE`
+- JWT_EXPIRATION_MS
 
 ### Example `.env`
+```
 
 ```env
-DB_URL=jdbc:postgresql://localhost:5432/warehouse
+DB_HOST=postgres
+DB_NAME=warehouse
 DB_USERNAME=warehouse
 DB_PASSWORD=warehouse
+
 JWT_SECRET=replace-with-a-long-secret
 JWT_EXPIRATION_MS=3600000
 ```
-JWT_EXPIRATION_MS is optional and defaults to 3600000.
+
 
 **Running locally**
 
@@ -99,22 +111,17 @@ Create a .env file based on .env.example, then run:
 
 From the docker directory run:
 ```
-docker compose up --build
+docker compose --env-file ../.env up --build
 ```
 This starts:
 
-PostgreSQL on port 5432
-the Spring Boot application on port 8080
+PostgreSQL mapped to host port 54433
+Spring Boot application mapped to host port 8081
 
-The application container is configured with:
-```
-DB_URL=jdbc:postgresql://postgres:5432/warehouse
-DB_NAME=warehouse
-DB_USERNAME=warehouse
-DB_PASSWORD=warehouse
-JWT_SECRET=...
-JWT_EXPIRATION_MS=3600000
-```
+The application connects to PostgreSQL internally via:
+
+```jdbc:postgresql://postgres:5432/cinema```
+
 ## Testing
 
 The project includes:

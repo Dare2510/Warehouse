@@ -82,7 +82,7 @@ The application uses the following environment variables:
 - DB_USERNAME
 - DB_PASSWORD
 
-- JWT_SECRE`
+- JWT_SECRET`
 - JWT_EXPIRATION_MS
 ```
 
@@ -120,7 +120,7 @@ Spring Boot application mapped to host port 8081
 
 The application connects to PostgreSQL internally via:
 
-```jdbc:postgresql://postgres:5432/cinema```
+```jdbc:postgresql://postgres:5432/warehouse```
 
 ## Testing
 

@@ -41,7 +41,7 @@ public class ProcessorController {
 	}
 
 	//Only shipped orders
-	@GetMapping("/archive")
+	@PatchMapping("/archive")
 	public ResponseEntity<Void> moveShippedOrders() {
 		processorService.archiveShippedOrders();
 		return ResponseEntity.ok().build();

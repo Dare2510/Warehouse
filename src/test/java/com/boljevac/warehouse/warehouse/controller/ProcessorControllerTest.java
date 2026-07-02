@@ -1,22 +1,21 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.order.entity.OrderStatus;
 
-import com.boljevac.warehouse.warehouse.order.exception.OrderNotFoundException;
-import com.boljevac.warehouse.warehouse.order.exception.StatusChangeInvalidOrderException;
-import com.boljevac.warehouse.warehouse.processor.controller.ProcessorController;
-import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
-import com.boljevac.warehouse.warehouse.processor.dto.ProcessorRequest;
-import com.boljevac.warehouse.warehouse.processor.dto.ProcessorResponse;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
+import com.boljevac.warehouse.order.exception.OrderNotFoundException;
+import com.boljevac.warehouse.order.exception.StatusChangeInvalidOrderException;
+import com.boljevac.warehouse.processor.controller.ProcessorController;
+import com.boljevac.warehouse.processor.service.ProcessorService;
+import com.boljevac.warehouse.processor.dto.ProcessorRequest;
+import com.boljevac.warehouse.processor.dto.ProcessorResponse;
+import com.boljevac.warehouse.security.jwt.JwtUtil;
+import com.boljevac.warehouse.security.jwt.JwTAuthenticationFilter;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -38,13 +37,11 @@ public class ProcessorControllerTest {
 	ProcessorService processorService;
 
 	@MockitoBean
-	JwtToken jwtToken;
+	JwtUtil jwtToken;
 
 	@MockitoBean
-	JwtAuthFilter jwtAuthFilter;
+	JwTAuthenticationFilter jwtAuthFilter;
 
-	@MockitoBean
-	UserDetailsService userDetailsService;
 	@Autowired
 	MockMvc mockMvc;
 

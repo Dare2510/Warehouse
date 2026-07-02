@@ -1,21 +1,20 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.inventory.controller.InventoryController;
-import com.boljevac.warehouse.warehouse.inventory.dto.InventoryRequest;
-import com.boljevac.warehouse.warehouse.inventory.dto.InventoryResponse;
-import com.boljevac.warehouse.warehouse.inventory.exceptions.InventoryNotFoundException;
-import com.boljevac.warehouse.warehouse.inventory.service.InventoryService;
-import com.boljevac.warehouse.warehouse.location.exceptions.LocationsNotCreatedException;
-import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
+import com.boljevac.warehouse.inventory.controller.InventoryController;
+import com.boljevac.warehouse.inventory.dto.InventoryRequest;
+import com.boljevac.warehouse.inventory.dto.InventoryResponse;
+import com.boljevac.warehouse.inventory.exceptions.InventoryNotFoundException;
+import com.boljevac.warehouse.inventory.service.InventoryService;
+import com.boljevac.warehouse.location.exceptions.LocationsNotCreatedException;
+import com.boljevac.warehouse.product.exception.ProductNotFoundException;
+import com.boljevac.warehouse.security.jwt.JwtUtil;
+import com.boljevac.warehouse.security.jwt.JwTAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,11 +36,10 @@ public class InventoryControllerTest {
 	@MockitoBean
 	InventoryService inventoryService;
 	@MockitoBean
-	JwtToken jwtToken;
+	JwtUtil jwtUtil;
 	@MockitoBean
-	JwtAuthFilter jwtAuthFilter;
-	@MockitoBean
-	UserDetailsService userDetailsService;
+	JwTAuthenticationFilter jwtAuthFilter;
+
 
 
 	@Test

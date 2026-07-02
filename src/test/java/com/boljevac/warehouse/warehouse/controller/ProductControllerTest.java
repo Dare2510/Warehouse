@@ -1,11 +1,11 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.product.controller.ProductController;
-import com.boljevac.warehouse.warehouse.product.service.ProductService;
-import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
-import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
+import com.boljevac.warehouse.product.controller.ProductController;
+import com.boljevac.warehouse.product.service.ProductService;
+import com.boljevac.warehouse.product.dto.ProductRequest;
+import com.boljevac.warehouse.product.dto.ProductResponse;
+import com.boljevac.warehouse.security.jwt.JwtUtil;
+import com.boljevac.warehouse.security.jwt.JwTAuthenticationFilter;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,11 +36,10 @@ public class ProductControllerTest {
 	@MockitoBean
 	ProductService productService;
 	@MockitoBean
-	JwtToken jwtToken;
+	JwtUtil jwtToken;
 	@MockitoBean
-	JwtAuthFilter jwtAuthFilter;
-	@MockitoBean
-	UserDetailsService userDetailsService;
+	JwTAuthenticationFilter jwtAuthFilter;
+
 
 	@Test
 	void getAllProducts_returns200() throws Exception {

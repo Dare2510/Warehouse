@@ -1,23 +1,22 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.order.controller.OrderController;
-import com.boljevac.warehouse.warehouse.order.service.OrderService;
-import com.boljevac.warehouse.warehouse.order.entity.OrderStatus;
-import com.boljevac.warehouse.warehouse.order.dto.OrderRequest;
-import com.boljevac.warehouse.warehouse.order.dto.OrderResponse;
-import com.boljevac.warehouse.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
-import com.boljevac.warehouse.warehouse.order.exception.OrderExceedsStockException;
-import com.boljevac.warehouse.warehouse.processor.service.ProcessorService;
-import com.boljevac.warehouse.warehouse.product.exception.EmptyProductRepositoryException;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
+import com.boljevac.warehouse.order.controller.OrderController;
+import com.boljevac.warehouse.order.service.OrderService;
+import com.boljevac.warehouse.order.entity.OrderStatus;
+import com.boljevac.warehouse.order.dto.OrderRequest;
+import com.boljevac.warehouse.order.dto.OrderResponse;
+import com.boljevac.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
+import com.boljevac.warehouse.order.exception.OrderExceedsStockException;
+import com.boljevac.warehouse.processor.service.ProcessorService;
+import com.boljevac.warehouse.product.exception.EmptyProductRepositoryException;
+import com.boljevac.warehouse.security.jwt.JwtUtil;
+import com.boljevac.warehouse.security.jwt.JwTAuthenticationFilter;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,13 +36,10 @@ public class OrderControllerTest {
 	MockMvc mockMvc;
 
 	@MockitoBean
-	JwtToken jwtToken;
+	JwtUtil jwtToken;
 
 	@MockitoBean
-	JwtAuthFilter jwtAuthFilter;
-
-	@MockitoBean
-	UserDetailsService userDetailsService;
+	JwTAuthenticationFilter jwtAuthFilter;
 
 	@MockitoBean
 	OrderService orderService;

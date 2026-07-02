@@ -1,21 +1,20 @@
 package com.boljevac.warehouse.warehouse.controller;
 
-import com.boljevac.warehouse.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
-import com.boljevac.warehouse.warehouse.location.controller.LocationsController;
-import com.boljevac.warehouse.warehouse.location.dto.LocationsRequest;
-import com.boljevac.warehouse.warehouse.location.dto.LocationsResponse;
-import com.boljevac.warehouse.warehouse.location.exceptions.LocationLoadLimitExceededException;
-import com.boljevac.warehouse.warehouse.location.exceptions.LocationsAlreadyCreatedException;
-import com.boljevac.warehouse.warehouse.location.repository.LocationsRepository;
-import com.boljevac.warehouse.warehouse.location.service.LocationService;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtAuthFilter;
-import com.boljevac.warehouse.warehouse.security.jwt.JwtToken;
+import com.boljevac.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
+import com.boljevac.warehouse.location.controller.LocationsController;
+import com.boljevac.warehouse.location.dto.LocationsRequest;
+import com.boljevac.warehouse.location.dto.LocationsResponse;
+import com.boljevac.warehouse.location.exceptions.LocationLoadLimitExceededException;
+import com.boljevac.warehouse.location.exceptions.LocationsAlreadyCreatedException;
+import com.boljevac.warehouse.location.repository.LocationsRepository;
+import com.boljevac.warehouse.location.service.LocationService;
+import com.boljevac.warehouse.security.jwt.JwtUtil;
+import com.boljevac.warehouse.security.jwt.JwTAuthenticationFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,11 +36,10 @@ public class LocationControllerTest {
 	@MockitoBean
 	LocationsRepository locationsRepository;
 	@MockitoBean
-	JwtToken jwtToken;
+	JwtUtil jwtToken;
 	@MockitoBean
-	JwtAuthFilter jwtAuthFilter;
-	@MockitoBean
-	UserDetailsService userDetailsService;
+	JwTAuthenticationFilter jwtAuthFilter;
+
 
 	@Test
 	public void createLocations_whenCreatingFirstTime_returns201() throws Exception {

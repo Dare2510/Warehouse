@@ -1,0 +1,20 @@
+package com.boljevac.warehouse.inventory.repository;
+
+import com.boljevac.warehouse.inventory.entity.InventoryEntity;
+import com.boljevac.warehouse.product.entity.ProductEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+
+@Repository
+public interface InventoryRepository extends JpaRepository<InventoryEntity, Long> {
+
+	InventoryEntity getByProductEntity(ProductEntity productEntity);
+
+	List<InventoryEntity> getAllByProductEntity(ProductEntity productEntity);
+
+	boolean existsByProductEntity(Long productEntityId);
+}
+

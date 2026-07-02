@@ -1,12 +1,12 @@
 package com.boljevac.warehouse.warehouse.service;
 
-import com.boljevac.warehouse.warehouse.product.entity.ProductEntity;
-import com.boljevac.warehouse.warehouse.product.exception.ProductDuplicateCreationException;
-import com.boljevac.warehouse.warehouse.product.exception.ProductNotFoundException;
-import com.boljevac.warehouse.warehouse.product.repository.ProductRepository;
-import com.boljevac.warehouse.warehouse.product.service.ProductService;
-import com.boljevac.warehouse.warehouse.product.dto.ProductRequest;
-import com.boljevac.warehouse.warehouse.product.dto.ProductResponse;
+import com.boljevac.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.product.exception.ProductDuplicateCreationException;
+import com.boljevac.warehouse.product.exception.ProductNotFoundException;
+import com.boljevac.warehouse.product.repository.ProductRepository;
+import com.boljevac.warehouse.product.service.ProductService;
+import com.boljevac.warehouse.product.dto.ProductRequest;
+import com.boljevac.warehouse.product.dto.ProductResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

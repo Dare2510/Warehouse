@@ -56,8 +56,12 @@ Authentication is handled using JWT tokens.
 - `ADMIN` – full system access
 
 ### Users
-currently is no user creation supported, users are created via InMemoryUserDetails 
-in `AppUserConfig.class`
+
+If the Database ist empty an Admin user will be created on startup.
+Define email and password via Environment variables.
+
+Customer can create a new user - Role = user, the customer cannot change his role
+Admin can freely choose between roles when creating new users.
 
 ## Database
 
@@ -82,8 +86,11 @@ The application uses the following environment variables:
 - DB_USERNAME
 - DB_PASSWORD
 
-- JWT_SECRET`
+- JWT_SECRET
 - JWT_EXPIRATION_MS
+
+- ADMIN_EMAIL
+- ADMIN_PASSWORD
 ```
 
 ### Example `.env`
@@ -96,6 +103,9 @@ DB_PASSWORD=warehouse
 
 JWT_SECRET=replace-with-a-long-secret
 JWT_EXPIRATION_MS=3600000
+
+- ADMIN_EMAIL=admin@mail.com
+- ADMIN_PASSWORD=change-me-now
 ```
 
 

@@ -3,6 +3,7 @@ package com.boljevac.warehouse.inventory.entity;
 import com.boljevac.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.location.entity.LocationType;
 import com.boljevac.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,10 @@ public class InventoryEntity {
 
 	@Column(name = "location")
 	private String location;
+
+	@ManyToOne
+	@JoinColumn(name = "created_by_user")
+	private UserEntity createdByUser;
 
 	public InventoryEntity(ProductEntity productEntity, LocationEntity locationEntity, int quantity, String location) {
 		this.productEntity = productEntity;

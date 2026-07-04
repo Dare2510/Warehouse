@@ -1,5 +1,6 @@
 package com.boljevac.warehouse.product.entity;
 
+import com.boljevac.warehouse.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,10 @@ public class ProductEntity {
 
 	@Column(name = "weight_per_piece", nullable = false)
 	private double weightPerPiece;
+
+	@ManyToOne
+	@JoinColumn(name = "created_by_user")
+	private UserEntity productCreatedByUser;
 
 	public ProductEntity(String product, BigDecimal pricePerPiece, double weightPerPiece) {
 		this.product = product;

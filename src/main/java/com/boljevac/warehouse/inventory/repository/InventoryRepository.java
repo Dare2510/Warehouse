@@ -14,7 +14,5 @@ public interface InventoryRepository extends JpaRepository<InventoryEntity, Long
 	InventoryEntity getByProductEntity(ProductEntity productEntity);
 
 	List<InventoryEntity> getAllByProductEntity(ProductEntity productEntity);
-
-	boolean existsByProductEntity(Long productEntityId);
 }
 

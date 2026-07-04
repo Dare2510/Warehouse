@@ -18,6 +18,9 @@ import com.boljevac.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.product.service.ProductService;
+import com.boljevac.warehouse.security.principal.AuthenticatedUser;
+import com.boljevac.warehouse.user.entity.UserEntity;
+import com.boljevac.warehouse.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -36,17 +39,19 @@ public class OrderService {
 	private final LocationsRepository locationsRepository;
 	private final ProductService productService;
 	private final ModelMapper modelMapper;
+	private final UserService userService;
 
 
 	public OrderService(OrderRepository orderRepository,
 	                    InventoryRepository inventoryRepository,
-	                    ProductRepository productRepository, LocationsRepository locationsRepository, ProductService productService, ModelMapper modelMapper) {
+	                    ProductRepository productRepository, LocationsRepository locationsRepository, ProductService productService, ModelMapper modelMapper, UserService userService) {
 		this.orderRepository = orderRepository;
 		this.inventoryRepository = inventoryRepository;
 		this.productRepository = productRepository;
 		this.locationsRepository = locationsRepository;
 		this.productService = productService;
 		this.modelMapper = modelMapper;
+		this.userService = userService;
 	}
 
 	public List<ProductResponse> getListOfProducts() {
@@ -57,7 +62,10 @@ public class OrderService {
 					productEntity.getId(),
 					productEntity.getProduct(),
 					productEntity.getPricePerPiece(),
-					productEntity.getWeightPerPiece()));
+					productEntity.getWeightPerPiece(),
+					productEntity.getProductCreatedByUser().getId()
+
+			));
 		}
 
 		if (productList.isEmpty()) {
@@ -69,10 +77,11 @@ public class OrderService {
 
 
 	@Transactional
-	public OrderResponse createOrder(OrderRequest orderRequest) {
+	public OrderResponse createOrder(AuthenticatedUser authenticatedUser,OrderRequest orderRequest) {
 
 		ProductEntity orderedItem = productService.getProductById(orderRequest.getProductId());
 		List<InventoryEntity> inventories = inventoryRepository.getAllByProductEntity(orderedItem);
+		UserEntity createdBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 
 		int totalAvailableQuantity = inventories.stream().mapToInt(InventoryEntity::getQuantity).sum();
 		int orderedQuantity = orderRequest.getQuantity();
@@ -81,6 +90,9 @@ public class OrderService {
 		validateOrderQuantity(totalAvailableQuantity, orderedQuantity);
 
 		OrderEntity fulfilledOrder = getQuantitiesAndReturnOrder(orderedItem, remainingToFulfill, inventories);
+		fulfilledOrder.setCreatedByUser(createdBy);
+		fulfilledOrder.setLastChangedByUser(createdBy);
+
 		orderRepository.save(fulfilledOrder);
 		log.info("New Order with Id {} has been created", fulfilledOrder.getId());
 
@@ -89,13 +101,14 @@ public class OrderService {
 	}
 
 	@Transactional
-	public OrderResponse cancelOrder(Long id) {
+	public OrderResponse cancelOrder(AuthenticatedUser authenticatedUser,Long id) {
 		OrderEntity orderToCancel = getOrderById(id);
-
+		UserEntity canceledBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 		boolean cancelIsValid = validateCancelRequest(orderToCancel);
 
 		if (cancelIsValid) {
-			updateInventory(orderToCancel);
+			updateInventory(canceledBy,orderToCancel);
+
 			log.info("Order with Id {} has been cancelled", orderToCancel.getId());
 		} else {
 			throw new OrderCancelOrDeleteNotPossibleException(orderToCancel.getId());
@@ -109,11 +122,12 @@ public class OrderService {
 		return orderToCancel.getOrderStatus().equals(OrderStatus.ORDER_PLACED);
 	}
 
-	private void updateInventory(OrderEntity orderToCancel) {
+	private void updateInventory(UserEntity updatedBy,OrderEntity orderToCancel) {
 
 		orderToCancel.setOrderStatus(OrderStatus.CANCELLED);
 		ProductEntity canceledItem = productService.getProductById(orderToCancel.getProductEntity().getId());
 		LocationEntity newLocation = new LocationEntity(canceledItem, LocationType.BLOCK, orderToCancel.getQuantity(), true);
+		orderToCancel.setLastChangedByUser(updatedBy);
 
 		InventoryEntity canceledQuantity = new InventoryEntity(
 				canceledItem,

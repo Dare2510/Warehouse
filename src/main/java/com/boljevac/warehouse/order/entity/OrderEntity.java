@@ -35,8 +35,13 @@ public class OrderEntity {
 	private OrderStatus orderStatus;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private UserEntity user;
+	@JoinColumn(name = "created_by_user")
+	private UserEntity createdByUser;
+
+	@ManyToOne
+	@JoinColumn(name = "last_changed_by_user")
+	private UserEntity lastChangedByUser;
+
 
 	public OrderEntity(ProductEntity productEntity, int quantity) {
 		this.productEntity = productEntity;

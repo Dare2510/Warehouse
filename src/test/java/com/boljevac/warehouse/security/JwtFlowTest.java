@@ -2,8 +2,10 @@ package com.boljevac.warehouse.security;
 
 import com.boljevac.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.product.dto.ProductResponse;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.boljevac.warehouse.user.dto.UserRequest;
+import com.boljevac.warehouse.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +20,6 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -35,25 +36,12 @@ public class JwtFlowTest {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	//Helper for Login and get Token
-	public String loginAndGetToken(String username, String password) throws Exception {
-		String userJson = """
-				{ "username": "%s", "password": "%s" }
-				""".formatted(username, password);
-		System.out.println("JWT_SECRET=" + System.getenv("JWT_SECRET"));
-		String responseJson = mockMvc
-				.perform(post("/api/warehouse/login")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(userJson))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andReturn()
-				.getResponse()
-				.getContentAsString();
+	@Autowired
+	UserRepository userRepository;
 
-		JsonNode responseJsonNode = objectMapper.readTree(responseJson);
-		System.out.println("JWT_SECRET=" + System.getenv("JWT_SECRET"));
-		return responseJsonNode.get("token").asText();
+	@AfterEach
+	public void afterEach() {
+		userRepository.deleteAll();
 	}
 
 	@Test
@@ -62,7 +50,7 @@ public class JwtFlowTest {
 	}
 
 	@Test
-	void getOrders_withClerkLogin_returns403() throws Exception {
+	void getProducts_withUserLogin_returns403() throws Exception {
 		when(orderService.getListOfProducts())
 				.thenReturn(List.of(new ProductResponse(
 						1L,
@@ -71,14 +59,16 @@ public class JwtFlowTest {
 						10
 
 				)));
-		String token = loginAndGetToken("clerk", "ClerkPassword");
-		mockMvc.perform(get("/api/warehouse/orders/products")
+		postUserRegistration();
+		String token = loginAndGetToken("testUser@mail.com", "testPassword");
+
+		mockMvc.perform(get("/api/warehouse/products")
 						.header("Authorization", "Bearer " + token))
 				.andExpect(status().isForbidden());
 	}
 
 	@Test
-	void getOrders_withClerkLogin_returns200() throws Exception {
+	void getProducts_withAdminLogin_returns200() throws Exception {
 		when(orderService.getListOfProducts()).thenReturn(
 				List.of(new ProductResponse(
 						1L,
@@ -87,9 +77,57 @@ public class JwtFlowTest {
 						10
 				)));
 
-		String token = loginAndGetToken("user", "UserPassword");
+		String token = loginAndGetToken("emailForTest@mail.com", "testPassword");
+		mockMvc.perform(get("/api/warehouse/products")
+						.header("Authorization", "Bearer " + token))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void getProductsForOrders_withUserLogin_returns200() throws Exception {
+		when(orderService.getListOfProducts())
+				.thenReturn(List.of(new ProductResponse(
+						1L,
+						"TestProduct",
+						BigDecimal.valueOf(500),
+						10
+
+				)));
+		postUserRegistration();
+		String token = loginAndGetToken("testUser@mail.com", "testPassword");
+
 		mockMvc.perform(get("/api/warehouse/orders/products")
 						.header("Authorization", "Bearer " + token))
 				.andExpect(status().isOk());
 	}
+
+	//Helper Methods
+	private void postUserRegistration() throws Exception {
+		UserRequest newUser = new UserRequest("testUser@mail.com", "testPassword","tester",
+				"testName", "testSurname");
+		mockMvc.perform(post("/api/user/register")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(newUser)))
+				.andExpect(status().isOk());
+	}
+
+	public String loginAndGetToken(String email, String password) throws Exception {
+		String userJson = """
+				{ "email": "%s",
+				"password": "%s" }
+				""".formatted(email, password);
+		System.out.println("JWT_SECRET=" + System.getenv("JWT_SECRET"));
+		String responseJson = mockMvc
+				.perform(post("/api/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(userJson))
+				.andExpect(status().isOk())
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+
+		System.out.println("JWT_SECRET=" + System.getenv("JWT_SECRET"));
+		return responseJson;
+	}
+
 }

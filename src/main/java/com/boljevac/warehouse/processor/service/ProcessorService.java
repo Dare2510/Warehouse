@@ -11,6 +11,9 @@ import com.boljevac.warehouse.order.repository.ShippedOrdersRepository;
 import com.boljevac.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.processor.dto.ProcessorResponse;
+import com.boljevac.warehouse.security.principal.AuthenticatedUser;
+import com.boljevac.warehouse.user.entity.UserEntity;
+import com.boljevac.warehouse.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,12 +30,14 @@ public class ProcessorService {
 	public final ShippedOrdersRepository shippedOrdersRepository;
 	public final OrderService orderService;
 	private final ModelMapper modelMapper;
+	private final UserService userService;
 
-	public ProcessorService(OrderRepository orderRepository, ShippedOrdersRepository shippedOrdersRepository, OrderService orderService, ModelMapper modelMapper) {
+	public ProcessorService(OrderRepository orderRepository, ShippedOrdersRepository shippedOrdersRepository, OrderService orderService, ModelMapper modelMapper, UserService userService) {
 		this.orderRepository = orderRepository;
 		this.shippedOrdersRepository = shippedOrdersRepository;
 		this.orderService = orderService;
 		this.modelMapper = modelMapper;
+		this.userService = userService;
 	}
 
 	public List<ProcessorResponse> getListOfOrdersByStatus(ProcessorRequest processorRequest) {
@@ -51,10 +56,11 @@ public class ProcessorService {
 	}
 
 
-	public ProcessorResponse changeStatusOfOrder(Long orderId, OrderStatus newOrderStatus) {
+	public ProcessorResponse changeStatusOfOrder(AuthenticatedUser authenticatedUser,Long orderId, OrderStatus newOrderStatus) {
 
 		OrderEntity orderToChangeStatus = orderService.getOrderById(orderId);
 		OrderStatus statusToChange = orderToChangeStatus.getOrderStatus();
+		UserEntity changedBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 
 		//Validation if the required sequence of statusToChange changes is met
 		boolean validStatusChange = statusToChange.validatorCorrectStatusChange(orderToChangeStatus, newOrderStatus);
@@ -63,6 +69,7 @@ public class ProcessorService {
 			throw new StatusChangeInvalidOrderException();
 		}
 		orderToChangeStatus.setOrderStatus(newOrderStatus);
+		orderToChangeStatus.setLastChangedByUser(changedBy);
 		orderRepository.save(orderToChangeStatus);
 		log.info("Order with Id {} has been changed", orderToChangeStatus.getId());
 
@@ -90,9 +97,10 @@ public class ProcessorService {
 	}
 
 	@Transactional
-	public void archiveShippedOrders() {
+	public void archiveShippedOrders(AuthenticatedUser authenticatedUser) {
 
 		List<OrderEntity> listOfShippedOrders = orderRepository.getByOrderStatus(OrderStatus.SHIPPED);
+		UserEntity changedBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 
 		boolean shippedOrdersExists = validateOrdersExist(listOfShippedOrders);
 
@@ -103,6 +111,7 @@ public class ProcessorService {
 		List<ShippedEntity> shippedEntities = new ArrayList<>();
 
 		for (OrderEntity orderEntity : listOfShippedOrders) {
+			orderEntity.setLastChangedByUser(changedBy);
 			shippedEntities.add(new ShippedEntity(
 					orderEntity
 			));

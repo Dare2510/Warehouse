@@ -11,6 +11,9 @@ import com.boljevac.warehouse.location.exceptions.LocationsNotCreatedException;
 import com.boljevac.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.product.service.ProductService;
+import com.boljevac.warehouse.security.principal.AuthenticatedUser;
+import com.boljevac.warehouse.user.entity.UserEntity;
+import com.boljevac.warehouse.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,14 @@ public class InventoryService {
 	private final InventoryRepository inventoryRepository;
 	private final LocationsRepository locationsRepository;
 	private final ProductService productService;
+	private final UserService userService;
 
 	public InventoryService(InventoryRepository inventoryRepository,
-	                        LocationsRepository locationsRepository, ProductService productService) {
+	                        LocationsRepository locationsRepository, ProductService productService, UserService userService) {
 		this.inventoryRepository = inventoryRepository;
 		this.locationsRepository = locationsRepository;
 		this.productService = productService;
+		this.userService = userService;
 	}
 
 	@Transactional
@@ -41,13 +46,12 @@ public class InventoryService {
 	}
 
 	@Transactional
-	public InventoryResponse createStock(InventoryRequest inventoryRequest) {
+	public InventoryResponse createStock(AuthenticatedUser authenticatedUser,InventoryRequest inventoryRequest) {
 		//First creation of Locations is needed
 		if (!validateLocationsExists()) {
 			log.warn("Locations not created");
 			throw new LocationsNotCreatedException();
 		}
-		;
 
 		ProductEntity product = productService.getProductById(inventoryRequest.getProductId());
 
@@ -57,6 +61,8 @@ public class InventoryService {
 				inventoryRequest.getQuantity(),
 				true);
 
+		UserEntity stockCreatedBy = userService.getUserByAuthenticatedUser(authenticatedUser);
+		newLocation.setLocationCreatedByUser(stockCreatedBy);
 		locationsRepository.save(newLocation);
 
 		InventoryEntity newInventoryProduct = new InventoryEntity(
@@ -65,6 +71,8 @@ public class InventoryService {
 				inventoryRequest.getQuantity(),
 				newLocation.toString()
 		);
+
+		newInventoryProduct.setCreatedByUser(stockCreatedBy);
 		inventoryRepository.save(newInventoryProduct);
 
 		log.info("New Location with Id {} and new Inventory with Id {} have been created",

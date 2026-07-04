@@ -4,9 +4,11 @@ import com.boljevac.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.order.dto.OrderResponse;
 import com.boljevac.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.product.dto.ProductResponse;
+import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,13 +29,15 @@ public class OrderController {
 	}
 
 	@PostMapping
-	public ResponseEntity<OrderResponse> createOrder(@RequestBody @Valid OrderRequest orderRequest) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderRequest));
+	public ResponseEntity<OrderResponse> createOrder(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+													 @RequestBody @Valid OrderRequest orderRequest) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(authenticatedUser,orderRequest));
 	}
 
 	//Cancel only possibly if status is Order_Placed
 	@PatchMapping("/{id}/cancel")
-	public ResponseEntity<OrderResponse> cancelOrderById(@PathVariable Long id) {
-		return ResponseEntity.status(HttpStatus.OK).body(orderService.cancelOrder(id));
+	public ResponseEntity<OrderResponse> cancelOrderById(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+														 @PathVariable Long id) {
+		return ResponseEntity.status(HttpStatus.OK).body(orderService.cancelOrder(authenticatedUser,id));
 	}
 }

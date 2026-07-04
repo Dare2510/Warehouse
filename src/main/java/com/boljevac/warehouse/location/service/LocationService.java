@@ -14,6 +14,9 @@ import com.boljevac.warehouse.location.exceptions.LocationsAlreadyCreatedExcepti
 import com.boljevac.warehouse.location.exceptions.NoUnusedLocationException;
 import com.boljevac.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.security.principal.AuthenticatedUser;
+import com.boljevac.warehouse.user.entity.UserEntity;
+import com.boljevac.warehouse.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,10 +29,12 @@ public class LocationService {
 	private static final double MAX_LOCATION_WEIGHT = 1000;
 	private final LocationsRepository locationsRepository;
 	private final InventoryRepository inventoryRepository;
+	private final UserService userService;
 
-	public LocationService(LocationsRepository locationsRepository, InventoryRepository inventoryRepository) {
+	public LocationService(LocationsRepository locationsRepository, InventoryRepository inventoryRepository, UserService userService) {
 		this.locationsRepository = locationsRepository;
 		this.inventoryRepository = inventoryRepository;
+		this.userService = userService;
 	}
 
 	//Storage Location creation -> only once, all new Locations created via create Stock go directly to Block
@@ -64,12 +69,13 @@ public class LocationService {
 	}
 
 	@Transactional
-	public LocationsResponse storeInventory(LocationsRequest toStoreRequest) {
+	public LocationsResponse storeInventory(AuthenticatedUser authenticatedUser,LocationsRequest toStoreRequest) {
 
 		InventoryEntity toStoreFrom = getEntityToStoreFrom(toStoreRequest);
 		LocationEntity fromLocation = toStoreFrom.getLocationEntity();
 		LocationEntity toStoreInLocation = getAvailableLocation();
 		ProductEntity product = toStoreFrom.getProductEntity();
+		UserEntity storedBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 
 		int quantityToStore = toStoreRequest.getQuantity();
 		int availableQuantity = toStoreFrom.getQuantity();
@@ -82,14 +88,16 @@ public class LocationService {
 		validateLocationWeight(weightToStore, availableWeightOnLocation, toStoreInLocation.getId());
 
 		//Updating Locations
-		updateFromInventory(weightToStore, toStoreFromWeight, availableQuantity, quantityToStore, toStoreFrom, fromLocation);
-		updateTargetLocation(quantityToStore, weightToStore, product, toStoreInLocation);
+		updateFromInventory(storedBy,weightToStore, toStoreFromWeight, availableQuantity, quantityToStore, toStoreFrom, fromLocation);
+		updateTargetLocation(storedBy,quantityToStore, weightToStore, product, toStoreInLocation);
 
 		InventoryEntity storedInventory = new InventoryEntity(
 				product,
 				toStoreInLocation,
 				toStoreInLocation.getQuantity(),
 				toStoreInLocation.toString());
+
+		storedInventory.setCreatedByUser(storedBy);
 
 		saveEntities(fromLocation, toStoreInLocation, toStoreFrom, storedInventory);
 
@@ -142,12 +150,13 @@ public class LocationService {
 		}
 	}
 
-	private void updateTargetLocation(int quantityToStore, double weightToStore, ProductEntity product,
+	private void updateTargetLocation(UserEntity updatedBy,int quantityToStore, double weightToStore, ProductEntity product,
 	                                  LocationEntity toStoreInLocation) {
 		toStoreInLocation.setLoaded(true);
 		toStoreInLocation.setProductEntity(product);
 		toStoreInLocation.setQuantity(quantityToStore);
 		toStoreInLocation.setRemainingWeightToStore(toStoreInLocation.getRemainingWeightToStore() - weightToStore);
+		toStoreInLocation.setLocationCreatedByUser(updatedBy);
 
 		if (toStoreInLocation.getId() > 300) {
 			toStoreInLocation.setLocationType(LocationType.BLOCK);
@@ -156,7 +165,7 @@ public class LocationService {
 		}
 	}
 
-	private void updateFromInventory(double weightToStore, double toStoreFromWeight,
+	private void updateFromInventory(UserEntity updatedBy,double weightToStore, double toStoreFromWeight,
 	                                 int availableQuantity, int quantityToStore,
 	                                 InventoryEntity fromInventory, LocationEntity fromLocation) {
 
@@ -165,11 +174,13 @@ public class LocationService {
 			fromInventory.setQuantity(0);
 			fromInventory.setProductEntity(null);
 			fromInventory.setLocationEntity(null);
+			fromInventory.setCreatedByUser(updatedBy);
 
 			fromLocation.setLoaded(false);
 			fromLocation.setRemainingWeightToStore(MAX_LOCATION_WEIGHT);
 			fromLocation.setProductEntity(null);
 			fromLocation.setQuantity(0);
+			fromLocation.setLocationCreatedByUser(updatedBy);
 
 			log.info("Location Id {} and Inventory Id {} are now empty",
 					fromLocation.getId(), fromInventory.getId());
@@ -179,6 +190,7 @@ public class LocationService {
 		fromInventory.setTotalWeight(toStoreFromWeight - weightToStore);
 		fromLocation.setQuantity(fromLocation.getQuantity() - quantityToStore);
 		fromLocation.setRemainingWeightToStore(fromLocation.getRemainingWeightToStore() + weightToStore);
+		fromLocation.setLocationCreatedByUser(updatedBy);
 		log.info("Location with Id {} and Inventory with Id {} have been updated",
 				fromLocation.getId(), fromInventory.getId());
 	}

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/management/user")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+@PreAuthorize("hasAnyRole('CLERK','ADMIN')")
 public class UserManagementController {
 
 	private final UserService userService;
@@ -42,12 +42,6 @@ public class UserManagementController {
 	@PatchMapping("/{userId}/{role}/update")
 	public ResponseEntity<Void> updateUser(@RequestBody @Valid UserRequest userRequest, @PathVariable Long userId, @PathVariable Role role) {
 		userService.updateUserByManagement(userId, userRequest, role);
-		return ResponseEntity.ok().build();
-	}
-
-	@DeleteMapping("/{userId}/delete")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
-		userService.deleteUserByManagement(userId);
 		return ResponseEntity.ok().build();
 	}
 }

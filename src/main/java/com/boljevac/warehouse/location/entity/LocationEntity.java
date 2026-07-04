@@ -1,6 +1,7 @@
 package com.boljevac.warehouse.location.entity;
 
 import com.boljevac.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,6 +42,10 @@ public class LocationEntity {
 
 	@Column(name = "remaining_weight_to_store", nullable = false)
 	private double remainingWeightToStore = 1000;
+
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private UserEntity locationCreatedByUser;
 
 
 	public LocationEntity(ProductEntity productEntity, LocationType locationType, int quantity, boolean loaded) {

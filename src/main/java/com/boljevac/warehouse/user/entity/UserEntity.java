@@ -1,6 +1,9 @@
 package com.boljevac.warehouse.user.entity;
 
+import com.boljevac.warehouse.inventory.entity.InventoryEntity;
+import com.boljevac.warehouse.location.entity.LocationEntity;
 import com.boljevac.warehouse.order.entity.OrderEntity;
+import com.boljevac.warehouse.product.entity.ProductEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,7 +41,19 @@ public class UserEntity {
 	@Column(name = "role", nullable = false)
 	private Role role;
 
-	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-	private List<OrderEntity> orders;
+	@OneToMany(mappedBy = "createdByUser", fetch = FetchType.LAZY)
+	private List<OrderEntity> ordersBy;
+
+	@OneToMany(mappedBy = "lastChangedByUser", fetch = FetchType.LAZY)
+	private List<OrderEntity> ordersChangedByUser;
+
+	@OneToMany(mappedBy = "productCreatedByUser", fetch = FetchType.LAZY)
+	private List<ProductEntity> productCreatedByUser;
+
+	@OneToMany(mappedBy = "createdByUser", fetch = FetchType.LAZY)
+	private List<InventoryEntity> inventoryCreatedByUser;
+
+	@OneToMany(mappedBy = "locationCreatedByUser", fetch = FetchType.LAZY)
+	private List<LocationEntity> locationCreatedByUser;
 
 }

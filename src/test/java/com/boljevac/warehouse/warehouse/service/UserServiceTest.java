@@ -2,12 +2,10 @@ package com.boljevac.warehouse.warehouse.service;
 
 import com.boljevac.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
-import com.boljevac.warehouse.user.dto.UserPasswordValidationRequest;
 import com.boljevac.warehouse.user.dto.UserRequest;
 import com.boljevac.warehouse.user.dto.UserResponse;
 import com.boljevac.warehouse.user.entity.Role;
 import com.boljevac.warehouse.user.entity.UserEntity;
-import com.boljevac.warehouse.user.exception.UserDeletionNotPossibleException;
 import com.boljevac.warehouse.user.exception.UserDoubleCreationException;
 import com.boljevac.warehouse.user.exception.UserIncorrectCredentialsException;
 import com.boljevac.warehouse.user.exception.UserNotFoundException;
@@ -107,45 +105,6 @@ public class UserServiceTest {
 		verify(userRepository).findByEmail(EMAIL);
 		verify(passwordEncoder, never()).encode(PASSWORD);
 		verify(userRepository, never()).save(any(UserEntity.class));
-
-	}
-
-	@Test
-	public void deleteUserByCustomer_deleteIsValid_deletesUser() {
-		AuthenticatedUser authenticatedUser = authenticatedUser();
-		UserEntity existingUser = new UserEntity();
-		UserPasswordValidationRequest passwordInput = new UserPasswordValidationRequest(PASSWORD);
-		existingUser.setPassword(PASSWORD);
-		when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existingUser));
-		when(orderRepository.userCanBeDeleted(existingUser)).thenReturn(true);
-		when(passwordEncoder.matches(PASSWORD, existingUser.getPassword())).thenReturn(true);
-
-		userService.deleteUserByCustomer(authenticatedUser, passwordInput);
-
-		verify(userRepository).delete(existingUser);
-		verify(userRepository).findById(USER_ID);
-		verify(orderRepository).userCanBeDeleted(existingUser);
-
-	}
-
-	@Test
-	public void deleteUserByCustomer_deleteNotValid_throwsUserDeletionNotPossibleException() {
-		AuthenticatedUser authenticatedUser = authenticatedUser();
-		UserEntity existingUser = new UserEntity();
-		UserPasswordValidationRequest passwordInput = new UserPasswordValidationRequest(PASSWORD);
-		existingUser.setPassword(PASSWORD);
-
-		when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existingUser));
-		when(orderRepository.userCanBeDeleted(existingUser)).thenReturn(false);
-		when(passwordEncoder.matches(PASSWORD, existingUser.getPassword())).thenReturn(true);
-
-		assertThatThrownBy(() -> userService.deleteUserByCustomer(authenticatedUser, passwordInput))
-				.isInstanceOf(UserDeletionNotPossibleException.class)
-				.hasMessage("Deletion not possible, you have open orders");
-
-		verify(userRepository).findById(USER_ID);
-		verify(orderRepository).userCanBeDeleted(existingUser);
-		verify(userRepository, never()).delete(existingUser);
 
 	}
 

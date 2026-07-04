@@ -3,12 +3,10 @@ package com.boljevac.warehouse.user.service;
 
 import com.boljevac.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
-import com.boljevac.warehouse.user.dto.UserPasswordValidationRequest;
 import com.boljevac.warehouse.user.dto.UserRequest;
 import com.boljevac.warehouse.user.dto.UserResponse;
 import com.boljevac.warehouse.user.entity.Role;
 import com.boljevac.warehouse.user.entity.UserEntity;
-import com.boljevac.warehouse.user.exception.UserDeletionNotPossibleException;
 import com.boljevac.warehouse.user.exception.UserDoubleCreationException;
 import com.boljevac.warehouse.user.exception.UserIncorrectCredentialsException;
 import com.boljevac.warehouse.user.exception.UserNotFoundException;
@@ -53,30 +51,6 @@ public class UserService {
 
 		return responseMapper(user, adminCreation);
 
-	}
-
-	public void deleteUserByCustomer(AuthenticatedUser authenticatedUser, UserPasswordValidationRequest passwordValidationRequest) {
-		UserEntity toDelete = getUserByAuthenticatedUser(authenticatedUser);
-
-		//User can only be deleted if there are no open reservations
-		boolean canBeDeleted = deleteValid(toDelete);
-
-		String passwordInput = passwordValidationRequest.getPassword();
-
-		boolean passwordMatches = passwordEncoder.matches(passwordInput, toDelete.getPassword());
-
-		if (!passwordMatches) {
-			log.info("Wrong password input for user with id {}", toDelete.getId());
-			throw new UserIncorrectCredentialsException();
-		}
-
-		if (!canBeDeleted) {
-			log.warn("User with email {} and id {} tried to delete his account, failed - open orders exist",
-					toDelete.getEmail(), toDelete.getId());
-			throw new UserDeletionNotPossibleException();
-		}
-		log.info("User with id {} deleted", toDelete.getId());
-		userRepository.delete(toDelete);
 	}
 
 	public void updateUserByCustomer(AuthenticatedUser authenticatedUser, UserRequest userRequest) {
@@ -140,27 +114,6 @@ public class UserService {
 
 		userRepository.save(toUpdate);
 		log.info("User with email {} updated", toUpdate.getEmail());
-	}
-
-	public void deleteUserByManagement(Long userId) {
-		UserEntity toDelete = getUserById(userId);
-
-		//User can only be deleted if there are no open reservations
-		boolean canBeDeleted = deleteValid(toDelete);
-
-		if (!canBeDeleted) {
-			log.warn("User with email {} and id {} has open reservations, deletion not possible",
-					toDelete.getEmail(), toDelete.getId());
-			throw new UserDeletionNotPossibleException(toDelete.getEmail(), toDelete.getId());
-		}
-		log.info("User with id {} deleted", toDelete.getId());
-		userRepository.delete(toDelete);
-
-
-	}
-
-	private boolean deleteValid(UserEntity user) {
-		return orderRepository.userCanBeDeleted(user);
 	}
 
 	//Helper Methods

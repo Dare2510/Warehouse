@@ -13,6 +13,9 @@ import com.boljevac.warehouse.order.exception.StatusChangeInvalidOrderException;
 import com.boljevac.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.product.exception.ProductNotFoundException;
+import com.boljevac.warehouse.user.exception.UserDoubleCreationException;
+import com.boljevac.warehouse.user.exception.UserIncorrectCredentialsException;
+import com.boljevac.warehouse.user.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -233,6 +236,43 @@ public class GlobalExceptionHandler {
 		ErrorResponse error = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				"Request body is invalid or contains missing/incorrect field values",
+				request.getRequestURI()
+		);
+		log.error(error.toString());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex,
+																	 HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.NOT_FOUND.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+		log.error(error.toString());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+
+	@ExceptionHandler(UserIncorrectCredentialsException.class)
+	public ResponseEntity<ErrorResponse> handleUserIncorrectCredentialsException(UserIncorrectCredentialsException ex,
+																				 HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
+				request.getRequestURI()
+		);
+		log.error(error.toString());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
+	@ExceptionHandler(UserDoubleCreationException.class)
+	public ResponseEntity<ErrorResponse> handleUserDoubleCreationException(UserDoubleCreationException ex,
+																			   HttpServletRequest request) {
+
+		ErrorResponse error = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
 				request.getRequestURI()
 		);
 		log.error(error.toString());

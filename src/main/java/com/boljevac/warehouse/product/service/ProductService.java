@@ -32,14 +32,16 @@ public class ProductService {
 	}
 
 	public ProductResponse createAndValidateNewProduct(AuthenticatedUser authenticatedUser,ProductRequest productRequest) {
+		UserEntity createdBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 		ProductEntity newProduct = new ProductEntity(
+				createdBy,
 				productRequest.getProduct(),
 				productRequest.getValue(),
 				productRequest.getWeight()
 		);
 
 		boolean checkForDuplicate = productRepository.existsByProduct(newProduct.getProduct());
-		UserEntity createdBy = userService.getUserByAuthenticatedUser(authenticatedUser);
+
 		if (checkForDuplicate) {
 			throw new ProductDuplicateCreationException(newProduct);
 		}

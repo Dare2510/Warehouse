@@ -110,7 +110,7 @@ public class UserServiceTest {
 
 	@Test
 	public void updateUserByCustomer_updateIsValid_updatesUser() {
-		AuthenticatedUser authenticatedUser = authenticatedUser();
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
 		UserEntity existingUser = new UserEntity();
 		UserRequest updatedValues = userRequestUpdatedUser();
 
@@ -133,7 +133,7 @@ public class UserServiceTest {
 
 	@Test
 	public void updateUserByCustomer_whenPasswordDoesntMatch_throwsUserIncorrectCredentialsException() {
-		AuthenticatedUser authenticatedUser = authenticatedUser();
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
 		UserEntity existingUser = new UserEntity();
 		UserRequest updatedValues = userRequestUpdatedUser();
 
@@ -221,7 +221,8 @@ public class UserServiceTest {
 		return new UserRequest(UPDATED_EMAIL, PASSWORD, UPDATED_USERNAME, UPDATED_NAME, UPDATED_SURNAME);
 	}
 
-	private AuthenticatedUser authenticatedUser() {
+	private AuthenticatedUser createAuthenticatedAdminHelper() {
+
 		return new AuthenticatedUser(USER_ID, EMAIL, USER_ROLE);
 	}
 

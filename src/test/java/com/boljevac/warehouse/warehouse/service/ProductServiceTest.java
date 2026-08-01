@@ -14,7 +14,6 @@ import com.boljevac.warehouse.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -54,8 +53,8 @@ public class ProductServiceTest {
 
 	@Test
 	public void createAndValidateNewProduct_whenProductAlreadyExists_throwsProductAlreadyExistsException() {
-		ProductRequest request = productRequest();
-		AuthenticatedUser adminUser = authenticatedAdmin();
+		ProductRequest request = productRequestHelper();
+		AuthenticatedUser adminUser = createAuthenticatedAdminHelper();
 
 		when(productRepository.existsByProduct(request.getProduct())).thenReturn(true);
 
@@ -69,10 +68,10 @@ public class ProductServiceTest {
 
 	@Test
 	public void createAndValidateNewProduct_whenRequestIsValid_returnsProductResponse() {
-		ProductRequest request = productRequest();
-		AuthenticatedUser adminUser = authenticatedAdmin();
-		UserEntity createdByUser = user(adminUser);
-		ProductEntity productEntity = product(createdByUser,request);
+		ProductRequest request = productRequestHelper();
+		AuthenticatedUser adminUser = createAuthenticatedAdminHelper();
+		UserEntity createdByUser = getUserByAuthenticatedUser(adminUser);
+		ProductEntity productEntity = createProductHelper(createdByUser,request);
 		UserEntity user = new UserEntity();
 
 		when(productRepository.save(any(ProductEntity.class))).thenReturn(productEntity);
@@ -88,10 +87,10 @@ public class ProductServiceTest {
 
 	@Test
 	public void updateProduct_whenRequestIsValid_returnsProductResponse() {
-		ProductRequest newValues = updatedProductRequest();
-		AuthenticatedUser adminUser = authenticatedAdmin();
-		UserEntity createdByUser = user(adminUser);
-		ProductEntity product = product(createdByUser,newValues);
+		ProductRequest newValues = updatedProductRequestHelper();
+		AuthenticatedUser adminUser = createAuthenticatedAdminHelper();
+		UserEntity createdByUser = getUserByAuthenticatedUser(adminUser);
+		ProductEntity product = createProductHelper(createdByUser,newValues);
 
 
 		Long id = product.getId();
@@ -108,8 +107,8 @@ public class ProductServiceTest {
 
 	@Test
 	public void updateProduct_whenProductDoesNotExist_throwsProductNotFoundException() {
-		ProductRequest newValues = updatedProductRequest();
-		AuthenticatedUser adminUser = authenticatedAdmin();
+		ProductRequest newValues = updatedProductRequestHelper();
+		AuthenticatedUser adminUser = createAuthenticatedAdminHelper();
 
 		when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
 		assertThrows(ProductNotFoundException.class, () ->
@@ -119,23 +118,23 @@ public class ProductServiceTest {
 
 	}
 
-	private AuthenticatedUser authenticatedAdmin(){
+	private AuthenticatedUser createAuthenticatedAdminHelper(){
 		return new AuthenticatedUser(99L, "Admin@gmail.com", Role.ADMIN);
 	}
 
-	private ProductRequest productRequest(){
+	private ProductRequest productRequestHelper(){
 		return new ProductRequest(PRODUCT_NAME,PRODUCT_VALUE,PRODUCT_WEIGHT);
 	}
 
-	private ProductRequest updatedProductRequest(){
+	private ProductRequest updatedProductRequestHelper(){
 		return new ProductRequest(UPDATED_PRODUCT_NAME,UPDATED_PRODUCT_VALUE,UPDATED_PRODUCT_WEIGHT);
 	}
 
-	private ProductEntity product(UserEntity user,ProductRequest productRequest){
+	private ProductEntity createProductHelper(UserEntity user, ProductRequest productRequest){
 		return new ProductEntity(user,productRequest.getProduct(), productRequest.getValue(), productRequest.getWeight());
 	}
 
-	private UserEntity user(AuthenticatedUser authenticatedUser){
+	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser){
 		return userService.getUserByAuthenticatedUser(authenticatedUser);
 	}
 

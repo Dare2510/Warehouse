@@ -65,9 +65,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void changeStatusOfOrder_whenRequestedStatusIsValid_returnsProcessorResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 		OrderEntity orderWithValidStatus = new OrderEntity(product, 3);
 		orderWithValidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
 
@@ -81,9 +81,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void changeStatusOfOrder_whenRequestedStatusIsNotValid_throwsStatusChangeInvalidOrderException() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 		OrderEntity orderWithInvalidStatus = new OrderEntity(product, 3);
 		orderWithInvalidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
 
@@ -101,9 +101,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void deleteOrderById_whenOrderStatusIsCancelled_returnsProcessorResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 		OrderEntity cancelledOrder = new OrderEntity(product, 30);
 		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
 
@@ -116,9 +116,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void deleteOrderById_whenOrderStatusIsNotQualifiedForDeletion_throwsOrderCancelOrDeleteNotPossibleException() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 		OrderEntity processingOrder = new OrderEntity(product, 30);
 		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
 
@@ -132,9 +132,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void archiveShippedOrders_whenOrdersWithStatusShippedAvailable_returnsProcessorResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 		OrderEntity shippedOrderA = new OrderEntity(product, 30);
 		OrderEntity shippedOrderB = new OrderEntity(product, 10);
 
@@ -158,9 +158,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void archiveShippedOrders_whenNoOrdersWithStatusShipped_throwsOrderNotFoundException() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		OrderEntity cancelledOrder = new OrderEntity(product, 30);
 
@@ -183,9 +183,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void deleteOrdersById_whenOrderWithStatusCancelledFound_returnsProcessorResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 		OrderEntity cancelledOrder = new OrderEntity(product, 30);
 		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
 
@@ -199,9 +199,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void deleteOrderById_whenTheOrderHasNotStatusCancelled_throwsOrderCancelOrDeleteNotPossibleException() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		OrderEntity processingOrder = new OrderEntity(product, 30);
 		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
@@ -217,9 +217,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void deleteAllCancelledOrders_whenOrdersWithStatusCancelledAvailable_returnsProcessorResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		OrderEntity cancelledOrderA = new OrderEntity(product, 30);
 		OrderEntity cancelledOrderB = new OrderEntity(product, 10);
@@ -236,9 +236,9 @@ public class ProcessorServiceTest {
 
 	@Test
 	public void deleteAllCancelledOrders_whenNoOrdersWithStatusCancelledAvailable_throwsOrderNotFoundException() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		OrderEntity processingOrder = new OrderEntity(product, 30);
 		OrderEntity shippedOrder = new OrderEntity(product, 10);
@@ -256,15 +256,15 @@ public class ProcessorServiceTest {
 		verify(orderRepository, never()).deleteAll(orders);
 	}
 
-	private AuthenticatedUser authenticatedAdmin(){
+	private AuthenticatedUser createAuthenticatedAdminHelper(){
 		return new AuthenticatedUser(99L, "Admin@gmail.com", Role.ADMIN);
 	}
 
-	private UserEntity user(AuthenticatedUser authenticatedUser){
+	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser){
 		return userService.getUserByAuthenticatedUser(authenticatedUser);
 	}
 
-	private ProductEntity product(UserEntity user){
+	private ProductEntity createProductHelper(UserEntity user){
 		return new ProductEntity(user,PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
 	}
 }

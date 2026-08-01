@@ -81,9 +81,9 @@ public class OrderServiceTest {
 
 	@Test
 	public void createOrder_whenOrderRequestExceedsStock_throwsOrderExceedsStockException() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		LocationEntity location = createLocationHelper(product);
 		InventoryEntity inventory = createInventoryHelper(product,location, location.toString());
@@ -99,9 +99,9 @@ public class OrderServiceTest {
 
 	@Test
 	public void cancelOrder_whenOrderStatusIsNotValidForCancel_throwsOrderCancelNotPossibleException() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		OrderEntity order = new OrderEntity(product, 30);
 		order.setOrderStatus(OrderStatus.PROCESSING);
@@ -118,9 +118,9 @@ public class OrderServiceTest {
 
 	@Test
 	public void cancelOrder_whenStatusIsValidForCancel_returnsOrderResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		OrderEntity order = new OrderEntity(product, 5);
 
@@ -140,9 +140,9 @@ public class OrderServiceTest {
 
 	@Test
 	public void createOrder_whenOrderQuantityIsMoreThanAvailableQuantity_throwsOrderExceedsStockException() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		OrderRequest orderRequest = new OrderRequest(1L, 30);
 		LocationEntity location = createLocationHelper(product);
@@ -166,9 +166,9 @@ public class OrderServiceTest {
 
 	@Test
 	public void createOrder_whenAllRequirementsAreMetAndOnlyOneLocationIsNeeded_returnsOrderResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		LocationEntity location = createLocationHelper(product);
 		InventoryEntity inventory = createInventoryHelper(product,location, location.toString());
@@ -190,9 +190,9 @@ public class OrderServiceTest {
 	}
 	@Test
 	public void createOrder_whenAllRequirementsAreMetAndTwoLocationsAreNeeded_returnsOrderResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 		;
 		LocationEntity locationA = createLocationHelper(product);
 		LocationEntity locationB = createLocationHelper(product);
@@ -225,9 +225,9 @@ public class OrderServiceTest {
 
 	@Test
 	public void getOrderById_whenOrderIsAvailable_returnsOrderResponse() {
-		AuthenticatedUser authenticatedUser = authenticatedAdmin();
-		UserEntity user = user(authenticatedUser);
-		ProductEntity product = product(user);
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
+		ProductEntity product = createProductHelper(user);
 
 		OrderEntity order = new OrderEntity(product, 3);
 
@@ -247,15 +247,15 @@ public class OrderServiceTest {
 		verify(orderRepository).findById(1L);
 	}
 
-	private AuthenticatedUser authenticatedAdmin(){
+	private AuthenticatedUser createAuthenticatedAdminHelper(){
 		return new AuthenticatedUser(99L, "Admin@gmail.com", Role.ADMIN);
 	}
 
-	private UserEntity user(AuthenticatedUser authenticatedUser){
+	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser){
 		return userService.getUserByAuthenticatedUser(authenticatedUser);
 	}
 
-	private ProductEntity product(UserEntity user){
+	private ProductEntity createProductHelper(UserEntity user){
 		return new ProductEntity(user,PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
 	}
 

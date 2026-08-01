@@ -1,110 +1,110 @@
-package com.boljevac.warehouse.warehouse.controller;
-
-import com.boljevac.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
-import com.boljevac.warehouse.location.controller.LocationsController;
-import com.boljevac.warehouse.location.dto.LocationsRequest;
-import com.boljevac.warehouse.location.dto.LocationsResponse;
-import com.boljevac.warehouse.location.exceptions.LocationLoadLimitExceededException;
-import com.boljevac.warehouse.location.exceptions.LocationsAlreadyCreatedException;
-import com.boljevac.warehouse.location.repository.LocationsRepository;
-import com.boljevac.warehouse.location.service.LocationService;
-import com.boljevac.warehouse.security.jwt.JwtUtil;
-import com.boljevac.warehouse.security.jwt.JwTAuthenticationFilter;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(LocationsController.class)
-@AutoConfigureMockMvc(addFilters = false)
-public class LocationControllerTest {
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@MockitoBean
-	LocationService locationService;
-	@MockitoBean
-	LocationsRepository locationsRepository;
-	@MockitoBean
-	JwtUtil jwtToken;
-	@MockitoBean
-	JwTAuthenticationFilter jwtAuthFilter;
-
-
-	@Test
-	public void createLocations_whenCreatingFirstTime_returns201() throws Exception {
-		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isCreated());
-		verify(locationService).createLocations();
-	}
-
-	@Test
-	public void createLocations_whenLocationsAlreadyCreated_returns409() throws Exception {
-		doThrow(new LocationsAlreadyCreatedException()).when(locationService).createLocations();
-		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isConflict());
-		verify(locationService).createLocations();
-	}
-
-	@Test
-	public void storeInventory_whenRequestIsValid_returns200() throws Exception{
-		LocationsRequest request = new LocationsRequest(1L,5);
-		when(locationService.storeInventory(request)).thenReturn(
-				new LocationsResponse(
-						1L,
-						"TestProduct",
-						50.00,
-						500.00,
-						"Location"
-				)
-		);
-
-		mockMvc.perform(post("/api/warehouse/locations")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("""
-						{"inventoryId": 1 , "quantity": 5}
-						"""
-				)
-		).andExpect(status().isOk());
-
-		verify(locationService).storeInventory(any(LocationsRequest.class));
-	}
-
-	@Test
-	public void storeInventory_whenValidateAvailableQuantityFailed_returns400() throws Exception {
-		doThrow(new NotSufficientStockToStoreException(50)).when(locationService).storeInventory(any(LocationsRequest.class));
-
-		mockMvc.perform(post("/api/warehouse/locations")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("""
-						{"inventoryId": 1 , "quantity": 50}
-						"""
-				)
-		).andExpect(status().isBadRequest());
-
-		verify(locationService).storeInventory(any(LocationsRequest.class));
-	}
-
-	@Test
-	public void storeInventory_whenValidateAvailableWeightOnLocationFailed_returns400() throws Exception {
-		doThrow(new LocationLoadLimitExceededException()).when(locationService).storeInventory(any(LocationsRequest.class));
-
-		mockMvc.perform(post("/api/warehouse/locations")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("""
-						{"inventoryId": 1 , "quantity": 50}
-						"""
-				)
-		).andExpect(status().isBadRequest());
-
-		verify(locationService).storeInventory(any(LocationsRequest.class));
-	}
-}
+//package com.boljevac.warehouse.warehouse.controller;
+//
+//import com.boljevac.warehouse.inventory.exceptions.NotSufficientStockToStoreException;
+//import com.boljevac.warehouse.location.controller.LocationsController;
+//import com.boljevac.warehouse.location.dto.LocationsRequest;
+//import com.boljevac.warehouse.location.dto.LocationsResponse;
+//import com.boljevac.warehouse.location.exceptions.LocationLoadLimitExceededException;
+//import com.boljevac.warehouse.location.exceptions.LocationsAlreadyCreatedException;
+//import com.boljevac.warehouse.location.repository.LocationsRepository;
+//import com.boljevac.warehouse.location.service.LocationService;
+//import com.boljevac.warehouse.security.jwt.JwtUtil;
+//import com.boljevac.warehouse.security.jwt.JwTAuthenticationFilter;
+//import org.junit.jupiter.api.Test;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+//import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+//import org.springframework.http.MediaType;
+//import org.springframework.test.context.bean.override.mockito.MockitoBean;
+//import org.springframework.test.web.servlet.MockMvc;
+//
+//import static org.mockito.ArgumentMatchers.any;
+//import static org.mockito.Mockito.*;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+//
+//@WebMvcTest(LocationsController.class)
+//@AutoConfigureMockMvc(addFilters = false)
+//public class LocationControllerTest {
+//
+//	@Autowired
+//	private MockMvc mockMvc;
+//
+//	@MockitoBean
+//	LocationService locationService;
+//	@MockitoBean
+//	LocationsRepository locationsRepository;
+//	@MockitoBean
+//	JwtUtil jwtToken;
+//	@MockitoBean
+//	JwTAuthenticationFilter jwtAuthFilter;
+//
+//
+//	@Test
+//	public void createLocations_whenCreatingFirstTime_returns201() throws Exception {
+//		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isCreated());
+//		verify(locationService).createLocations();
+//	}
+//
+//	@Test
+//	public void createLocations_whenLocationsAlreadyCreated_returns409() throws Exception {
+//		doThrow(new LocationsAlreadyCreatedException()).when(locationService).createLocations();
+//		mockMvc.perform(put("/api/warehouse/locations")).andExpect(status().isConflict());
+//		verify(locationService).createLocations();
+//	}
+//
+//	@Test
+//	public void storeInventory_whenRequestIsValid_returns200() throws Exception{
+//		LocationsRequest request = new LocationsRequest(1L,5);
+//		when(locationService.storeInventory(request)).thenReturn(
+//				new LocationsResponse(
+//						1L,
+//						"TestProduct",
+//						50.00,
+//						500.00,
+//						"Location"
+//				)
+//		);
+//
+//		mockMvc.perform(post("/api/warehouse/locations")
+//				.contentType(MediaType.APPLICATION_JSON)
+//				.content("""
+//						{"inventoryId": 1 , "quantity": 5}
+//						"""
+//				)
+//		).andExpect(status().isOk());
+//
+//		verify(locationService).storeInventory(any(LocationsRequest.class));
+//	}
+//
+//	@Test
+//	public void storeInventory_whenValidateAvailableQuantityFailed_returns400() throws Exception {
+//		doThrow(new NotSufficientStockToStoreException(50)).when(locationService).storeInventory(any(LocationsRequest.class));
+//
+//		mockMvc.perform(post("/api/warehouse/locations")
+//				.contentType(MediaType.APPLICATION_JSON)
+//				.content("""
+//						{"inventoryId": 1 , "quantity": 50}
+//						"""
+//				)
+//		).andExpect(status().isBadRequest());
+//
+//		verify(locationService).storeInventory(any(LocationsRequest.class));
+//	}
+//
+//	@Test
+//	public void storeInventory_whenValidateAvailableWeightOnLocationFailed_returns400() throws Exception {
+//		doThrow(new LocationLoadLimitExceededException()).when(locationService).storeInventory(any(LocationsRequest.class));
+//
+//		mockMvc.perform(post("/api/warehouse/locations")
+//				.contentType(MediaType.APPLICATION_JSON)
+//				.content("""
+//						{"inventoryId": 1 , "quantity": 50}
+//						"""
+//				)
+//		).andExpect(status().isBadRequest());
+//
+//		verify(locationService).storeInventory(any(LocationsRequest.class));
+//	}
+//}

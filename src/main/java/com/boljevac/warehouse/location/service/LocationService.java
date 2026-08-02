@@ -207,7 +207,7 @@ public class LocationService {
 	                                        ProductEntity product, int quantityToStore) {
 		return new LocationsResponse(
 				location.getId(),
-				product.toString(),
+				product.toString().trim(),
 				product.getWeightPerPiece(),
 				product.getWeightPerPiece() * quantityToStore,
 				location.toString());

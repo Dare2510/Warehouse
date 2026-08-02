@@ -193,7 +193,6 @@ public class OrderServiceTest {
 		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
 		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
 		ProductEntity product = createProductHelper(user);
-		;
 		LocationEntity locationA = createLocationHelper(product);
 		LocationEntity locationB = createLocationHelper(product);
 		InventoryEntity inventoryA = createInventoryHelper(product,locationA, locationA.toString());

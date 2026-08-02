@@ -40,6 +40,7 @@ public class InventoryService {
 		InventoryEntity inventory = getInventoryEntity(id);
 
 		return new InventoryResponse(
+				inventory.getId(),
 				inventory.getProductEntity().getProduct(),
 				inventory.getQuantity());
 
@@ -78,7 +79,7 @@ public class InventoryService {
 		log.info("New Location with Id {} and new Inventory with Id {} have been created",
 				newLocation.getId(), newInventoryProduct.getId());
 
-		return new InventoryResponse(product.getProduct(), newInventoryProduct.getQuantity());
+		return new InventoryResponse(newInventoryProduct.getId(),product.getProduct(), newInventoryProduct.getQuantity());
 
 	}
 
@@ -90,6 +91,6 @@ public class InventoryService {
 
 	//Helper Methods
 	private boolean validateLocationsExists() {
-		return locationsRepository.count() < 1 ? false : true;
+		return locationsRepository.count() >= 1;
 	}
 }

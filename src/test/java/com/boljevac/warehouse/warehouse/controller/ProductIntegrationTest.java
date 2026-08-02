@@ -5,6 +5,7 @@ import com.boljevac.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.dto.UserRequest;
 import com.boljevac.warehouse.user.entity.Role;
+import com.boljevac.warehouse.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.AfterEach;
@@ -43,6 +44,9 @@ public class ProductIntegrationTest {
 	@Autowired
 	private ProductRepository productRepository;
 
+	@Autowired
+	private UserRepository userRepository;
+
 	private static final String PRODUCT_NAME = "TestProduct";
 	private static final String UPDATED_PRODUCT_NAME = "TestNewNameProduct";
 
@@ -61,7 +65,25 @@ public class ProductIntegrationTest {
 
 	@AfterEach
 	public void tearDown() {
+
 		productRepository.deleteAll();
+		userRepository.deleteAll();
+	}
+
+	@Test
+	public void getPageOfProducts_withPageableDefaults_returnIsOK() throws Exception {
+		UserRequest userRequest = userRequest();
+		Long userId = registerUserAndGetId(userRequest);
+
+		mockMvc.perform(get("/api/warehouse/products")
+						.with(clerkAuth(userId))
+						.param("page", "0")
+						.param("size", "10")
+						.param("sort", "product")
+						.param("direction", "ASC"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content").isArray())
+				.andExpect(jsonPath("$.size").value(10));
 	}
 
 	@Test
@@ -77,7 +99,8 @@ public class ProductIntegrationTest {
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.name").value(PRODUCT_NAME))
 				.andExpect(jsonPath("$.price").value(PRODUCT_VALUE))
-				.andExpect(jsonPath("$.weight").value(PRODUCT_WEIGHT));
+				.andExpect(jsonPath("$.weight").value(PRODUCT_WEIGHT))
+				.andExpect(jsonPath("$.userId").value(userId));
 
 	}
 

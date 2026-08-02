@@ -7,6 +7,8 @@ import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,7 +40,8 @@ public class ProductController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Page<ProductResponse>> getItems(Pageable pageable) {
+	public ResponseEntity<Page<ProductResponse>> getItems(@PageableDefault(page = 0, size = 10,
+			sort = "product", direction = Sort.Direction.ASC) Pageable pageable) {
 		return ResponseEntity.status(HttpStatus.OK).body(service.getAllProducts(pageable));
 	}
 

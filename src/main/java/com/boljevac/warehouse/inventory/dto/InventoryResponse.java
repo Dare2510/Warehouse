@@ -1,4 +1,4 @@
 package com.boljevac.warehouse.inventory.dto;
 
-public record InventoryResponse(String product, int quantity) {
+public record InventoryResponse(Long inventoryId, String product, int quantity) {
 }

@@ -47,7 +47,7 @@ public class ProcessorServiceTest {
 	private UserService  userService;
 
 	@Mock
-	ModelMapper modelMapper;
+	private ModelMapper modelMapper;
 
 	@InjectMocks
 	private ProcessorService processorService;

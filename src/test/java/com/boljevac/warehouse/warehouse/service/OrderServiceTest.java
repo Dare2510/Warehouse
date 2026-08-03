@@ -38,22 +38,22 @@ import static org.mockito.Mockito.*;
 public class OrderServiceTest {
 
 	@Mock
-	OrderRepository orderRepository;
+	private OrderRepository orderRepository;
 	@Mock
-	ProductRepository productRepository;
+	private ProductRepository productRepository;
 	@Mock
-	InventoryRepository inventoryRepository;
+	private InventoryRepository inventoryRepository;
 	@Mock
-	LocationsRepository locationsRepository;
+	private LocationsRepository locationsRepository;
 	@Mock
-	ProductService productService;
+	private ProductService productService;
 	@Mock
-	ModelMapper modelMapper;
+	private ModelMapper modelMapper;
 	@Mock
-	UserService userService;
+	private UserService userService;
 
 	@InjectMocks
-	OrderService orderService;
+	private OrderService orderService;
 
 	private static final String PRODUCT_NAME = "TestProduct";
 	private static final BigDecimal PRODUCT_VALUE = new BigDecimal("10");

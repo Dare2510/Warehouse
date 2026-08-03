@@ -29,6 +29,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
 
+	@Mock
+	private ProductRepository productRepository;
+	@Mock
+	private ProductService productService;
+	@Mock
+	private UserService userService;
+
 	private static final String PRODUCT_NAME = "TestProduct";
 	private static final String UPDATED_PRODUCT_NAME = "TestNewNameProduct";
 
@@ -37,19 +44,11 @@ public class ProductServiceTest {
 	private static final double PRODUCT_WEIGHT = 50;
 	private static final double UPDATED_PRODUCT_WEIGHT = 30;
 
-	@Mock
-	ProductRepository productRepository;
-	@Mock
-	ProductService productService;
-	@Mock
-	UserService userService;
-
 	@BeforeEach
 	void setUp() {
 		productService = new ProductService(productRepository,userService);
 
 	}
-
 
 	@Test
 	public void createAndValidateNewProduct_whenProductAlreadyExists_throwsProductAlreadyExistsException() {

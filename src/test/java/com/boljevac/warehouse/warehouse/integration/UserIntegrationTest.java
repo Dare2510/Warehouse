@@ -1,4 +1,4 @@
-package com.boljevac.warehouse.warehouse.controller;
+package com.boljevac.warehouse.warehouse.integration;
 
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.dto.UserRequest;

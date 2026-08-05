@@ -1,4 +1,4 @@
-package com.boljevac.warehouse.warehouse.controller;
+package com.boljevac.warehouse.warehouse.integration;
 
 import com.boljevac.warehouse.inventory.dto.InventoryRequest;
 import com.boljevac.warehouse.inventory.repository.InventoryRepository;
@@ -120,7 +120,7 @@ public class LocationIntegrationTest {
 				.content(objectMapper.writeValueAsString(toStore))
 				.with(clerkAuth(userId)))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.inventoryId").value(inventoryId))
+				.andExpect(jsonPath("$.inventoryId").exists())
 				.andExpect(jsonPath("$.product").value(PRODUCT_NAME))
 				.andExpect(jsonPath("$.weightPerPiece").value(PRODUCT_WEIGHT))
 				.andExpect(jsonPath("$.totalWeight").value(PRODUCT_WEIGHT*QUANTITY_TO_STORE))

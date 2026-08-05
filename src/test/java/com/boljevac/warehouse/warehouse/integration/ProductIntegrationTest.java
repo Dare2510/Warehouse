@@ -1,4 +1,4 @@
-package com.boljevac.warehouse.warehouse.controller;
+package com.boljevac.warehouse.warehouse.integration;
 
 import com.boljevac.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.product.dto.ProductRequest;

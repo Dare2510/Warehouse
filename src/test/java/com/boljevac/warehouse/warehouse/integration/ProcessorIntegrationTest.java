@@ -1,4 +1,4 @@
-package com.boljevac.warehouse.warehouse.controller;
+package com.boljevac.warehouse.warehouse.integration;
 
 import com.boljevac.warehouse.inventory.dto.InventoryRequest;
 import com.boljevac.warehouse.inventory.repository.InventoryRepository;
@@ -7,6 +7,8 @@ import com.boljevac.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.order.repository.OrderRepository;
+import com.boljevac.warehouse.order.repository.ShippedOrdersRepository;
+import com.boljevac.warehouse.processor.dto.ProcessorRequest;
 import com.boljevac.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
@@ -31,14 +33,16 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-public class OrderIntegrationTest {
+public class ProcessorIntegrationTest {
+
 
 	@Autowired
 	MockMvc mockMvc;
@@ -56,7 +60,10 @@ public class OrderIntegrationTest {
 	private ProductRepository productRepository;
 
 	@Autowired
-	private LocationsRepository  locationsRepository;
+	private LocationsRepository locationsRepository;
+
+	@Autowired
+	private ShippedOrdersRepository shippedOrdersRepository;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -85,11 +92,13 @@ public class OrderIntegrationTest {
 	private static final Integer QUANTITY_TO_STORE = 5;
 
 	private static final int VALID_ORDER_QUANTITY = 3;
-	private static final int EXCEEDING_ORDER_QUANTITY = 20;
-	private static final Long INVALID_PRODUCT_ID_FOR_ORDER = 0L;
+
+	private static final OrderStatus VALID_PROCESSOR_REQUEST = OrderStatus.ORDER_PLACED;
+	private static final OrderStatus NOT_VALID_PROCESSOR_REQUEST = OrderStatus.PACKAGED;
 
 	@AfterEach
 	public void afterEach() {
+		shippedOrdersRepository.deleteAll();
 		orderRepository.deleteAll();
 		inventoryRepository.deleteAll();
 		locationsRepository.deleteAll();
@@ -97,8 +106,9 @@ public class OrderIntegrationTest {
 		userRepository.deleteAll();
 	}
 
+
 	@Test
-	public void createOrder_whenRequestIsValid_returns201() throws Exception {
+	public void getListOfOrdersByStatus_whenOrdersAreFound_returns200() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
 		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
 		createLocations(clerkId);
@@ -109,20 +119,55 @@ public class OrderIntegrationTest {
 		Long userId = registerUserAndGetId(userRequest());
 
 		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
-		mockMvc.perform(post("/api/warehouse/orders")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(validOrder))
-				.with(userAuth(userId)))
-				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.orderId").exists())
-				.andExpect(jsonPath("$.product").value(PRODUCT_NAME))
-				.andExpect(jsonPath("$.quantity").value(VALID_ORDER_QUANTITY))
-				.andExpect(jsonPath("$.totalPrice").value(BigDecimal.valueOf(VALID_ORDER_QUANTITY).multiply(PRODUCT_VALUE).doubleValue()))
-				.andExpect(jsonPath("$.orderStatus").value(OrderStatus.ORDER_PLACED.toString()));
+		createOrder(userId,validOrder);
+
+		ProcessorRequest orderPlaced = new ProcessorRequest(VALID_PROCESSOR_REQUEST);
+
+		mockMvc
+				.perform(post("/api/warehouse/processing")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(orderPlaced))
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[0]").isMap())
+				.andExpect(jsonPath("$.[0].productId").value(productId))
+				.andExpect(jsonPath("$.[0].product").value(PRODUCT_NAME))
+				.andExpect(jsonPath("$.[0].quantity").value(VALID_ORDER_QUANTITY))
+				.andExpect(jsonPath("$.[0].orderStatus").value(VALID_PROCESSOR_REQUEST.toString()));
+
 	}
 
 	@Test
-	public void createOrder_whenRequestIsExceedingStock_returns400() throws Exception {
+	public void getListOfOrdersByStatus_whenOrdersAreNotFound_returns404() throws Exception {
+			Long clerkId = registerUserAndGetId(clerkRequest());
+			Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+			createLocations(clerkId);
+			Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
+			LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
+			storeInventoryToLocation(toStore,clerkId);
+
+			Long userId = registerUserAndGetId(userRequest());
+
+			OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
+			createOrder(userId,validOrder);
+
+			ProcessorRequest notValidRequest = new ProcessorRequest(NOT_VALID_PROCESSOR_REQUEST);
+
+			mockMvc
+					.perform(post("/api/warehouse/processing")
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(notValidRequest))
+							.with(clerkAuth(clerkId)))
+					.andExpect(status().isNotFound())
+					.andExpect(jsonPath("$.message")
+							.value("Order/s not found"));
+
+
+
+	}
+	@Test
+	public void changeStatusOfOrder_whenRequestedStatusIsNotValidNextStatus_returns400() throws Exception {
+
 		Long clerkId = registerUserAndGetId(clerkRequest());
 		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
 		createLocations(clerkId);
@@ -132,64 +177,16 @@ public class OrderIntegrationTest {
 
 		Long userId = registerUserAndGetId(userRequest());
 
-		OrderRequest exceedingOrder = orderRequestHelper(productId,EXCEEDING_ORDER_QUANTITY);
-		mockMvc.perform(post("/api/warehouse/orders")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(exceedingOrder))
-						.with(userAuth(userId)))
-						.andExpect(status().isBadRequest())
-						.andExpect(jsonPath("$.message")
-						.value("Order exceeds stock, -> Order not possible."));
-	}
+		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
+		Long orderId = createOrderAndGetId(userId,validOrder);
 
-	@Test
-	public void createOrder_whenRequestIsNotValid_returns400() throws Exception {
-		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
-		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
-
-		Long userId = registerUserAndGetId(userRequest());
-
-		OrderRequest invalidOrder = orderRequestHelper(INVALID_PRODUCT_ID_FOR_ORDER,VALID_ORDER_QUANTITY);
-
-		mockMvc.perform(post("/api/warehouse/orders")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(invalidOrder))
-						.with(userAuth(userId)))
+		mockMvc.perform(put("/api/warehouse/processing/statusChange/"+orderId+"/"+NOT_VALID_PROCESSOR_REQUEST)
+						.with(clerkAuth(clerkId)))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message")
-						.value("ProductId must be positive"));
+						.value("Status change order: " +
+								"ORDER_PLACED -> (CANCELLED)/PROCESSING -> PACKAGED -> SHIPPED"));
 	}
-
-	@Test
-	public void cancelOrder_whenRequestIsValid_returns200() throws Exception {
-		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
-		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
-
-		Long userId = registerUserAndGetId(userRequest());
-		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
-		mockMvc.perform(patch("/api/warehouse/orders/"+orderId+"/cancel")
-						.with(userAuth(userId)))
-						.andExpect(status().isOk());
-	}
-//
-//	@Test
-//	public void cancelOrder_whenOrderStatusIsNotOrderPlaced_returns400() throws Exception {
-//		doThrow(new OrderCancelOrDeleteNotPossibleException(1L)).when(orderService).cancelOrder(1L);
-//		mockMvc
-//				.perform(patch("/api/warehouse/orders/1/cancel"))
-//				.andExpect(status().isBadRequest());
-//
-//		verify(orderService).cancelOrder(1L);
-//	}
-//
 
 	//Clerk Authenticator
 
@@ -268,14 +265,6 @@ public class OrderIntegrationTest {
 		return ((Number) JsonPath.read(productResponseJson, "$.id")).longValue();
 	}
 
-	private void createProduct(ProductRequest productRequest, Long userId) throws Exception {
-
-		mockMvc.perform(post("/api/warehouse/products/create")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(productRequest))
-						.with(clerkAuth(userId)))
-				.andExpect(status().isCreated());
-	}
 
 	private Long registerUserAndGetId(UserRequest userRequest) throws Exception {
 		String userJson = mockMvc.perform(post("/api/user/register")
@@ -285,6 +274,15 @@ public class OrderIntegrationTest {
 				.andReturn().getResponse().getContentAsString();
 
 		return ((Number) JsonPath.read(userJson, "$.userId")).longValue();
+	}
+
+
+	private void createOrder(Long userId, OrderRequest orderRequest) throws Exception {
+		mockMvc.perform(post("/api/warehouse/orders")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(orderRequest))
+						.with(userAuth(userId)))
+				.andExpect(status().isCreated());
 	}
 
 	private Long createOrderAndGetId(Long userId, OrderRequest orderRequest) throws Exception {
@@ -325,7 +323,6 @@ public class OrderIntegrationTest {
 	private OrderRequest orderRequestHelper(Long productId, Integer quantity) {
 		return new OrderRequest(productId, quantity);
 	}
+
+
 }
-
-
-

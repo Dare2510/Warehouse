@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.time.LocalDateTime;
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -52,13 +50,13 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleEmptyProductRepositoryException(EmptyProductRepositoryException ex,
 	                                                                           HttpServletRequest request) {
 
-		return errorResponseBuilder(ex,request,HttpStatus.NOT_FOUND);
+		return errorResponseBuilder(ex, request, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(ProductNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException ex,
 	                                                                    HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.NOT_FOUND);
+		return errorResponseBuilder(ex, request, HttpStatus.NOT_FOUND);
 
 	}
 
@@ -66,20 +64,20 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleProductDoubleCreationException(ProductDuplicateCreationException ex,
 	                                                                          HttpServletRequest request) {
 
-		return errorResponseBuilder(ex,request,HttpStatus.CONFLICT);
+		return errorResponseBuilder(ex, request, HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(OrderNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleOrderNotFoundException(OrderNotFoundException ex,
 	                                                                  HttpServletRequest request) {
 
-		return errorResponseBuilder(ex,request,HttpStatus.NOT_FOUND);
+		return errorResponseBuilder(ex, request, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(OrderExceedsStockException.class)
 	public ResponseEntity<ErrorResponse> handleOrderExceedsStockException(OrderExceedsStockException ex,
 	                                                                      HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.BAD_REQUEST);
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}
 
 	//Sequence of status changes must be: ORDER_PLACED -> (CANCELLED)/PROCESSING -> PACKAGED -> SHIPPED
@@ -87,7 +85,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleInvalidStatusException(StatusChangeInvalidOrderException ex,
 	                                                                  HttpServletRequest request) {
 
-		return errorResponseBuilder(ex,request,HttpStatus.BAD_REQUEST);
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}
 
 	//To cancel an order it must have status Order_Placed
@@ -95,7 +93,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleOrderCancelNotPossibleException(OrderCancelOrDeleteNotPossibleException ex,
 	                                                                           HttpServletRequest request) {
 
-		return errorResponseBuilder(ex,request,HttpStatus.BAD_REQUEST);
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}
 
 	//If trying to set the status to a status that is not available
@@ -115,39 +113,39 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(NotSufficientStockToStoreException.class)
 	public ResponseEntity<ErrorResponse> handleNotSufficientStockToStoreException(NotSufficientStockToStoreException ex,
 	                                                                              HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.BAD_REQUEST);
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(NoUnusedLocationException.class)
 	public ResponseEntity<ErrorResponse> handleNoUnusedLocationException(NoUnusedLocationException ex,
 	                                                                     HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.NOT_FOUND);
+		return errorResponseBuilder(ex, request, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(InventoryNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleInventoryNotFoundException(InventoryNotFoundException ex,
 	                                                                      HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.NOT_FOUND);
+		return errorResponseBuilder(ex, request, HttpStatus.NOT_FOUND);
 	}
 
 	//Maximum 300 locations
 	@ExceptionHandler(LocationsAlreadyCreatedException.class)
 	public ResponseEntity<ErrorResponse> handleLocationsAlreadyCreatedException(LocationsAlreadyCreatedException ex,
 	                                                                            HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.CONFLICT);
+		return errorResponseBuilder(ex, request, HttpStatus.CONFLICT);
 	}
 
 	//Max weight per location = 1000
 	@ExceptionHandler(LocationLoadLimitExceededException.class)
 	public ResponseEntity<ErrorResponse> handleLocationLoadLimitExceededException(LocationLoadLimitExceededException ex,
 	                                                                              HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.BAD_REQUEST);
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(LocationsNotCreatedException.class)
 	public ResponseEntity<ErrorResponse> handleLocationsNotCreatedException(LocationsNotCreatedException ex,
 	                                                                        HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.BAD_REQUEST);
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
@@ -163,21 +161,21 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(UserNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex,
-																	 HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.NOT_FOUND);
+	                                                                 HttpServletRequest request) {
+		return errorResponseBuilder(ex, request, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(UserIncorrectCredentialsException.class)
 	public ResponseEntity<ErrorResponse> handleUserIncorrectCredentialsException(UserIncorrectCredentialsException ex,
-																				 HttpServletRequest request) {
-		return errorResponseBuilder(ex,request,HttpStatus.BAD_REQUEST);
+	                                                                             HttpServletRequest request) {
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(UserDoubleCreationException.class)
 	public ResponseEntity<ErrorResponse> handleUserDoubleCreationException(UserDoubleCreationException ex,
-																			   HttpServletRequest request) {
+	                                                                       HttpServletRequest request) {
 
-		return errorResponseBuilder(ex,request,HttpStatus.BAD_REQUEST);
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}
 
 	//Helper Method

@@ -69,7 +69,7 @@ public class LocationService {
 	}
 
 	@Transactional
-	public LocationsResponse storeInventory(AuthenticatedUser authenticatedUser,LocationsRequest toStoreRequest) {
+	public LocationsResponse storeInventory(AuthenticatedUser authenticatedUser, LocationsRequest toStoreRequest) {
 
 		InventoryEntity toStoreFrom = getEntityToStoreFrom(toStoreRequest);
 		LocationEntity fromLocation = toStoreFrom.getLocationEntity();
@@ -88,8 +88,8 @@ public class LocationService {
 		validateLocationWeight(weightToStore, availableWeightOnLocation, toStoreInLocation.getId());
 
 		//Updating Locations
-		updateFromInventory(storedBy,weightToStore, toStoreFromWeight, availableQuantity, quantityToStore, toStoreFrom, fromLocation);
-		updateTargetLocation(storedBy,quantityToStore, weightToStore, product, toStoreInLocation);
+		updateFromInventory(storedBy, weightToStore, toStoreFromWeight, availableQuantity, quantityToStore, toStoreFrom, fromLocation);
+		updateTargetLocation(storedBy, quantityToStore, weightToStore, product, toStoreInLocation);
 
 		InventoryEntity storedInventory = new InventoryEntity(
 				product,
@@ -150,7 +150,7 @@ public class LocationService {
 		}
 	}
 
-	private void updateTargetLocation(UserEntity updatedBy,int quantityToStore, double weightToStore, ProductEntity product,
+	private void updateTargetLocation(UserEntity updatedBy, int quantityToStore, double weightToStore, ProductEntity product,
 	                                  LocationEntity toStoreInLocation) {
 		toStoreInLocation.setLoaded(true);
 		toStoreInLocation.setProductEntity(product);
@@ -165,7 +165,7 @@ public class LocationService {
 		}
 	}
 
-	private void updateFromInventory(UserEntity updatedBy,double weightToStore, double toStoreFromWeight,
+	private void updateFromInventory(UserEntity updatedBy, double weightToStore, double toStoreFromWeight,
 	                                 int availableQuantity, int quantityToStore,
 	                                 InventoryEntity fromInventory, LocationEntity fromLocation) {
 

@@ -87,7 +87,7 @@ public class LocationIntegrationTest {
 	public void createLocations_whenCreatingFirstTime_returns201() throws Exception {
 		Long userId = registerUserAndGetId(userRequest());
 
-		mockMvc.perform(put("/api/warehouse/locations")
+		mockMvc.perform(post("/api/warehouse/locations/create")
 						.with(clerkAuth(userId)))
 				.andExpect(status().isCreated());
 	}
@@ -98,7 +98,7 @@ public class LocationIntegrationTest {
 
 		createLocations(userId);
 
-		mockMvc.perform(put("/api/warehouse/locations")
+		mockMvc.perform(post("/api/warehouse/locations/create")
 						.with(clerkAuth(userId)))
 				.andExpect(status().isConflict())
 				.andExpect(jsonPath("$.message")
@@ -186,7 +186,7 @@ public class LocationIntegrationTest {
 	//Endpoint Helpers
 
 	private void createLocations(Long userId) throws Exception {
-		mockMvc.perform(put("/api/warehouse/locations")
+		mockMvc.perform(post("/api/warehouse/locations/create")
 						.with(clerkAuth(userId)))
 				.andExpect(status().isCreated());
 	}

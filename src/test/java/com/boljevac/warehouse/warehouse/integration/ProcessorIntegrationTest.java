@@ -34,7 +34,8 @@ import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -124,7 +125,7 @@ public class ProcessorIntegrationTest {
 		ProcessorRequest orderPlaced = new ProcessorRequest(VALID_PROCESSOR_REQUEST);
 
 		mockMvc
-				.perform(post("/api/warehouse/processing")
+				.perform(get("/api/warehouse/processing")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(orderPlaced))
 						.with(clerkAuth(clerkId)))
@@ -154,7 +155,7 @@ public class ProcessorIntegrationTest {
 			ProcessorRequest notValidRequest = new ProcessorRequest(NOT_VALID_PROCESSOR_REQUEST);
 
 			mockMvc
-					.perform(post("/api/warehouse/processing")
+					.perform(get("/api/warehouse/processing")
 							.contentType(MediaType.APPLICATION_JSON)
 							.content(objectMapper.writeValueAsString(notValidRequest))
 							.with(clerkAuth(clerkId)))
@@ -180,7 +181,7 @@ public class ProcessorIntegrationTest {
 		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
 		Long orderId = createOrderAndGetId(userId,validOrder);
 
-		mockMvc.perform(put("/api/warehouse/processing/statusChange/"+orderId+"/"+NOT_VALID_PROCESSOR_REQUEST)
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/"+NOT_VALID_PROCESSOR_REQUEST)
 						.with(clerkAuth(clerkId)))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message")
@@ -229,7 +230,7 @@ public class ProcessorIntegrationTest {
 	//Endpoint Helpers
 
 	private void createLocations(Long userId) throws Exception {
-		mockMvc.perform(put("/api/warehouse/locations")
+		mockMvc.perform(post("/api/warehouse/locations/create")
 						.with(clerkAuth(userId)))
 				.andExpect(status().isCreated());
 	}

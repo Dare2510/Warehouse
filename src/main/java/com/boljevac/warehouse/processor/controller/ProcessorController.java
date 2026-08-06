@@ -23,14 +23,14 @@ public class ProcessorController {
 
 	private final ProcessorService processorService;
 
-	@PostMapping
+	@GetMapping
 	public ResponseEntity<List<ProcessorResponse>> getOrders(@RequestBody @Valid ProcessorRequest processorRequest) {
 
 		return ResponseEntity.status(HttpStatus.OK).body(processorService.getListOfOrdersByStatus(processorRequest));
 	}
 
 	//Change status, sequence must be followed : ORDER_PLACED -> (CANCELLED)/PROCESSING -> PACKAGED -> SHIPPED
-	@PutMapping("/statusChange/{id}/{orderStatus}")
+	@PatchMapping("/statusChange/{id}/{orderStatus}")
 	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@AuthenticationPrincipal AuthenticatedUser authenticatedUser, @PathVariable Long id, @PathVariable OrderStatus orderStatus) {
 		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeStatusOfOrder(authenticatedUser, id, orderStatus));
 	}

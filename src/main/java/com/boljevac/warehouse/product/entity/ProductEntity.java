@@ -32,7 +32,7 @@ public class ProductEntity {
 	@JoinColumn(name = "created_by_user")
 	private UserEntity productCreatedByUser;
 
-	public ProductEntity(UserEntity productCreatedByUser,String product, BigDecimal pricePerPiece, double weightPerPiece) {
+	public ProductEntity(UserEntity productCreatedByUser, String product, BigDecimal pricePerPiece, double weightPerPiece) {
 		this.productCreatedByUser = productCreatedByUser;
 		this.product = product;
 		this.pricePerPiece = pricePerPiece;

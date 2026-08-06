@@ -193,7 +193,7 @@ public class InventoryIntegrationTest {
 	}
 
 	private void createLocations(Long userId) throws Exception {
-		mockMvc.perform(put("/api/warehouse/locations")
+		mockMvc.perform(post("/api/warehouse/locations/create")
 						.with(clerkAuth(userId)))
 				.andExpect(status().isCreated());
 	}

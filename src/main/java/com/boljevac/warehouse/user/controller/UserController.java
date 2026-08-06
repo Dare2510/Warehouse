@@ -24,10 +24,11 @@ public class UserController {
 	public ResponseEntity<UserResponse> registerUser(@RequestBody @Valid UserRequest userRequest) {
 		return ResponseEntity.ok().body(userService.registerUserByCustomer(userRequest));
 	}
+
 	@PreAuthorize("hasRole('USER')")
 	@PatchMapping("/update")
 	public ResponseEntity<Void> updateUser(@RequestBody @Valid UserRequest userRequest,
-										   @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+	                                       @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 		userService.updateUserByCustomer(authenticatedUser, userRequest);
 		return ResponseEntity.ok().build();
 	}

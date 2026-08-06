@@ -22,7 +22,7 @@ public class LocationsController {
 
 	private final LocationService locationService;
 
-	@PutMapping
+	@PostMapping("/create")
 	public ResponseEntity<Void> createLocation() {
 		locationService.createLocations();
 		return ResponseEntity.status(HttpStatus.CREATED).build();

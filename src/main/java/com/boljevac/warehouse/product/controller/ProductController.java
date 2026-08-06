@@ -5,6 +5,7 @@ import com.boljevac.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.product.service.ProductService;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,19 +19,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/warehouse/products")
 @PreAuthorize("hasAnyRole('ADMIN','CLERK')")
+@AllArgsConstructor
 public class ProductController {
 
 	private final ProductService service;
 
-	public ProductController(ProductService service) {
-		this.service = service;
-	}
-
 	@PostMapping("/create")
 	public ResponseEntity<ProductResponse> createItem(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
-													  @RequestBody @Valid ProductRequest productRequest) {
+	                                                  @RequestBody @Valid ProductRequest productRequest) {
 		return ResponseEntity.status(HttpStatus.CREATED).
-				body(service.createAndValidateNewProduct(authenticatedUser,productRequest));
+				body(service.createAndValidateNewProduct(authenticatedUser, productRequest));
 	}
 
 	@DeleteMapping("/delete/{id}")
@@ -47,9 +45,9 @@ public class ProductController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Void> updateItem(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
-										   @PathVariable Long id,
+	                                       @PathVariable Long id,
 	                                       @RequestBody @Valid ProductRequest productRequest) {
-		service.updateProduct(authenticatedUser,id, productRequest);
+		service.updateProduct(authenticatedUser, id, productRequest);
 		return ResponseEntity.ok().build();
 	}
 }

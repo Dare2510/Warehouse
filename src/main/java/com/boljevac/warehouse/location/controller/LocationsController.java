@@ -5,6 +5,7 @@ import com.boljevac.warehouse.location.dto.LocationsResponse;
 import com.boljevac.warehouse.location.service.LocationService;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -16,13 +17,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("api/warehouse/locations")
 @PreAuthorize("hasAnyRole('ADMIN','CLERK')")
+@AllArgsConstructor
 public class LocationsController {
 
 	private final LocationService locationService;
-
-	public LocationsController(LocationService locationService) {
-		this.locationService = locationService;
-	}
 
 	@PutMapping
 	public ResponseEntity<Void> createLocation() {
@@ -32,8 +30,8 @@ public class LocationsController {
 
 	@PostMapping
 	public ResponseEntity<LocationsResponse> storeProduct(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
-														  @RequestBody @Valid LocationsRequest locationsRequest) {
-		return ResponseEntity.ok(locationService.storeInventory(authenticatedUser,locationsRequest));
+	                                                      @RequestBody @Valid LocationsRequest locationsRequest) {
+		return ResponseEntity.ok(locationService.storeInventory(authenticatedUser, locationsRequest));
 	}
 
 	@GetMapping("/getAll")

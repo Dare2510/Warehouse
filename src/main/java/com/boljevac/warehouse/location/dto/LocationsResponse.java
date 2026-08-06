@@ -1,10 +1,19 @@
 package com.boljevac.warehouse.location.dto;
 
-public record LocationsResponse(Long inventoryId,
-                                String product,
-                                double weightPerPiece,
-                                double totalWeight,
-                                String location) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class LocationsResponse {
+
+	private Long inventoryId;
+	private String product;
+	private double weightPerPiece;
+	private double totalWeight;
+	private String location;
 
 
 }

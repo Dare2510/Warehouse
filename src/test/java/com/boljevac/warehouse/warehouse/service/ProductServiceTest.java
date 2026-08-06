@@ -46,7 +46,7 @@ public class ProductServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		productService = new ProductService(productRepository,userService);
+		productService = new ProductService(userService,productRepository);
 
 	}
 
@@ -78,9 +78,9 @@ public class ProductServiceTest {
 		ProductResponse response = productService.createAndValidateNewProduct(adminUser,request);
 
 		verify(productRepository).save(any(ProductEntity.class));
-		assertEquals(PRODUCT_NAME, response.name());
-		assertEquals(PRODUCT_VALUE, response.price());
-		assertEquals(PRODUCT_WEIGHT, response.weight());
+		assertEquals(PRODUCT_NAME, response.getName());
+		assertEquals(PRODUCT_VALUE, response.getPrice());
+		assertEquals(PRODUCT_WEIGHT, response.getWeight());
 
 	}
 

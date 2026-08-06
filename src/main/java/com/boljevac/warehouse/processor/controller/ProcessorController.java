@@ -6,6 +6,7 @@ import com.boljevac.warehouse.processor.dto.ProcessorResponse;
 import com.boljevac.warehouse.processor.service.ProcessorService;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,13 +18,10 @@ import java.util.List;
 @RestController
 @RequestMapping("api/warehouse/processing")
 @PreAuthorize("hasAnyRole('ADMIN','CLERK')")
+@AllArgsConstructor
 public class ProcessorController {
 
 	private final ProcessorService processorService;
-
-	public ProcessorController(ProcessorService processorService) {
-		this.processorService = processorService;
-	}
 
 	@PostMapping
 	public ResponseEntity<List<ProcessorResponse>> getOrders(@RequestBody @Valid ProcessorRequest processorRequest) {
@@ -34,7 +32,7 @@ public class ProcessorController {
 	//Change status, sequence must be followed : ORDER_PLACED -> (CANCELLED)/PROCESSING -> PACKAGED -> SHIPPED
 	@PutMapping("/statusChange/{id}/{orderStatus}")
 	public ResponseEntity<ProcessorResponse> changeStatusToProcessing(@AuthenticationPrincipal AuthenticatedUser authenticatedUser, @PathVariable Long id, @PathVariable OrderStatus orderStatus) {
-		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeStatusOfOrder(authenticatedUser,id, orderStatus));
+		return ResponseEntity.status(HttpStatus.OK).body(processorService.changeStatusOfOrder(authenticatedUser, id, orderStatus));
 	}
 
 	//Only canceled orders

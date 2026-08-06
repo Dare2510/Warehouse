@@ -15,6 +15,7 @@ import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.entity.UserEntity;
 import com.boljevac.warehouse.user.service.UserService;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class ProcessorService {
 
 	public final OrderRepository orderRepository;
@@ -31,14 +33,6 @@ public class ProcessorService {
 	public final OrderService orderService;
 	private final ModelMapper modelMapper;
 	private final UserService userService;
-
-	public ProcessorService(OrderRepository orderRepository, ShippedOrdersRepository shippedOrdersRepository, OrderService orderService, ModelMapper modelMapper, UserService userService) {
-		this.orderRepository = orderRepository;
-		this.shippedOrdersRepository = shippedOrdersRepository;
-		this.orderService = orderService;
-		this.modelMapper = modelMapper;
-		this.userService = userService;
-	}
 
 	public List<ProcessorResponse> getListOfOrdersByStatus(ProcessorRequest processorRequest) {
 		OrderStatus orderStatus = processorRequest.getOrderStatus();
@@ -56,7 +50,7 @@ public class ProcessorService {
 	}
 
 
-	public ProcessorResponse changeStatusOfOrder(AuthenticatedUser authenticatedUser,Long orderId, OrderStatus newOrderStatus) {
+	public ProcessorResponse changeStatusOfOrder(AuthenticatedUser authenticatedUser, Long orderId, OrderStatus newOrderStatus) {
 
 		OrderEntity orderToChangeStatus = orderService.getOrderById(orderId);
 		OrderStatus statusToChange = orderToChangeStatus.getOrderStatus();
@@ -74,13 +68,6 @@ public class ProcessorService {
 		log.info("Order with Id {} has been changed", orderToChangeStatus.getId());
 
 		return modelMapper.map(orderToChangeStatus, ProcessorResponse.class);
-
-//		return new ProcessorResponse(
-//				orderToChangeStatus.getProductEntity().getId(),
-//				orderToChangeStatus.getProductEntity().getProduct(),
-//				orderToChangeStatus.getQuantity(),
-//				orderToChangeStatus.getOrderStatus()
-//		);
 	}
 
 	@Transactional

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class ProductRequest {
 
 	@NotBlank(message = "product is required")
@@ -26,9 +28,4 @@ public class ProductRequest {
 	@Positive(message = "weight must be >0")
 	private Double weight;
 
-	public ProductRequest(String product, BigDecimal value, double weight) {
-		this.product = product;
-		this.value = value;
-		this.weight = weight;
-	}
 }

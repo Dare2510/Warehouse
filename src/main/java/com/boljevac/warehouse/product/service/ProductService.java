@@ -9,6 +9,7 @@ import com.boljevac.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.entity.UserEntity;
 import com.boljevac.warehouse.user.service.UserService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,22 +17,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class ProductService {
 
 	private final UserService userService;
-	ProductRepository productRepository;
+	private final ProductRepository productRepository;
 
-	public ProductService(ProductRepository productRepository, UserService userService) {
-		this.productRepository = productRepository;
-		this.userService = userService;
-	}
 
 	public ProductEntity getProductById(Long id) throws ProductNotFoundException {
 		return productRepository.findById(id).
 				orElseThrow(() -> new ProductNotFoundException(id));
 	}
 
-	public ProductResponse createAndValidateNewProduct(AuthenticatedUser authenticatedUser,ProductRequest productRequest) {
+	public ProductResponse createAndValidateNewProduct(AuthenticatedUser authenticatedUser, ProductRequest productRequest) {
 		UserEntity createdBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 		ProductEntity newProduct = new ProductEntity(
 				createdBy,
@@ -76,7 +74,7 @@ public class ProductService {
 		));
 	}
 
-	public void updateProduct(AuthenticatedUser authenticatedUser,Long id, ProductRequest productRequest) {
+	public void updateProduct(AuthenticatedUser authenticatedUser, Long id, ProductRequest productRequest) {
 		ProductEntity productToUpdate = getProductById(id);
 		productToUpdate.setProduct(productRequest.getProduct());
 		productToUpdate.setPricePerPiece(productRequest.getValue());

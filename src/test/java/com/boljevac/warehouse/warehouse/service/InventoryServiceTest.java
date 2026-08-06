@@ -68,8 +68,8 @@ public class InventoryServiceTest {
 		when(inventoryRepository.findById(1L)).thenReturn(Optional.of(inventory));
 		InventoryResponse response = inventoryService.getInventoryResponse(1L);
 
-		assertEquals("TestProduct", response.product());
-		assertEquals(20,response.quantity());
+		assertEquals("TestProduct", response.getProduct());
+		assertEquals(20,response.getQuantity());
 
 	}
 

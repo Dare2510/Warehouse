@@ -15,25 +15,19 @@ import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.entity.UserEntity;
 import com.boljevac.warehouse.user.service.UserService;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class InventoryService {
 
 	private final InventoryRepository inventoryRepository;
 	private final LocationsRepository locationsRepository;
 	private final ProductService productService;
 	private final UserService userService;
-
-	public InventoryService(InventoryRepository inventoryRepository,
-	                        LocationsRepository locationsRepository, ProductService productService, UserService userService) {
-		this.inventoryRepository = inventoryRepository;
-		this.locationsRepository = locationsRepository;
-		this.productService = productService;
-		this.userService = userService;
-	}
 
 	@Transactional
 	public InventoryResponse getInventoryResponse(Long id) {
@@ -47,7 +41,7 @@ public class InventoryService {
 	}
 
 	@Transactional
-	public InventoryResponse createStock(AuthenticatedUser authenticatedUser,InventoryRequest inventoryRequest) {
+	public InventoryResponse createStock(AuthenticatedUser authenticatedUser, InventoryRequest inventoryRequest) {
 		//First creation of Locations is needed
 		if (!validateLocationsExists()) {
 			log.warn("Locations not created");
@@ -79,7 +73,7 @@ public class InventoryService {
 		log.info("New Location with Id {} and new Inventory with Id {} have been created",
 				newLocation.getId(), newInventoryProduct.getId());
 
-		return new InventoryResponse(newInventoryProduct.getId(),product.getProduct(), newInventoryProduct.getQuantity());
+		return new InventoryResponse(newInventoryProduct.getId(), product.getProduct(), newInventoryProduct.getQuantity());
 
 	}
 

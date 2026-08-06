@@ -1,4 +1,15 @@
 package com.boljevac.warehouse.inventory.dto;
 
-public record InventoryResponse(Long inventoryId, String product, int quantity) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class InventoryResponse {
+
+	private Long inventoryId;
+	private String product;
+	private int quantity;
 }

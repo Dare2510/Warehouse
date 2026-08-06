@@ -22,6 +22,7 @@ import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.entity.UserEntity;
 import com.boljevac.warehouse.user.service.UserService;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class OrderService {
 
 	private final OrderRepository orderRepository;
@@ -40,19 +42,6 @@ public class OrderService {
 	private final ProductService productService;
 	private final ModelMapper modelMapper;
 	private final UserService userService;
-
-
-	public OrderService(OrderRepository orderRepository,
-	                    InventoryRepository inventoryRepository,
-	                    ProductRepository productRepository, LocationsRepository locationsRepository, ProductService productService, ModelMapper modelMapper, UserService userService) {
-		this.orderRepository = orderRepository;
-		this.inventoryRepository = inventoryRepository;
-		this.productRepository = productRepository;
-		this.locationsRepository = locationsRepository;
-		this.productService = productService;
-		this.modelMapper = modelMapper;
-		this.userService = userService;
-	}
 
 	public List<ProductResponse> getListOfProducts() {
 		List<ProductResponse> productList = new ArrayList<>();
@@ -77,7 +66,7 @@ public class OrderService {
 
 
 	@Transactional
-	public OrderResponse createOrder(AuthenticatedUser authenticatedUser,OrderRequest orderRequest) {
+	public OrderResponse createOrder(AuthenticatedUser authenticatedUser, OrderRequest orderRequest) {
 
 		ProductEntity orderedItem = productService.getProductById(orderRequest.getProductId());
 		List<InventoryEntity> inventories = inventoryRepository.getAllByProductEntity(orderedItem);
@@ -101,13 +90,13 @@ public class OrderService {
 	}
 
 	@Transactional
-	public OrderResponse cancelOrder(AuthenticatedUser authenticatedUser,Long id) {
+	public OrderResponse cancelOrder(AuthenticatedUser authenticatedUser, Long id) {
 		OrderEntity orderToCancel = getOrderById(id);
 		UserEntity canceledBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 		boolean cancelIsValid = validateCancelRequest(orderToCancel);
 
 		if (cancelIsValid) {
-			updateInventory(canceledBy,orderToCancel);
+			updateInventory(canceledBy, orderToCancel);
 
 			log.info("Order with Id {} has been cancelled", orderToCancel.getId());
 		} else {
@@ -122,7 +111,7 @@ public class OrderService {
 		return orderToCancel.getOrderStatus().equals(OrderStatus.ORDER_PLACED);
 	}
 
-	private void updateInventory(UserEntity updatedBy,OrderEntity orderToCancel) {
+	private void updateInventory(UserEntity updatedBy, OrderEntity orderToCancel) {
 
 		orderToCancel.setOrderStatus(OrderStatus.CANCELLED);
 		ProductEntity canceledItem = productService.getProductById(orderToCancel.getProductEntity().getId());

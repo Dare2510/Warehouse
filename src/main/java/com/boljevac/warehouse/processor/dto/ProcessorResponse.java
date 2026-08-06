@@ -12,8 +12,8 @@ import lombok.Setter;
 @Setter
 public class ProcessorResponse {
 
-		Long productId;
-		String product;
-		double quantity;
-		OrderStatus orderStatus;
+	private Long productId;
+	private String product;
+	private double quantity;
+	private OrderStatus orderStatus;
 }

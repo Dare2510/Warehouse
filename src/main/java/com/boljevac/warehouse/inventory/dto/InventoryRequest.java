@@ -2,11 +2,13 @@ package com.boljevac.warehouse.inventory.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class InventoryRequest {
 
 	@NotNull(message = "Product ID is required")
@@ -16,9 +18,4 @@ public class InventoryRequest {
 	@NotNull(message = "Quantity is required")
 	@Positive(message = "Quantity must be > 0")
 	private Integer quantity;
-
-	public InventoryRequest(Long productId, int quantity) {
-		this.productId = productId;
-		this.quantity = quantity;
-	}
 }

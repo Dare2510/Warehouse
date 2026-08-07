@@ -85,6 +85,7 @@ public class InventoryService {
 
 	//Helper Methods
 	private boolean validateLocationsExists() {
+
 		return locationsRepository.count() >= 1;
 	}
 }

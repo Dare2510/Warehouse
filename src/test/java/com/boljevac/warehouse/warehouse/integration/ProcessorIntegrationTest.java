@@ -33,9 +33,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -189,7 +187,88 @@ public class ProcessorIntegrationTest {
 								"ORDER_PLACED -> (CANCELLED)/PROCESSING -> PACKAGED -> SHIPPED"));
 	}
 
-	//Clerk Authenticator
+	@Test
+	public void deleteOrderById_whenOrdersHasStatusCanceled_returns204() throws Exception {
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
+
+		Long userId = registerUserAndGetId(userRequest());
+		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+
+		cancelOrder(userId,orderId);
+
+		mockMvc.perform(delete("/api/warehouse/processing/delete/" + orderId)
+				.with(clerkAuth(clerkId)))
+				.andExpect(status().isNoContent());
+
+	}
+
+	@Test
+	public void deleteOrderById_whenOrdersStatusIsNotCanceled_returns400() throws Exception {
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
+
+		Long userId = registerUserAndGetId(userRequest());
+		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+
+		mockMvc.perform(delete("/api/warehouse/processing/delete/" + orderId)
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message")
+						.value("Can't cancel/delete order with id " + orderId));
+
+	}
+
+	@Test
+	public void deleteCancelledOrders_whenOrdersWithStatusCanceledAreFound_returns204() throws Exception {
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
+
+		Long userId = registerUserAndGetId(userRequest());
+		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+
+		cancelOrder(userId,orderId);
+
+		mockMvc.perform(delete("/api/warehouse/processing/deleteCancelled")
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isNoContent());
+
+	}
+
+	@Test
+	public void deleteCancelledOrders_whenOrdersWithStatusCanceledAreNotFound_returns404() throws Exception {
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
+
+		Long userId = registerUserAndGetId(userRequest());
+		createOrder(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+
+		mockMvc.perform(delete("/api/warehouse/processing/deleteCancelled")
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Order/s not found"));
+
+	}
+
+
+
+		//Clerk Authenticator
 
 	private RequestPostProcessor clerkAuth(Long clerkId) {
 		AuthenticatedUser principal = new AuthenticatedUser(
@@ -277,7 +356,6 @@ public class ProcessorIntegrationTest {
 		return ((Number) JsonPath.read(userJson, "$.userId")).longValue();
 	}
 
-
 	private void createOrder(Long userId, OrderRequest orderRequest) throws Exception {
 		mockMvc.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -295,6 +373,14 @@ public class ProcessorIntegrationTest {
 				.andReturn().getResponse().getContentAsString();
 
 		return ((Number) JsonPath.read(orderJson, "$.orderId")).longValue();
+	}
+
+
+
+	private void cancelOrder(Long userId, Long orderId) throws Exception {
+		mockMvc.perform(patch("/api/warehouse/orders/"+orderId+"/cancel")
+						.with(userAuth(userId)))
+				.andExpect(status().isOk());
 	}
 
 	//Request Helpers

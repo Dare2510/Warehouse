@@ -72,6 +72,11 @@ public class LocationService {
 	public LocationsResponse storeInventory(AuthenticatedUser authenticatedUser, LocationsRequest toStoreRequest) {
 
 		InventoryEntity toStoreFrom = getEntityToStoreFrom(toStoreRequest);
+
+		if(toStoreFrom.getProductEntity() == null) {
+			throw new InventoryNotFoundException(toStoreFrom.getId());
+		}
+
 		LocationEntity fromLocation = toStoreFrom.getLocationEntity();
 		LocationEntity toStoreInLocation = getAvailableLocation();
 		ProductEntity product = toStoreFrom.getProductEntity();
@@ -173,7 +178,6 @@ public class LocationService {
 			fromInventory.setTotalWeight(0);
 			fromInventory.setQuantity(0);
 			fromInventory.setProductEntity(null);
-			fromInventory.setLocationEntity(null);
 			fromInventory.setCreatedByUser(updatedBy);
 
 			fromLocation.setLoaded(false);

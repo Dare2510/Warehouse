@@ -7,6 +7,7 @@ import com.boljevac.warehouse.location.exceptions.LocationsAlreadyCreatedExcepti
 import com.boljevac.warehouse.location.exceptions.LocationsNotCreatedException;
 import com.boljevac.warehouse.location.exceptions.NoUnusedLocationException;
 import com.boljevac.warehouse.order.exception.*;
+import com.boljevac.warehouse.product.exception.DeletionProductFailed;
 import com.boljevac.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.product.exception.ProductNotFoundException;
@@ -64,6 +65,12 @@ public class GlobalExceptionHandler {
 		return errorResponseBuilder(ex, request, HttpStatus.CONFLICT);
 	}
 
+	@ExceptionHandler(DeletionProductFailed.class)
+	public ResponseEntity<ErrorResponse> handleDeletionProductFailed(DeletionProductFailed ex,
+	                                                                 HttpServletRequest request) {
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
+	}
+
 	@ExceptionHandler(OrderNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleOrderNotFoundException(OrderNotFoundException ex,
 	                                                                  HttpServletRequest request) {
@@ -95,7 +102,7 @@ public class GlobalExceptionHandler {
 
 	//Cancel only if Admin/Clerk or ownership validation is successful
 	@ExceptionHandler(OrderOwnerShipException.class)
-	public ResponseEntity<ErrorResponse> handleOrderOwnerShipException(OrderOwnerShipException ex,HttpServletRequest request){
+	public ResponseEntity<ErrorResponse> handleOrderOwnerShipException(OrderOwnerShipException ex, HttpServletRequest request) {
 
 
 		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);

@@ -1,5 +1,6 @@
 package com.boljevac.warehouse.warehouse.service;
 
+import com.boljevac.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.product.exception.ProductNotFoundException;
@@ -32,6 +33,8 @@ public class ProductServiceTest {
 	@Mock
 	private ProductRepository productRepository;
 	@Mock
+	private OrderRepository orderRepository;
+	@Mock
 	private ProductService productService;
 	@Mock
 	private UserService userService;
@@ -46,7 +49,7 @@ public class ProductServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		productService = new ProductService(userService,productRepository);
+		productService = new ProductService(userService,productRepository,orderRepository);
 
 	}
 

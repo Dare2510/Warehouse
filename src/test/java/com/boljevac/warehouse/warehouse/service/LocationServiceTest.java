@@ -151,7 +151,7 @@ public class LocationServiceTest {
 		verify(inventoryRepository, times(2)).save(any());
 		verify(locationsRepository, times(302)).save(any());
 
-		assertNull(toStoreFromInventory.getLocationEntity());
+		assertNotNull(toStoreFromInventory.getLocationEntity());
 		assertEquals(0, toStoreFromInventory.getQuantity());
 		assertNull(toStoreFromInventory.getProductEntity());
 

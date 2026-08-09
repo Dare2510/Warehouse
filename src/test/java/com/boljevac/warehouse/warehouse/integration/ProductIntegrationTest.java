@@ -1,5 +1,11 @@
 package com.boljevac.warehouse.warehouse.integration;
 
+import com.boljevac.warehouse.inventory.dto.InventoryRequest;
+import com.boljevac.warehouse.inventory.repository.InventoryRepository;
+import com.boljevac.warehouse.location.dto.LocationsRequest;
+import com.boljevac.warehouse.location.repository.LocationsRepository;
+import com.boljevac.warehouse.order.dto.OrderRequest;
+import com.boljevac.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
@@ -47,6 +53,15 @@ public class ProductIntegrationTest {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private OrderRepository orderRepository;
+
+	@Autowired
+	private InventoryRepository inventoryRepository;
+
+	@Autowired
+	private LocationsRepository locationsRepository;
+
 	private static final String PRODUCT_NAME = "TestProduct";
 	private static final String UPDATED_PRODUCT_NAME = "TestNewNameProduct";
 
@@ -57,22 +72,33 @@ public class ProductIntegrationTest {
 	private static final double INVALID_PRODUCT_WEIGHT = 0;
 	private static final Long UNAVAILABLE_PRODUCT_ID = 999L;
 
-	private static final String USER_MAIL = "clerk@mail.com";
-	private static final String USER_USERNAME = "testClerk";
-	private static final String USER_FIRST_NAME = "testClerkFirstName";
-	private static final String USER_SURNAME = "testClerkSurname";
+	private static final Integer INVENTORY_QUANTITY = 10;
+	private static final Integer QUANTITY_TO_STORE = 5;
+	private static final int VALID_ORDER_QUANTITY = 3;
+
+	private static final String USER_MAIL = "user@mail.com";
+	private static final String USER_USERNAME = "testUser";
+	private static final String USER_FIRST_NAME = "testUserFirstName";
+	private static final String USER_SURNAME = "testUserSurname";
 	private static final String PASSWORD = "password";
 
-	@AfterEach
-	public void tearDown() {
+	private static final String CLERK_MAIL = "clerk@mail.com";
+	private static final String CLERK_USERNAME = "testClerk";
+	private static final String CLERK_FIRST_NAME = "testClerkFirstName";
+	private static final String CLERK_SURNAME = "testClerkSurname";
 
+	@AfterEach
+	public void afterEach() {
+		orderRepository.deleteAll();
+		inventoryRepository.deleteAll();
+		locationsRepository.deleteAll();
 		productRepository.deleteAll();
 		userRepository.deleteAll();
 	}
 
 	@Test
 	public void getPageOfProducts_withPageableDefaults_returnIsOK() throws Exception {
-		UserRequest userRequest = userRequest();
+		UserRequest userRequest = clerkRequest();
 		Long userId = registerUserAndGetId(userRequest);
 
 		mockMvc.perform(get("/api/warehouse/products")
@@ -88,7 +114,7 @@ public class ProductIntegrationTest {
 
 	@Test
 	public void createProduct_whenRequestIsValid_returnCreated() throws Exception {
-		UserRequest userRequest = userRequest();
+		UserRequest userRequest = clerkRequest();
 		Long userId = registerUserAndGetId(userRequest);
 		ProductRequest productRequest = productRequestHelper();
 
@@ -106,7 +132,7 @@ public class ProductIntegrationTest {
 
 	@Test
 	public void createProduct_whenRequestProductWeightIsNotValid_returnsBadRequest() throws Exception {
-		UserRequest userRequest = userRequest();
+		UserRequest userRequest = clerkRequest();
 		Long userId = registerUserAndGetId(userRequest);
 		ProductRequest productRequest = productRequestWithInvalidWeight();
 
@@ -122,7 +148,7 @@ public class ProductIntegrationTest {
 
 	@Test
 	public void createProduct_whenProductNameAlreadyExists_returns409() throws Exception {
-		UserRequest userRequest = userRequest();
+		UserRequest userRequest = clerkRequest();
 		Long userId = registerUserAndGetId(userRequest);
 		ProductRequest productRequest = productRequestHelper();
 		createProduct(productRequest, userId);
@@ -138,8 +164,8 @@ public class ProductIntegrationTest {
 	}
 
 	@Test
-	public void deleteProduct_whenProductIsFound_deletesProduct() throws Exception {
-		UserRequest userRequest = userRequest();
+	public void deleteProduct_whenProductIsFoundAndNoOrdersExist_deletesProduct() throws Exception {
+		UserRequest userRequest = clerkRequest();
 		Long userId = registerUserAndGetId(userRequest);
 		ProductRequest productRequest = productRequestHelper();
 		Long productId = createProductAndGetId(productRequest,userId);
@@ -152,7 +178,7 @@ public class ProductIntegrationTest {
 
 	@Test
 	public void deleteProduct_whenProductIsNotFound_returns405() throws Exception {
-		UserRequest userRequest = userRequest();
+		UserRequest userRequest = clerkRequest();
 		Long userId = registerUserAndGetId(userRequest);
 
 		mockMvc.perform(delete("/api/warehouse/products/delete/" + UNAVAILABLE_PRODUCT_ID)
@@ -160,6 +186,27 @@ public class ProductIntegrationTest {
 					.andExpect(status().isNotFound())
 					.andExpect(jsonPath("$.message")
 					.value("Product with id " + UNAVAILABLE_PRODUCT_ID + " not found"));
+
+	}
+
+	@Test
+	public void deleteProduct_whenOrderExists_returns400() throws Exception {
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore,clerkId);
+
+		Long userId = registerUserAndGetId(userRequest());
+		createOrder(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+
+		mockMvc.perform(delete("/api/warehouse/products/delete/" + productId)
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message")
+						.value("Cannot delete product with id " +productId + " order exist"));
+
 
 	}
 
@@ -199,6 +246,25 @@ public class ProductIntegrationTest {
 		return authentication(auth);
 	}
 
+	//User Authenticator
+
+	private RequestPostProcessor userAuth(Long userId) {
+		AuthenticatedUser principal = new AuthenticatedUser(
+				userId,
+				USER_MAIL,
+				Role.USER
+		);
+
+		UsernamePasswordAuthenticationToken auth =
+				new UsernamePasswordAuthenticationToken(
+						principal,
+						null,
+						List.of(new SimpleGrantedAuthority("ROLE_USER"))
+				);
+
+		return authentication(auth);
+	}
+
 	//Endpoint Helper
 
 	private Long createProductAndGetId(ProductRequest productRequest, Long userId) throws Exception {
@@ -232,6 +298,39 @@ public class ProductIntegrationTest {
 		return ((Number) JsonPath.read(userJson, "$.userId")).longValue();
 	}
 
+	private void createLocations(Long userId) throws Exception {
+		mockMvc.perform(post("/api/warehouse/locations/create")
+						.with(clerkAuth(userId)))
+				.andExpect(status().isCreated());
+	}
+
+	private Long createInventoryAndGetId(Long userId, InventoryRequest request) throws Exception {
+		String inventoryResponseJson = mockMvc.perform(post("/api/warehouse/inventory")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
+						.with(clerkAuth(userId)))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+
+		return ((Number) JsonPath.read(inventoryResponseJson, "$.inventoryId")).longValue();
+	}
+
+	private void storeInventoryToLocation(LocationsRequest toStore, Long userId) throws Exception {
+		mockMvc.perform(post("/api/warehouse/locations")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(toStore))
+						.with(clerkAuth(userId)))
+				.andExpect(status().isOk());
+	}
+
+	private void createOrder(Long userId, OrderRequest orderRequest) throws Exception {
+		mockMvc.perform(post("/api/warehouse/orders")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(orderRequest))
+						.with(userAuth(userId)))
+				.andExpect(status().isCreated());
+	}
+
 	//Request Helper
 
 	private ProductRequest productRequestHelper(){
@@ -248,6 +347,18 @@ public class ProductIntegrationTest {
 
 	private UserRequest userRequest() {
 		return new UserRequest(USER_MAIL, PASSWORD, USER_USERNAME, USER_FIRST_NAME, USER_SURNAME);
+	}
+
+	private UserRequest clerkRequest() {
+		return new UserRequest(CLERK_MAIL, PASSWORD, CLERK_USERNAME, CLERK_FIRST_NAME, CLERK_SURNAME);
+	}
+
+	private InventoryRequest inventoryRequestHelper(Long productId) {
+		return new InventoryRequest(productId, INVENTORY_QUANTITY);
+	}
+
+	private OrderRequest orderRequestHelper(Long productId, Integer quantity) {
+		return new OrderRequest(productId, quantity);
 	}
 
 

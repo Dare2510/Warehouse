@@ -2,6 +2,7 @@ package com.boljevac.warehouse.warehouse.service;
 
 import com.boljevac.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.product.entity.ProductEntity;
+import com.boljevac.warehouse.product.exception.DeletionProductFailed;
 import com.boljevac.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.product.exception.ProductNotFoundException;
 import com.boljevac.warehouse.product.repository.ProductRepository;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -117,6 +119,48 @@ public class ProductServiceTest {
 				productService.updateProduct(adminUser,anyLong(), newValues)
 		);
 		verify(productRepository, never()).save(any(ProductEntity.class));
+
+	}
+
+	@Test
+	public void deleteProduct_whenNoOrdersExist_deletesProduct(){
+		ProductRequest request = productRequestHelper();
+		AuthenticatedUser adminUser = createAuthenticatedAdminHelper();
+		UserEntity createdByUser = getUserByAuthenticatedUser(adminUser);
+		ProductEntity productEntity = createProductHelper(createdByUser,request);
+
+		Long id = productEntity.getId();
+
+		when(productRepository.findById(id)).thenReturn(Optional.of(productEntity));
+		when(orderRepository.existsByProductEntity(productEntity)).thenReturn(false);
+
+		productService.deleteProduct(id);
+
+		verify(productRepository).findById(id);
+		verify(productRepository).delete(productEntity);
+		verify(orderRepository, times(1)).existsByProductEntity(productEntity);
+
+	}
+
+	@Test
+	public void deleteProduct_whenOrdersExist_throwsDeletionProductFailed(){
+		ProductRequest request = productRequestHelper();
+		AuthenticatedUser adminUser = createAuthenticatedAdminHelper();
+		UserEntity createdByUser = getUserByAuthenticatedUser(adminUser);
+		ProductEntity productEntity = createProductHelper(createdByUser,request);
+
+		Long id = productEntity.getId();
+
+		when(productRepository.findById(id)).thenReturn(Optional.of(productEntity));
+		when(orderRepository.existsByProductEntity(productEntity)).thenReturn(true);
+
+		assertThatThrownBy(()  -> productService.deleteProduct(id))
+				.isInstanceOf(DeletionProductFailed.class)
+				.hasMessage(("Cannot delete product with id " +id + " order exist"));
+
+		verify(productRepository).findById(id);
+		verify(productRepository,never()).delete(productEntity);
+		verify(orderRepository, times(1)).existsByProductEntity(productEntity);
 
 	}
 

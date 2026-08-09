@@ -6,10 +6,7 @@ import com.boljevac.warehouse.location.exceptions.LocationLoadLimitExceededExcep
 import com.boljevac.warehouse.location.exceptions.LocationsAlreadyCreatedException;
 import com.boljevac.warehouse.location.exceptions.LocationsNotCreatedException;
 import com.boljevac.warehouse.location.exceptions.NoUnusedLocationException;
-import com.boljevac.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
-import com.boljevac.warehouse.order.exception.OrderExceedsStockException;
-import com.boljevac.warehouse.order.exception.OrderNotFoundException;
-import com.boljevac.warehouse.order.exception.StatusChangeInvalidOrderException;
+import com.boljevac.warehouse.order.exception.*;
 import com.boljevac.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.product.exception.ProductNotFoundException;
@@ -92,6 +89,14 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(OrderCancelOrDeleteNotPossibleException.class)
 	public ResponseEntity<ErrorResponse> handleOrderCancelNotPossibleException(OrderCancelOrDeleteNotPossibleException ex,
 	                                                                           HttpServletRequest request) {
+
+		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
+	}
+
+	//Cancel only if Admin/Clerk or ownership validation is successful
+	@ExceptionHandler(OrderOwnerShipException.class)
+	public ResponseEntity<ErrorResponse> handleOrderOwnerShipException(OrderOwnerShipException ex,HttpServletRequest request){
+
 
 		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
 	}

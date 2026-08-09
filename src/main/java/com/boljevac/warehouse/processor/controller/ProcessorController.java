@@ -37,8 +37,8 @@ public class ProcessorController {
 
 	//Only canceled orders
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Void> deleteOrderById(@PathVariable Long id) {
-		processorService.deleteOrderById(id);
+	public ResponseEntity<Void> deleteOrderById(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,@PathVariable Long id) {
+		processorService.deleteOrderById(authenticatedUser,id);
 		return ResponseEntity.noContent().build();
 	}
 

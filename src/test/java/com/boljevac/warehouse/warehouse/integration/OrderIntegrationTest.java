@@ -71,6 +71,8 @@ public class OrderIntegrationTest {
 	private static final String USER_FIRST_NAME = "testUserFirstName";
 	private static final String USER_SURNAME = "testUserSurname";
 
+	private static final String SECOND_USER_MAIL = "secondUser@mail.com";
+
 
 	private static final String PASSWORD = "password";
 
@@ -106,7 +108,7 @@ public class OrderIntegrationTest {
 		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
 		storeInventoryToLocation(toStore,clerkId);
 
-		Long userId = registerUserAndGetId(userRequest());
+		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
 
 		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
 		mockMvc.perform(post("/api/warehouse/orders")
@@ -130,7 +132,7 @@ public class OrderIntegrationTest {
 		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
 		storeInventoryToLocation(toStore,clerkId);
 
-		Long userId = registerUserAndGetId(userRequest());
+		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
 
 		OrderRequest exceedingOrder = orderRequestHelper(productId,EXCEEDING_ORDER_QUANTITY);
 		mockMvc.perform(post("/api/warehouse/orders")
@@ -151,7 +153,7 @@ public class OrderIntegrationTest {
 		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
 		storeInventoryToLocation(toStore,clerkId);
 
-		Long userId = registerUserAndGetId(userRequest());
+		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
 
 		OrderRequest invalidOrder = orderRequestHelper(INVALID_PRODUCT_ID_FOR_ORDER,VALID_ORDER_QUANTITY);
 
@@ -173,11 +175,31 @@ public class OrderIntegrationTest {
 		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
 		storeInventoryToLocation(toStore,clerkId);
 
-		Long userId = registerUserAndGetId(userRequest());
+		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
 		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
 		mockMvc.perform(patch("/api/warehouse/orders/"+orderId+"/cancel")
 						.with(userAuth(userId)))
 						.andExpect(status().isOk());
+	}
+
+	@Test
+	public void cancelOrder_whenOwnershipValidationFailed_returns200() throws Exception {
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore,clerkId);
+
+		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
+		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+		Long failingUserId = registerUserAndGetId(userRequest(SECOND_USER_MAIL));
+
+		mockMvc.perform(patch("/api/warehouse/orders/"+orderId+"/cancel")
+						.with(userAuth(failingUserId)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message")
+						.value("You don't own order with id " + orderId));
 	}
 //
 //	@Test
@@ -312,11 +334,9 @@ public class OrderIntegrationTest {
 		return new UserRequest(CLERK_MAIL, PASSWORD, CLERK_USERNAME, CLERK_FIRST_NAME, CLERK_SURNAME);
 	}
 
-	private UserRequest userRequest() {
-		return new UserRequest(USER_MAIL, PASSWORD, USER_USERNAME, USER_FIRST_NAME, USER_SURNAME);
+	private UserRequest userRequest(String userMail) {
+		return new UserRequest(userMail, PASSWORD, USER_USERNAME, USER_FIRST_NAME, USER_SURNAME);
 	}
-
-
 
 	private InventoryRequest inventoryRequestHelper(Long productId) {
 		return new InventoryRequest(productId, INVENTORY_QUANTITY);

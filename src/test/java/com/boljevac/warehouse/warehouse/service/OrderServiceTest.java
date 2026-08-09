@@ -231,17 +231,18 @@ public class OrderServiceTest {
 		OrderEntity order = new OrderEntity(product, 3);
 
 		when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
-		orderService.getOrderById(1L);
+		orderService.getOrderById(authenticatedUser,1L);
 
 		verify(orderRepository).findById(1L);
-		assertEquals(order, orderService.getOrderById(1L));
+		assertEquals(order, orderService.getOrderById(authenticatedUser,1L));
 
 	}
 
 	@Test
 	public void getOrderById_whenOrderIsNotAvailable_throwsOrderNotFoundException() {
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
 		assertThrows(OrderNotFoundException.class,
-				() -> orderService.getOrderById(1L));
+				() -> orderService.getOrderById(authenticatedUser,1L));
 
 		verify(orderRepository).findById(1L);
 	}

@@ -12,6 +12,7 @@ import com.boljevac.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
 import com.boljevac.warehouse.order.exception.OrderExceedsStockException;
 import com.boljevac.warehouse.order.exception.OrderNotFoundException;
+import com.boljevac.warehouse.order.exception.OrderOwnerShipException;
 import com.boljevac.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.product.entity.ProductEntity;
@@ -19,6 +20,7 @@ import com.boljevac.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.product.service.ProductService;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
+import com.boljevac.warehouse.user.entity.Role;
 import com.boljevac.warehouse.user.entity.UserEntity;
 import com.boljevac.warehouse.user.service.UserService;
 import jakarta.transaction.Transactional;
@@ -91,7 +93,7 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse cancelOrder(AuthenticatedUser authenticatedUser, Long id) {
-		OrderEntity orderToCancel = getOrderById(id);
+		OrderEntity orderToCancel = getOrderById(authenticatedUser,id);
 		UserEntity canceledBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 		boolean cancelIsValid = validateCancelRequest(orderToCancel);
 
@@ -130,10 +132,17 @@ public class OrderService {
 
 	}
 
-	public OrderEntity getOrderById(Long id) throws OrderNotFoundException {
-		return orderRepository.findById(id).orElseThrow(
+	public OrderEntity getOrderById(AuthenticatedUser authenticatedUser,Long id) throws OrderNotFoundException {
+		OrderEntity order = orderRepository.findById(id).orElseThrow(
 				OrderNotFoundException::new
 		);
+
+		if(authenticatedUser.getRole() == Role.USER && !order.getCreatedByUser().getId().equals(authenticatedUser.getUserId())){
+			log.info("Ownership validation for order with Id {} has been denied", order.getId());
+			throw new OrderOwnerShipException(id);
+		}
+
+		return order;
 	}
 
 	private void validateOrderQuantity(int totalStockQuantity, int orderedQuantity) throws OrderExceedsStockException {

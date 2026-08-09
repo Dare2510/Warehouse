@@ -71,7 +71,7 @@ public class ProcessorServiceTest {
 		OrderEntity orderWithValidStatus = new OrderEntity(product, 3);
 		orderWithValidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
 
-		when(orderService.getOrderById(1L)).thenReturn(orderWithValidStatus);
+		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(orderWithValidStatus);
 		processorService.changeStatusOfOrder(authenticatedUser,1L, OrderStatus.PROCESSING);
 
 		assertEquals(OrderStatus.PROCESSING, orderWithValidStatus.getOrderStatus());
@@ -87,7 +87,7 @@ public class ProcessorServiceTest {
 		OrderEntity orderWithInvalidStatus = new OrderEntity(product, 3);
 		orderWithInvalidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
 
-		when(orderService.getOrderById(1L)).thenReturn(orderWithInvalidStatus);
+		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(orderWithInvalidStatus);
 
 		assertThrows(StatusChangeInvalidOrderException.class, () -> {
 			processorService.changeStatusOfOrder(authenticatedUser,1L, OrderStatus.SHIPPED);
@@ -107,8 +107,8 @@ public class ProcessorServiceTest {
 		OrderEntity cancelledOrder = new OrderEntity(product, 30);
 		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
 
-		when(orderService.getOrderById(1L)).thenReturn(cancelledOrder);
-		processorService.deleteOrderById(1L);
+		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(cancelledOrder);
+		processorService.deleteOrderById(authenticatedUser,1L);
 
 		verify(orderRepository).delete(cancelledOrder);
 		assertFalse(orderRepository.existsById(1L));
@@ -122,10 +122,10 @@ public class ProcessorServiceTest {
 		OrderEntity processingOrder = new OrderEntity(product, 30);
 		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
 
-		when(orderService.getOrderById(1L)).thenReturn(processingOrder);
+		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(processingOrder);
 
 		assertThrows(OrderCancelOrDeleteNotPossibleException.class, () -> {
-			processorService.deleteOrderById(1L);
+			processorService.deleteOrderById(authenticatedUser,1L);
 		});
 		verify(orderRepository, never()).deleteById(1L);
 	}
@@ -189,9 +189,9 @@ public class ProcessorServiceTest {
 		OrderEntity cancelledOrder = new OrderEntity(product, 30);
 		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
 
-		when(orderService.getOrderById(1L)).thenReturn(cancelledOrder);
+		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(cancelledOrder);
 
-		processorService.deleteOrderById(1L);
+		processorService.deleteOrderById(authenticatedUser,1L);
 
 		verify(orderRepository).delete(cancelledOrder);
 
@@ -206,10 +206,10 @@ public class ProcessorServiceTest {
 		OrderEntity processingOrder = new OrderEntity(product, 30);
 		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
 
-		when(orderService.getOrderById(1L)).thenReturn(processingOrder);
+		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(processingOrder);
 
 		assertThrows(OrderCancelOrDeleteNotPossibleException.class, () -> {
-			processorService.deleteOrderById(1L);
+			processorService.deleteOrderById(authenticatedUser,1L);
 		});
 
 		verify(orderRepository, never()).delete(processingOrder);

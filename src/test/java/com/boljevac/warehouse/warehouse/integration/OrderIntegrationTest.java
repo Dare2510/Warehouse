@@ -181,7 +181,7 @@ public class OrderIntegrationTest {
 	}
 
 	@Test
-	public void cancelOrder_whenOwnershipValidationFailed_returns200() throws Exception {
+	public void cancelOrder_whenOwnershipValidationFailed_returns403() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
 		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
 		createLocations(clerkId);
@@ -195,11 +195,11 @@ public class OrderIntegrationTest {
 
 		mockMvc.perform(patch("/api/warehouse/orders/"+orderId+"/cancel")
 						.with(userAuth(failingUserId)))
-				.andExpect(status().isBadRequest())
+				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.message")
 						.value("You don't own order with id " + orderId));
 	}
-//
+
 //	@Test
 //	public void cancelOrder_whenOrderStatusIsNotOrderPlaced_returns400() throws Exception {
 //		doThrow(new OrderCancelOrDeleteNotPossibleException(1L)).when(orderService).cancelOrder(1L);

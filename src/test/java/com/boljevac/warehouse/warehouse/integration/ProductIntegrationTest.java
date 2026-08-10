@@ -205,7 +205,7 @@ public class ProductIntegrationTest {
 						.with(clerkAuth(clerkId)))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message")
-						.value("Cannot delete product with id " +productId + " order exist"));
+						.value("Cannot delete product with id " +productId + " order or inventory exist"));
 
 
 	}

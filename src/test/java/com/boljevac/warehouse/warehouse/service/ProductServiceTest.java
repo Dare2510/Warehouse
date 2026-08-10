@@ -1,6 +1,8 @@
 package com.boljevac.warehouse.warehouse.service;
 
+import com.boljevac.warehouse.inventory.repository.InventoryRepository;
 import com.boljevac.warehouse.order.repository.OrderRepository;
+import com.boljevac.warehouse.order.repository.ShippedOrdersRepository;
 import com.boljevac.warehouse.product.entity.ProductEntity;
 import com.boljevac.warehouse.product.exception.DeletionProductFailed;
 import com.boljevac.warehouse.product.exception.ProductDuplicateCreationException;
@@ -39,6 +41,10 @@ public class ProductServiceTest {
 	@Mock
 	private ProductService productService;
 	@Mock
+	private ShippedOrdersRepository shippedOrdersRepository;
+	@Mock
+	private InventoryRepository inventoryRepository;
+	@Mock
 	private UserService userService;
 
 	private static final String PRODUCT_NAME = "TestProduct";
@@ -51,7 +57,7 @@ public class ProductServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		productService = new ProductService(userService,productRepository,orderRepository);
+		productService = new ProductService(userService,productRepository,orderRepository,shippedOrdersRepository,inventoryRepository);
 
 	}
 
@@ -133,12 +139,16 @@ public class ProductServiceTest {
 
 		when(productRepository.findById(id)).thenReturn(Optional.of(productEntity));
 		when(orderRepository.existsByProductEntity(productEntity)).thenReturn(false);
+		when(shippedOrdersRepository.existsByProductId(id)).thenReturn(false);
+		when(inventoryRepository.existsByProductEntity(productEntity)).thenReturn(false);
 
 		productService.deleteProduct(id);
 
 		verify(productRepository).findById(id);
-		verify(productRepository).delete(productEntity);
 		verify(orderRepository, times(1)).existsByProductEntity(productEntity);
+		verify(shippedOrdersRepository, times(1)).existsByProductId(id);
+		verify(inventoryRepository, times(1)).existsByProductEntity(productEntity);
+		verify(productRepository).delete(productEntity);
 
 	}
 
@@ -153,14 +163,69 @@ public class ProductServiceTest {
 
 		when(productRepository.findById(id)).thenReturn(Optional.of(productEntity));
 		when(orderRepository.existsByProductEntity(productEntity)).thenReturn(true);
+		when(inventoryRepository.existsByProductEntity(productEntity)).thenReturn(false);
 
 		assertThatThrownBy(()  -> productService.deleteProduct(id))
 				.isInstanceOf(DeletionProductFailed.class)
-				.hasMessage(("Cannot delete product with id " +id + " order exist"));
+				.hasMessage(("Cannot delete product with id " +id + " order or inventory exist"));
 
 		verify(productRepository).findById(id);
 		verify(productRepository,never()).delete(productEntity);
 		verify(orderRepository, times(1)).existsByProductEntity(productEntity);
+		verify(shippedOrdersRepository,never()).existsByProductId(id);
+		verify(inventoryRepository, times(1)).existsByProductEntity(productEntity);
+
+	}
+
+	@Test
+	public void deleteProduct_whenShippedOrdersExist_throwsDeletionProductFailed(){
+		ProductRequest request = productRequestHelper();
+		AuthenticatedUser adminUser = createAuthenticatedAdminHelper();
+		UserEntity createdByUser = getUserByAuthenticatedUser(adminUser);
+		ProductEntity productEntity = createProductHelper(createdByUser,request);
+
+		Long id = productEntity.getId();
+
+		when(productRepository.findById(id)).thenReturn(Optional.of(productEntity));
+		when(orderRepository.existsByProductEntity(productEntity)).thenReturn(false);
+		when(shippedOrdersRepository.existsByProductId(id)).thenReturn(true);
+		when(inventoryRepository.existsByProductEntity(productEntity)).thenReturn(false);
+
+		assertThatThrownBy(()  -> productService.deleteProduct(id))
+				.isInstanceOf(DeletionProductFailed.class)
+				.hasMessage(("Cannot delete product with id " +id + " order or inventory exist"));
+
+		verify(productRepository).findById(id);
+		verify(productRepository,never()).delete(productEntity);
+		verify(orderRepository, times(1)).existsByProductEntity(productEntity);
+		verify(shippedOrdersRepository, times(1)).existsByProductId(id);
+		verify(inventoryRepository, times(1)).existsByProductEntity(productEntity);
+
+	}
+
+	@Test
+	public void deleteProduct_whenInventoryExist_throwsDeletionProductFailed(){
+		ProductRequest request = productRequestHelper();
+		AuthenticatedUser adminUser = createAuthenticatedAdminHelper();
+		UserEntity createdByUser = getUserByAuthenticatedUser(adminUser);
+		ProductEntity productEntity = createProductHelper(createdByUser,request);
+
+		Long id = productEntity.getId();
+
+		when(productRepository.findById(id)).thenReturn(Optional.of(productEntity));
+		when(orderRepository.existsByProductEntity(productEntity)).thenReturn(false);
+		when(shippedOrdersRepository.existsByProductId(id)).thenReturn(false);
+		when(inventoryRepository.existsByProductEntity(productEntity)).thenReturn(true);
+
+		assertThatThrownBy(()  -> productService.deleteProduct(id))
+				.isInstanceOf(DeletionProductFailed.class)
+				.hasMessage(("Cannot delete product with id " +id + " order or inventory exist"));
+
+		verify(productRepository).findById(id);
+		verify(productRepository,never()).delete(productEntity);
+		verify(orderRepository, times(1)).existsByProductEntity(productEntity);
+		verify(shippedOrdersRepository, times(1)).existsByProductId(id);
+		verify(inventoryRepository, times(1)).existsByProductEntity(productEntity);
 
 	}
 

@@ -1,6 +1,6 @@
-package com.dare.cinema_booking_system.security.principal;
+package com.boljevac.warehouse.security.principal;
 
-import com.dare.cinema_booking_system.user.entity.Role;
+import com.boljevac.warehouse.user.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

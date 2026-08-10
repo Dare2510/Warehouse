@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleOrderOwnerShipException(OrderOwnerShipException ex, HttpServletRequest request) {
 
 
-		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
+		return errorResponseBuilder(ex, request, HttpStatus.FORBIDDEN);
 	}
 
 	//If trying to set the status to a status that is not available

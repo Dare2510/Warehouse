@@ -2,6 +2,7 @@ package com.boljevac.warehouse.product.service;
 
 import com.boljevac.warehouse.inventory.repository.InventoryRepository;
 import com.boljevac.warehouse.order.repository.OrderRepository;
+import com.boljevac.warehouse.order.repository.ShippedOrdersRepository;
 import com.boljevac.warehouse.product.dto.ProductRequest;
 import com.boljevac.warehouse.product.dto.ProductResponse;
 import com.boljevac.warehouse.product.entity.ProductEntity;
@@ -26,6 +27,8 @@ public class ProductService {
 	private final UserService userService;
 	private final ProductRepository productRepository;
 	private final OrderRepository orderRepository;
+	private final ShippedOrdersRepository shippedOrdersRepository;
+	private final InventoryRepository inventoryRepository;
 
 
 	public ProductEntity getProductById(Long id) throws ProductNotFoundException {
@@ -63,14 +66,17 @@ public class ProductService {
 
 	public void deleteProduct(Long id) {
 		ProductEntity toDelete = getProductById(id);
-		boolean orderExists = orderRepository.existsByProductEntity(toDelete);
+		boolean orderExists = orderRepository.existsByProductEntity(toDelete) ||
+				shippedOrdersRepository.existsByProductId(toDelete.getId());
 
-		if (!orderExists) {
+		boolean inventoryExists = inventoryRepository.existsByProductEntity(toDelete);
+
+		if (!orderExists && !inventoryExists) {
 		log.info("Product with id {} has been deleted", toDelete.getId());
 		productRepository.delete(toDelete);
 
 		} else {
-			log.info("Product with id {} cannot be deleted, order exists", toDelete.getId());
+			log.info("Product with id {} cannot be deleted, order or inventory exists", toDelete.getId());
 			throw new DeletionProductFailed(toDelete.getId());
 		}
 	}

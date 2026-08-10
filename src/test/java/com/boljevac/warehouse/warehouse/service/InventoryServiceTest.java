@@ -105,7 +105,6 @@ public class InventoryServiceTest {
 	public void createStock_whenLocationsNotExist_throwsLocationsNotCreatedException() {
 		InventoryRequest request = new InventoryRequest(1L,20);
 		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
-		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
 
 		assertThrows(LocationsNotCreatedException.class,
 				() ->inventoryService.createStock(authenticatedUser,request)

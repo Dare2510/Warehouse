@@ -12,5 +12,7 @@ import java.util.List;
 public interface InventoryRepository extends JpaRepository<InventoryEntity, Long> {
 
 	List<InventoryEntity> getAllByProductEntity(ProductEntity productEntity);
+
+	boolean existsByProductEntity(ProductEntity productEntity);
 }
 

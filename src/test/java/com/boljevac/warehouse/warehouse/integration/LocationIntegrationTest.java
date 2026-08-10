@@ -29,7 +29,6 @@ import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -74,7 +73,7 @@ public class LocationIntegrationTest {
 	private static final Integer EXCEEDING_QUANTITY_TO_STORE = 20;
 
 	@AfterEach
-	public void tearDown() throws Exception{
+	public void tearDown(){
 
 		inventoryRepository.deleteAll();
 		locationsRepository.deleteAll();

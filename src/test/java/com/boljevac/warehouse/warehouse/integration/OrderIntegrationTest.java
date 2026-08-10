@@ -80,8 +80,6 @@ public class OrderIntegrationTest {
 	private static final BigDecimal PRODUCT_VALUE = new BigDecimal("300");
 	private static final double PRODUCT_WEIGHT = 50;
 
-	private static final double EXCEEDING_PRODUCT_WEIGHT = 500;
-
 	private static final Integer INVENTORY_QUANTITY = 10;
 
 	private static final Integer QUANTITY_TO_STORE = 5;
@@ -290,15 +288,6 @@ public class OrderIntegrationTest {
 		return ((Number) JsonPath.read(productResponseJson, "$.id")).longValue();
 	}
 
-	private void createProduct(ProductRequest productRequest, Long userId) throws Exception {
-
-		mockMvc.perform(post("/api/warehouse/products/create")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(productRequest))
-						.with(clerkAuth(userId)))
-				.andExpect(status().isCreated());
-	}
-
 	private Long registerUserAndGetId(UserRequest userRequest) throws Exception {
 		String userJson = mockMvc.perform(post("/api/user/register")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -324,10 +313,6 @@ public class OrderIntegrationTest {
 
 	private ProductRequest productRequestHelper() {
 		return new ProductRequest(PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
-	}
-
-	private ProductRequest productWithExceedingWeightRequestHelper() {
-		return new ProductRequest(PRODUCT_NAME, PRODUCT_VALUE, EXCEEDING_PRODUCT_WEIGHT);
 	}
 
 	private UserRequest clerkRequest() {

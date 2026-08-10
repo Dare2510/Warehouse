@@ -69,7 +69,7 @@ public class InventoryIntegrationTest {
 	private static final Long UNAVAILABLE_INVENTORY_ID = 999L;
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		inventoryRepository.deleteAll();
 		locationsRepository.deleteAll();
 		productRepository.deleteAll();

@@ -27,6 +27,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.math.BigDecimal;
@@ -36,6 +37,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -84,8 +86,6 @@ public class ProcessorIntegrationTest {
 	private static final BigDecimal PRODUCT_VALUE = new BigDecimal("300");
 	private static final double PRODUCT_WEIGHT = 50;
 
-	private static final double EXCEEDING_PRODUCT_WEIGHT = 500;
-
 	private static final Integer INVENTORY_QUANTITY = 10;
 
 	private static final Integer QUANTITY_TO_STORE = 5;
@@ -94,6 +94,10 @@ public class ProcessorIntegrationTest {
 
 	private static final OrderStatus VALID_PROCESSOR_REQUEST = OrderStatus.ORDER_PLACED;
 	private static final OrderStatus NOT_VALID_PROCESSOR_REQUEST = OrderStatus.PACKAGED;
+	private static final OrderStatus ORDER_STATUS_PROCESSING = OrderStatus.PROCESSING;
+	private static final OrderStatus ORDER_STATUS_PACKAGED = OrderStatus.PACKAGED;
+	private static final OrderStatus ORDER_STATUS_SHIPPED = OrderStatus.SHIPPED;
+
 
 	@AfterEach
 	public void afterEach() {
@@ -188,6 +192,30 @@ public class ProcessorIntegrationTest {
 	}
 
 	@Test
+	public void changeStatusOfOrder_whenRequestedStatusIsValidNextStatus_returns200() throws Exception {
+
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore,clerkId);
+
+		Long userId = registerUserAndGetId(userRequest());
+
+		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
+		Long orderId = createOrderAndGetId(userId,validOrder);
+
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/" + ORDER_STATUS_PROCESSING)
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.productId").value(productId))
+				.andExpect(jsonPath("$.product").value(PRODUCT_NAME))
+				.andExpect(jsonPath("$.quantity").value(VALID_ORDER_QUANTITY))
+				.andExpect(jsonPath("$.orderStatus").value(ORDER_STATUS_PROCESSING.toString()));
+	}
+
+	@Test
 	public void deleteOrderById_whenOrdersHasStatusCanceled_returns204() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
 		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
@@ -264,6 +292,44 @@ public class ProcessorIntegrationTest {
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.message").value("Order/s not found"));
 
+	}
+
+	@Test
+	public void archiveOrder_whenOrdersWithStatusShippedWereFound_returns204() throws Exception {
+
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore,clerkId);
+
+		Long userId = registerUserAndGetId(userRequest());
+
+		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
+		Long orderId = createOrderAndGetId(userId,validOrder);
+
+		setOrderToShipped(clerkId,orderId);
+
+		mockMvc.perform(patch("/api/warehouse/processing/archive")
+				.with(clerkAuth(clerkId)))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void archiveOrder_whenOrdersWithStatusShippedWereNotFound_returns400() throws Exception {
+
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore,clerkId);
+
+		mockMvc.perform(patch("/api/warehouse/processing/archive")
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Order/s not found"));
 	}
 
 
@@ -383,16 +449,25 @@ public class ProcessorIntegrationTest {
 				.andExpect(status().isOk());
 	}
 
+	private void setOrderToShipped(Long clerkId, Long orderId) throws Exception {
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/" + ORDER_STATUS_PROCESSING)
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/" + ORDER_STATUS_PACKAGED)
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/" + ORDER_STATUS_SHIPPED)
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isOk());
+	}
+
 	//Request Helpers
 
 	private ProductRequest productRequestHelper() {
 		return new ProductRequest(PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
 	}
-
-	private ProductRequest productWithExceedingWeightRequestHelper() {
-		return new ProductRequest(PRODUCT_NAME, PRODUCT_VALUE, EXCEEDING_PRODUCT_WEIGHT);
-	}
-
 	private UserRequest clerkRequest() {
 		return new UserRequest(CLERK_MAIL, PASSWORD, CLERK_USERNAME, CLERK_FIRST_NAME, CLERK_SURNAME);
 	}
@@ -400,8 +475,6 @@ public class ProcessorIntegrationTest {
 	private UserRequest userRequest() {
 		return new UserRequest(USER_MAIL, PASSWORD, USER_USERNAME, USER_FIRST_NAME, USER_SURNAME);
 	}
-
-
 
 	private InventoryRequest inventoryRequestHelper(Long productId) {
 		return new InventoryRequest(productId, INVENTORY_QUANTITY);

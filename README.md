@@ -108,21 +108,24 @@ JWT_EXPIRATION_MS=3600000
 - ADMIN_PASSWORD=change-me-now
 ```
 
-
 **Running locally**
 
 Make sure PostgreSQL is running and that a database named warehouse exists.
 
 Create a .env file based on .env.example, then run:
+
 ```
 ./mvnw spring-boot:run
 ```
+
 **Running with Docker Compose**
 
 From the docker directory run:
+
 ```
 docker compose --env-file ../.env up --build
 ```
+
 This starts:
 
 PostgreSQL mapped to host port 54433
@@ -142,9 +145,11 @@ The project includes:
 * validation tests
 
 **Run tests with:**
+
 ```
 ./mvnw test
 ```
+
 ## Learning Goals
 
 **This project was built to:**
@@ -157,7 +162,6 @@ The project includes:
 * Improve code quality
 * Learn Docker
 * Practice clean commit structure and incremental improvements
-
 
 ## Known limitations
 

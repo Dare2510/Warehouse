@@ -6,8 +6,8 @@ import com.boljevac.warehouse.location.dto.LocationsRequest;
 import com.boljevac.warehouse.location.repository.LocationsRepository;
 import com.boljevac.warehouse.order.dto.OrderRequest;
 import com.boljevac.warehouse.order.repository.OrderRepository;
-import com.boljevac.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.product.dto.ProductRequest;
+import com.boljevac.warehouse.product.repository.ProductRepository;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.dto.UserRequest;
 import com.boljevac.warehouse.user.entity.Role;
@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -168,10 +167,10 @@ public class ProductIntegrationTest {
 		UserRequest userRequest = clerkRequest();
 		Long userId = registerUserAndGetId(userRequest);
 		ProductRequest productRequest = productRequestHelper();
-		Long productId = createProductAndGetId(productRequest,userId);
+		Long productId = createProductAndGetId(productRequest, userId);
 
 		mockMvc.perform(delete("/api/warehouse/products/delete/" + productId)
-				 .with(clerkAuth(userId)))
+						.with(clerkAuth(userId)))
 				.andExpect(status().isNoContent());
 
 	}
@@ -182,30 +181,30 @@ public class ProductIntegrationTest {
 		Long userId = registerUserAndGetId(userRequest);
 
 		mockMvc.perform(delete("/api/warehouse/products/delete/" + UNAVAILABLE_PRODUCT_ID)
-					.with(clerkAuth(userId)))
-					.andExpect(status().isNotFound())
-					.andExpect(jsonPath("$.message")
-					.value("Product with id " + UNAVAILABLE_PRODUCT_ID + " not found"));
+						.with(clerkAuth(userId)))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message")
+						.value("Product with id " + UNAVAILABLE_PRODUCT_ID + " not found"));
 
 	}
 
 	@Test
 	public void deleteProduct_whenOrderExists_returns400() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
-		createOrder(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+		createOrder(userId, orderRequestHelper(productId, VALID_ORDER_QUANTITY));
 
 		mockMvc.perform(delete("/api/warehouse/products/delete/" + productId)
 						.with(clerkAuth(clerkId)))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message")
-						.value("Cannot delete product with id " +productId + " order or inventory exist"));
+						.value("Cannot delete product with id " + productId + " order or inventory exist"));
 
 
 	}
@@ -215,13 +214,13 @@ public class ProductIntegrationTest {
 		UserRequest userRequest = userRequest();
 		Long userId = registerUserAndGetId(userRequest);
 		ProductRequest productRequest = productRequestHelper();
-		Long productId = createProductAndGetId(productRequest,userId);
+		Long productId = createProductAndGetId(productRequest, userId);
 		ProductRequest updatedProductRequest = updatedProductRequestHelper();
 
 		mockMvc.perform(put("/api/warehouse/products/" + productId)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(updatedProductRequest))
-				.with(clerkAuth(userId)))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(updatedProductRequest))
+						.with(clerkAuth(userId)))
 				.andExpect(status().isOk());
 
 	}
@@ -333,16 +332,16 @@ public class ProductIntegrationTest {
 
 	//Request Helper
 
-	private ProductRequest productRequestHelper(){
-		return new ProductRequest(PRODUCT_NAME,PRODUCT_VALUE,PRODUCT_WEIGHT);
+	private ProductRequest productRequestHelper() {
+		return new ProductRequest(PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
 	}
 
-	private ProductRequest updatedProductRequestHelper(){
-		return new ProductRequest(UPDATED_PRODUCT_NAME,UPDATED_PRODUCT_VALUE,UPDATED_PRODUCT_WEIGHT);
+	private ProductRequest updatedProductRequestHelper() {
+		return new ProductRequest(UPDATED_PRODUCT_NAME, UPDATED_PRODUCT_VALUE, UPDATED_PRODUCT_WEIGHT);
 	}
 
-	private ProductRequest productRequestWithInvalidWeight(){
-		return new ProductRequest(PRODUCT_NAME,PRODUCT_VALUE,INVALID_PRODUCT_WEIGHT);
+	private ProductRequest productRequestWithInvalidWeight() {
+		return new ProductRequest(PRODUCT_NAME, PRODUCT_VALUE, INVALID_PRODUCT_WEIGHT);
 	}
 
 	private UserRequest userRequest() {

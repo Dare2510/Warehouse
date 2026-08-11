@@ -52,7 +52,7 @@ public class ProcessorService {
 
 	public ProcessorResponse changeStatusOfOrder(AuthenticatedUser authenticatedUser, Long orderId, OrderStatus newOrderStatus) {
 
-		OrderEntity orderToChangeStatus = orderService.getOrderById(authenticatedUser,orderId);
+		OrderEntity orderToChangeStatus = orderService.getOrderById(authenticatedUser, orderId);
 		OrderStatus statusToChange = orderToChangeStatus.getOrderStatus();
 		UserEntity changedBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 
@@ -71,8 +71,8 @@ public class ProcessorService {
 	}
 
 	@Transactional
-	public void deleteOrderById(AuthenticatedUser authenticatedUser,Long orderId) {
-		OrderEntity orderToDelete = orderService.getOrderById(authenticatedUser,orderId);
+	public void deleteOrderById(AuthenticatedUser authenticatedUser, Long orderId) {
+		OrderEntity orderToDelete = orderService.getOrderById(authenticatedUser, orderId);
 		boolean deletionIsValid = validateToDeleteOrder(orderToDelete);
 
 		if (deletionIsValid) {

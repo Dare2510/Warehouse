@@ -1,12 +1,12 @@
 package com.boljevac.warehouse.warehouse.service;
 
+import com.boljevac.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.order.entity.OrderStatus;
 import com.boljevac.warehouse.order.entity.ShippedEntity;
 import com.boljevac.warehouse.order.exception.OrderCancelOrDeleteNotPossibleException;
 import com.boljevac.warehouse.order.exception.OrderNotFoundException;
-import com.boljevac.warehouse.order.repository.OrderRepository;
-import com.boljevac.warehouse.order.entity.OrderEntity;
 import com.boljevac.warehouse.order.exception.StatusChangeInvalidOrderException;
+import com.boljevac.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.order.repository.ShippedOrdersRepository;
 import com.boljevac.warehouse.order.service.OrderService;
 import com.boljevac.warehouse.processor.service.ProcessorService;
@@ -44,7 +44,7 @@ public class ProcessorServiceTest {
 	private OrderService orderService;
 
 	@Mock
-	private UserService  userService;
+	private UserService userService;
 
 	@Mock
 	private ModelMapper modelMapper;
@@ -60,7 +60,7 @@ public class ProcessorServiceTest {
 	@BeforeEach
 	public void setup() {
 		processorService = new ProcessorService(
-				orderRepository,shippedOrdersRepository,orderService,modelMapper,userService);
+				orderRepository, shippedOrdersRepository, orderService, modelMapper, userService);
 	}
 
 	@Test
@@ -71,8 +71,8 @@ public class ProcessorServiceTest {
 		OrderEntity orderWithValidStatus = new OrderEntity(product, 3);
 		orderWithValidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
 
-		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(orderWithValidStatus);
-		processorService.changeStatusOfOrder(authenticatedUser,1L, OrderStatus.PROCESSING);
+		when(orderService.getOrderById(authenticatedUser, 1L)).thenReturn(orderWithValidStatus);
+		processorService.changeStatusOfOrder(authenticatedUser, 1L, OrderStatus.PROCESSING);
 
 		assertEquals(OrderStatus.PROCESSING, orderWithValidStatus.getOrderStatus());
 
@@ -87,10 +87,10 @@ public class ProcessorServiceTest {
 		OrderEntity orderWithInvalidStatus = new OrderEntity(product, 3);
 		orderWithInvalidStatus.setOrderStatus(OrderStatus.ORDER_PLACED);
 
-		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(orderWithInvalidStatus);
+		when(orderService.getOrderById(authenticatedUser, 1L)).thenReturn(orderWithInvalidStatus);
 
 		assertThrows(StatusChangeInvalidOrderException.class, () -> {
-			processorService.changeStatusOfOrder(authenticatedUser,1L, OrderStatus.SHIPPED);
+			processorService.changeStatusOfOrder(authenticatedUser, 1L, OrderStatus.SHIPPED);
 		});
 
 		assertEquals(OrderStatus.ORDER_PLACED, orderWithInvalidStatus.getOrderStatus());
@@ -107,8 +107,8 @@ public class ProcessorServiceTest {
 		OrderEntity cancelledOrder = new OrderEntity(product, 30);
 		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
 
-		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(cancelledOrder);
-		processorService.deleteOrderById(authenticatedUser,1L);
+		when(orderService.getOrderById(authenticatedUser, 1L)).thenReturn(cancelledOrder);
+		processorService.deleteOrderById(authenticatedUser, 1L);
 
 		verify(orderRepository).delete(cancelledOrder);
 		assertFalse(orderRepository.existsById(1L));
@@ -122,10 +122,10 @@ public class ProcessorServiceTest {
 		OrderEntity processingOrder = new OrderEntity(product, 30);
 		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
 
-		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(processingOrder);
+		when(orderService.getOrderById(authenticatedUser, 1L)).thenReturn(processingOrder);
 
 		assertThrows(OrderCancelOrDeleteNotPossibleException.class, () -> {
-			processorService.deleteOrderById(authenticatedUser,1L);
+			processorService.deleteOrderById(authenticatedUser, 1L);
 		});
 		verify(orderRepository, never()).deleteById(1L);
 	}
@@ -189,9 +189,9 @@ public class ProcessorServiceTest {
 		OrderEntity cancelledOrder = new OrderEntity(product, 30);
 		cancelledOrder.setOrderStatus(OrderStatus.CANCELLED);
 
-		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(cancelledOrder);
+		when(orderService.getOrderById(authenticatedUser, 1L)).thenReturn(cancelledOrder);
 
-		processorService.deleteOrderById(authenticatedUser,1L);
+		processorService.deleteOrderById(authenticatedUser, 1L);
 
 		verify(orderRepository).delete(cancelledOrder);
 
@@ -206,10 +206,10 @@ public class ProcessorServiceTest {
 		OrderEntity processingOrder = new OrderEntity(product, 30);
 		processingOrder.setOrderStatus(OrderStatus.PROCESSING);
 
-		when(orderService.getOrderById(authenticatedUser,1L)).thenReturn(processingOrder);
+		when(orderService.getOrderById(authenticatedUser, 1L)).thenReturn(processingOrder);
 
 		assertThrows(OrderCancelOrDeleteNotPossibleException.class, () -> {
-			processorService.deleteOrderById(authenticatedUser,1L);
+			processorService.deleteOrderById(authenticatedUser, 1L);
 		});
 
 		verify(orderRepository, never()).delete(processingOrder);
@@ -256,15 +256,15 @@ public class ProcessorServiceTest {
 		verify(orderRepository, never()).deleteAll(orders);
 	}
 
-	private AuthenticatedUser createAuthenticatedAdminHelper(){
+	private AuthenticatedUser createAuthenticatedAdminHelper() {
 		return new AuthenticatedUser(99L, "Admin@gmail.com", Role.ADMIN);
 	}
 
-	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser){
+	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser) {
 		return userService.getUserByAuthenticatedUser(authenticatedUser);
 	}
 
-	private ProductEntity createProductHelper(UserEntity user){
-		return new ProductEntity(user,PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
+	private ProductEntity createProductHelper(UserEntity user) {
+		return new ProductEntity(user, PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
 	}
 }

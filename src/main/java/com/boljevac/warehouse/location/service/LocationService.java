@@ -73,7 +73,7 @@ public class LocationService {
 
 		InventoryEntity toStoreFrom = getEntityToStoreFrom(toStoreRequest);
 
-		if(toStoreFrom.getProductEntity() == null) {
+		if (toStoreFrom.getProductEntity() == null) {
 			throw new InventoryNotFoundException(toStoreFrom.getId());
 		}
 

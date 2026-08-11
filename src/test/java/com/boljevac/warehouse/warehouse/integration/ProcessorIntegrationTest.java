@@ -113,16 +113,16 @@ public class ProcessorIntegrationTest {
 	@Test
 	public void getListOfOrdersByStatus_whenOrdersAreFound_returns200() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
 
-		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
-		createOrder(userId,validOrder);
+		OrderRequest validOrder = orderRequestHelper(productId, VALID_ORDER_QUANTITY);
+		createOrder(userId, validOrder);
 
 		ProcessorRequest orderPlaced = new ProcessorRequest(VALID_PROCESSOR_REQUEST);
 
@@ -142,48 +142,48 @@ public class ProcessorIntegrationTest {
 
 	@Test
 	public void getListOfOrdersByStatus_whenOrdersAreNotFound_returns404() throws Exception {
-			Long clerkId = registerUserAndGetId(clerkRequest());
-			Long productId = createProductAndGetId(productRequestHelper(),clerkId);
-			createLocations(clerkId);
-			Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-			LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-			storeInventoryToLocation(toStore,clerkId);
+		Long clerkId = registerUserAndGetId(clerkRequest());
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
+		createLocations(clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
-			Long userId = registerUserAndGetId(userRequest());
+		Long userId = registerUserAndGetId(userRequest());
 
-			OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
-			createOrder(userId,validOrder);
+		OrderRequest validOrder = orderRequestHelper(productId, VALID_ORDER_QUANTITY);
+		createOrder(userId, validOrder);
 
-			ProcessorRequest notValidRequest = new ProcessorRequest(NOT_VALID_PROCESSOR_REQUEST);
+		ProcessorRequest notValidRequest = new ProcessorRequest(NOT_VALID_PROCESSOR_REQUEST);
 
-			mockMvc
-					.perform(get("/api/warehouse/processing")
-							.contentType(MediaType.APPLICATION_JSON)
-							.content(objectMapper.writeValueAsString(notValidRequest))
-							.with(clerkAuth(clerkId)))
-					.andExpect(status().isNotFound())
-					.andExpect(jsonPath("$.message")
-							.value("Order/s not found"));
-
+		mockMvc
+				.perform(get("/api/warehouse/processing")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(notValidRequest))
+						.with(clerkAuth(clerkId)))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message")
+						.value("Order/s not found"));
 
 
 	}
+
 	@Test
 	public void changeStatusOfOrder_whenRequestedStatusIsNotValidNextStatus_returns400() throws Exception {
 
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
 
-		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
-		Long orderId = createOrderAndGetId(userId,validOrder);
+		OrderRequest validOrder = orderRequestHelper(productId, VALID_ORDER_QUANTITY);
+		Long orderId = createOrderAndGetId(userId, validOrder);
 
-		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/"+NOT_VALID_PROCESSOR_REQUEST)
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/" + orderId + "/" + NOT_VALID_PROCESSOR_REQUEST)
 						.with(clerkAuth(clerkId)))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message")
@@ -195,18 +195,18 @@ public class ProcessorIntegrationTest {
 	public void changeStatusOfOrder_whenRequestedStatusIsValidNextStatus_returns200() throws Exception {
 
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
 
-		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
-		Long orderId = createOrderAndGetId(userId,validOrder);
+		OrderRequest validOrder = orderRequestHelper(productId, VALID_ORDER_QUANTITY);
+		Long orderId = createOrderAndGetId(userId, validOrder);
 
-		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/" + ORDER_STATUS_PROCESSING)
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/" + orderId + "/" + ORDER_STATUS_PROCESSING)
 						.with(clerkAuth(clerkId)))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.productId").value(productId))
@@ -225,12 +225,12 @@ public class ProcessorIntegrationTest {
 		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
-		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+		Long orderId = createOrderAndGetId(userId, orderRequestHelper(productId, VALID_ORDER_QUANTITY));
 
-		cancelOrder(userId,orderId);
+		cancelOrder(userId, orderId);
 
 		mockMvc.perform(delete("/api/warehouse/processing/delete/" + orderId)
-				.with(clerkAuth(clerkId)))
+						.with(clerkAuth(clerkId)))
 				.andExpect(status().isNoContent());
 
 	}
@@ -245,7 +245,7 @@ public class ProcessorIntegrationTest {
 		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
-		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+		Long orderId = createOrderAndGetId(userId, orderRequestHelper(productId, VALID_ORDER_QUANTITY));
 
 		mockMvc.perform(delete("/api/warehouse/processing/delete/" + orderId)
 						.with(clerkAuth(clerkId)))
@@ -265,9 +265,9 @@ public class ProcessorIntegrationTest {
 		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
-		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+		Long orderId = createOrderAndGetId(userId, orderRequestHelper(productId, VALID_ORDER_QUANTITY));
 
-		cancelOrder(userId,orderId);
+		cancelOrder(userId, orderId);
 
 		mockMvc.perform(delete("/api/warehouse/processing/deleteCancelled")
 						.with(clerkAuth(clerkId)))
@@ -285,7 +285,7 @@ public class ProcessorIntegrationTest {
 		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
-		createOrder(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+		createOrder(userId, orderRequestHelper(productId, VALID_ORDER_QUANTITY));
 
 		mockMvc.perform(delete("/api/warehouse/processing/deleteCancelled")
 						.with(clerkAuth(clerkId)))
@@ -298,21 +298,21 @@ public class ProcessorIntegrationTest {
 	public void archiveOrder_whenOrdersWithStatusShippedWereFound_returns204() throws Exception {
 
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest());
 
-		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
-		Long orderId = createOrderAndGetId(userId,validOrder);
+		OrderRequest validOrder = orderRequestHelper(productId, VALID_ORDER_QUANTITY);
+		Long orderId = createOrderAndGetId(userId, validOrder);
 
-		setOrderToShipped(clerkId,orderId);
+		setOrderToShipped(clerkId, orderId);
 
 		mockMvc.perform(patch("/api/warehouse/processing/archive")
-				.with(clerkAuth(clerkId)))
+						.with(clerkAuth(clerkId)))
 				.andExpect(status().isOk());
 	}
 
@@ -320,11 +320,11 @@ public class ProcessorIntegrationTest {
 	public void archiveOrder_whenOrdersWithStatusShippedWereNotFound_returns400() throws Exception {
 
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		mockMvc.perform(patch("/api/warehouse/processing/archive")
 						.with(clerkAuth(clerkId)))
@@ -333,8 +333,7 @@ public class ProcessorIntegrationTest {
 	}
 
 
-
-		//Clerk Authenticator
+	//Clerk Authenticator
 
 	private RequestPostProcessor clerkAuth(Long clerkId) {
 		AuthenticatedUser principal = new AuthenticatedUser(
@@ -442,23 +441,22 @@ public class ProcessorIntegrationTest {
 	}
 
 
-
 	private void cancelOrder(Long userId, Long orderId) throws Exception {
-		mockMvc.perform(patch("/api/warehouse/orders/"+orderId+"/cancel")
+		mockMvc.perform(patch("/api/warehouse/orders/" + orderId + "/cancel")
 						.with(userAuth(userId)))
 				.andExpect(status().isOk());
 	}
 
 	private void setOrderToShipped(Long clerkId, Long orderId) throws Exception {
-		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/" + ORDER_STATUS_PROCESSING)
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/" + orderId + "/" + ORDER_STATUS_PROCESSING)
 						.with(clerkAuth(clerkId)))
 				.andExpect(status().isOk());
 
-		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/" + ORDER_STATUS_PACKAGED)
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/" + orderId + "/" + ORDER_STATUS_PACKAGED)
 						.with(clerkAuth(clerkId)))
 				.andExpect(status().isOk());
 
-		mockMvc.perform(patch("/api/warehouse/processing/statusChange/"+orderId+"/" + ORDER_STATUS_SHIPPED)
+		mockMvc.perform(patch("/api/warehouse/processing/statusChange/" + orderId + "/" + ORDER_STATUS_SHIPPED)
 						.with(clerkAuth(clerkId)))
 				.andExpect(status().isOk());
 	}
@@ -468,6 +466,7 @@ public class ProcessorIntegrationTest {
 	private ProductRequest productRequestHelper() {
 		return new ProductRequest(PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
 	}
+
 	private UserRequest clerkRequest() {
 		return new UserRequest(CLERK_MAIL, PASSWORD, CLERK_USERNAME, CLERK_FIRST_NAME, CLERK_SURNAME);
 	}

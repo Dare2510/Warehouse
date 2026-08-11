@@ -93,7 +93,7 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse cancelOrder(AuthenticatedUser authenticatedUser, Long id) {
-		OrderEntity orderToCancel = getOrderById(authenticatedUser,id);
+		OrderEntity orderToCancel = getOrderById(authenticatedUser, id);
 		UserEntity canceledBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 		boolean cancelIsValid = validateCancelRequest(orderToCancel);
 
@@ -132,12 +132,12 @@ public class OrderService {
 
 	}
 
-	public OrderEntity getOrderById(AuthenticatedUser authenticatedUser,Long id) throws OrderNotFoundException {
+	public OrderEntity getOrderById(AuthenticatedUser authenticatedUser, Long id) throws OrderNotFoundException {
 		OrderEntity order = orderRepository.findById(id).orElseThrow(
 				OrderNotFoundException::new
 		);
 
-		if(authenticatedUser.getRole() == Role.USER && !order.getCreatedByUser().getId().equals(authenticatedUser.getUserId())){
+		if (authenticatedUser.getRole() == Role.USER && !order.getCreatedByUser().getId().equals(authenticatedUser.getUserId())) {
 			log.info("Ownership validation for order with Id {} has been denied", order.getId());
 			throw new OrderOwnerShipException(id);
 		}

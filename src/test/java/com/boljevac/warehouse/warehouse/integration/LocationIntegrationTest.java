@@ -73,7 +73,7 @@ public class LocationIntegrationTest {
 	private static final Integer EXCEEDING_QUANTITY_TO_STORE = 20;
 
 	@AfterEach
-	public void tearDown(){
+	public void tearDown() {
 
 		inventoryRepository.deleteAll();
 		locationsRepository.deleteAll();
@@ -109,20 +109,20 @@ public class LocationIntegrationTest {
 	@Test
 	public void storeInventory_whenInventoryExists_returns200() throws Exception {
 		Long userId = registerUserAndGetId(userRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),userId);
+		Long productId = createProductAndGetId(productRequestHelper(), userId);
 		createLocations(userId);
-		Long inventoryId = createInventoryAndGetId(userId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
+		Long inventoryId = createInventoryAndGetId(userId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
 
 		mockMvc.perform(post("/api/warehouse/locations")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(toStore))
-				.with(clerkAuth(userId)))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(toStore))
+						.with(clerkAuth(userId)))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.inventoryId").exists())
 				.andExpect(jsonPath("$.product").value(PRODUCT_NAME))
 				.andExpect(jsonPath("$.weightPerPiece").value(PRODUCT_WEIGHT))
-				.andExpect(jsonPath("$.totalWeight").value(PRODUCT_WEIGHT*QUANTITY_TO_STORE))
+				.andExpect(jsonPath("$.totalWeight").value(PRODUCT_WEIGHT * QUANTITY_TO_STORE))
 				.andExpect(jsonPath("$.location").exists());
 
 	}
@@ -130,10 +130,10 @@ public class LocationIntegrationTest {
 	@Test
 	public void storeInventory_whenQuantityIsNotAvailable_returns400() throws Exception {
 		Long userId = registerUserAndGetId(userRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),userId);
+		Long productId = createProductAndGetId(productRequestHelper(), userId);
 		createLocations(userId);
-		Long inventoryId = createInventoryAndGetId(userId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,EXCEEDING_QUANTITY_TO_STORE);
+		Long inventoryId = createInventoryAndGetId(userId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, EXCEEDING_QUANTITY_TO_STORE);
 
 		mockMvc.perform(post("/api/warehouse/locations")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -148,10 +148,10 @@ public class LocationIntegrationTest {
 	@Test
 	public void storeInventory_whenWeightExceedsLocation_returns400() throws Exception {
 		Long userId = registerUserAndGetId(userRequest());
-		Long productId = createProductAndGetId(productWithExceedingWeightRequestHelper(),userId);
+		Long productId = createProductAndGetId(productWithExceedingWeightRequestHelper(), userId);
 		createLocations(userId);
-		Long inventoryId = createInventoryAndGetId(userId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
+		Long inventoryId = createInventoryAndGetId(userId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
 
 		mockMvc.perform(post("/api/warehouse/locations")
 						.contentType(MediaType.APPLICATION_JSON)

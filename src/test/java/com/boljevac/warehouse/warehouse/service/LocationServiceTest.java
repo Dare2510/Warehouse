@@ -27,8 +27,8 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class LocationServiceTest {
@@ -40,7 +40,7 @@ public class LocationServiceTest {
 	private InventoryRepository inventoryRepository;
 
 	@Mock
-	private UserService  userService;
+	private UserService userService;
 
 	@InjectMocks
 	private LocationService locationService;
@@ -57,7 +57,7 @@ public class LocationServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		locationService = new LocationService(locationsRepository,inventoryRepository,userService);
+		locationService = new LocationService(locationsRepository, inventoryRepository, userService);
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class LocationServiceTest {
 		when(locationsRepository.findAll()).thenReturn(Collections.singletonList(toStoreInLocation));
 		when(locationsRepository.getLocationById(toStoreInLocation.getId())).thenReturn(toStoreInLocation);
 
-		locationService.storeInventory(authenticatedUser,request);
+		locationService.storeInventory(authenticatedUser, request);
 
 		verify(inventoryRepository, times(2)).save(any());
 		verify(locationsRepository, times(302)).save(any());
@@ -146,7 +146,7 @@ public class LocationServiceTest {
 		when(locationsRepository.findAll()).thenReturn(Collections.singletonList(toStoreInLocation));
 		when(locationsRepository.getLocationById(toStoreInLocation.getId())).thenReturn(toStoreInLocation);
 
-		locationService.storeInventory(authenticatedUser,request);
+		locationService.storeInventory(authenticatedUser, request);
 
 		verify(inventoryRepository, times(2)).save(any());
 		verify(locationsRepository, times(302)).save(any());
@@ -194,7 +194,7 @@ public class LocationServiceTest {
 		when(locationsRepository.getLocationById(toStoreInLocation.getId())).thenReturn(toStoreInLocation);
 
 		assertThrows(NotSufficientStockToStoreException.class,
-				() -> locationService.storeInventory(authenticatedUser,request));
+				() -> locationService.storeInventory(authenticatedUser, request));
 
 		verify(locationsRepository, never()).save(toStoreInLocation);
 	}
@@ -225,7 +225,7 @@ public class LocationServiceTest {
 		when(locationsRepository.getLocationById(toStoreInLocation.getId())).thenReturn(toStoreInLocation);
 
 		assertThrows(LocationLoadLimitExceededException.class,
-				() -> locationService.storeInventory(authenticatedUser,request));
+				() -> locationService.storeInventory(authenticatedUser, request));
 
 		verify(locationsRepository, never()).save(toStoreInLocation);
 
@@ -238,22 +238,22 @@ public class LocationServiceTest {
 		locationService.createLocations();
 		LocationsRequest request = new LocationsRequest(1L, 5);
 		assertThrows(InventoryNotFoundException.class, ()
-				-> locationService.storeInventory(authenticatedUser,request));
+				-> locationService.storeInventory(authenticatedUser, request));
 
 		verify(inventoryRepository, times(1)).findById(anyLong());
 
 	}
 
-	private AuthenticatedUser createAuthenticatedAdminHelper(){
+	private AuthenticatedUser createAuthenticatedAdminHelper() {
 		return new AuthenticatedUser(99L, "Admin@gmail.com", Role.ADMIN);
 	}
 
-	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser){
+	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser) {
 		return userService.getUserByAuthenticatedUser(authenticatedUser);
 	}
 
-	private ProductEntity createProductHelper(UserEntity user){
-		return new ProductEntity(user,PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
+	private ProductEntity createProductHelper(UserEntity user) {
+		return new ProductEntity(user, PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
 	}
 
 	private LocationEntity createLocationHelper(ProductEntity product) {

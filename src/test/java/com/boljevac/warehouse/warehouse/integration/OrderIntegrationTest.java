@@ -31,7 +31,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,7 +57,7 @@ public class OrderIntegrationTest {
 	private ProductRepository productRepository;
 
 	@Autowired
-	private LocationsRepository  locationsRepository;
+	private LocationsRepository locationsRepository;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -100,19 +101,19 @@ public class OrderIntegrationTest {
 	@Test
 	public void createOrder_whenRequestIsValid_returns201() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
 
-		OrderRequest validOrder = orderRequestHelper(productId,VALID_ORDER_QUANTITY);
+		OrderRequest validOrder = orderRequestHelper(productId, VALID_ORDER_QUANTITY);
 		mockMvc.perform(post("/api/warehouse/orders")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(validOrder))
-				.with(userAuth(userId)))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(validOrder))
+						.with(userAuth(userId)))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.orderId").exists())
 				.andExpect(jsonPath("$.product").value(PRODUCT_NAME))
@@ -124,36 +125,36 @@ public class OrderIntegrationTest {
 	@Test
 	public void createOrder_whenRequestIsExceedingStock_returns400() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
 
-		OrderRequest exceedingOrder = orderRequestHelper(productId,EXCEEDING_ORDER_QUANTITY);
+		OrderRequest exceedingOrder = orderRequestHelper(productId, EXCEEDING_ORDER_QUANTITY);
 		mockMvc.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(exceedingOrder))
 						.with(userAuth(userId)))
-						.andExpect(status().isBadRequest())
-						.andExpect(jsonPath("$.message")
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message")
 						.value("Order exceeds stock, -> Order not possible."));
 	}
 
 	@Test
 	public void createOrder_whenRequestIsNotValid_returns400() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
 
-		OrderRequest invalidOrder = orderRequestHelper(INVALID_PRODUCT_ID_FOR_ORDER,VALID_ORDER_QUANTITY);
+		OrderRequest invalidOrder = orderRequestHelper(INVALID_PRODUCT_ID_FOR_ORDER, VALID_ORDER_QUANTITY);
 
 		mockMvc.perform(post("/api/warehouse/orders")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -167,33 +168,33 @@ public class OrderIntegrationTest {
 	@Test
 	public void cancelOrder_whenRequestIsValid_returns200() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
-		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
-		mockMvc.perform(patch("/api/warehouse/orders/"+orderId+"/cancel")
+		Long orderId = createOrderAndGetId(userId, orderRequestHelper(productId, VALID_ORDER_QUANTITY));
+		mockMvc.perform(patch("/api/warehouse/orders/" + orderId + "/cancel")
 						.with(userAuth(userId)))
-						.andExpect(status().isOk());
+				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void cancelOrder_whenOwnershipValidationFailed_returns403() throws Exception {
 		Long clerkId = registerUserAndGetId(clerkRequest());
-		Long productId = createProductAndGetId(productRequestHelper(),clerkId);
+		Long productId = createProductAndGetId(productRequestHelper(), clerkId);
 		createLocations(clerkId);
-		Long inventoryId = createInventoryAndGetId(clerkId,inventoryRequestHelper(productId));
-		LocationsRequest toStore = new LocationsRequest(inventoryId,QUANTITY_TO_STORE);
-		storeInventoryToLocation(toStore,clerkId);
+		Long inventoryId = createInventoryAndGetId(clerkId, inventoryRequestHelper(productId));
+		LocationsRequest toStore = new LocationsRequest(inventoryId, QUANTITY_TO_STORE);
+		storeInventoryToLocation(toStore, clerkId);
 
 		Long userId = registerUserAndGetId(userRequest(USER_MAIL));
-		Long orderId = createOrderAndGetId(userId,orderRequestHelper(productId,VALID_ORDER_QUANTITY));
+		Long orderId = createOrderAndGetId(userId, orderRequestHelper(productId, VALID_ORDER_QUANTITY));
 		Long failingUserId = registerUserAndGetId(userRequest(SECOND_USER_MAIL));
 
-		mockMvc.perform(patch("/api/warehouse/orders/"+orderId+"/cancel")
+		mockMvc.perform(patch("/api/warehouse/orders/" + orderId + "/cancel")
 						.with(userAuth(failingUserId)))
 				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.message")

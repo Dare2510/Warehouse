@@ -72,8 +72,8 @@ public class ProductService {
 		boolean inventoryExists = inventoryRepository.existsByProductEntity(toDelete);
 
 		if (!orderExists && !inventoryExists) {
-		log.info("Product with id {} has been deleted", toDelete.getId());
-		productRepository.delete(toDelete);
+			log.info("Product with id {} has been deleted", toDelete.getId());
+			productRepository.delete(toDelete);
 
 		} else {
 			log.info("Product with id {} cannot be deleted, order or inventory exists", toDelete.getId());

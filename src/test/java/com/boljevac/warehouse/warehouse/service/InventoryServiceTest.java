@@ -26,9 +26,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,13 +63,13 @@ public class InventoryServiceTest {
 		ProductEntity product = createProductHelper(user);
 
 		LocationEntity locationEntity = createLocationHelper(product);
-		InventoryEntity inventory = createInventoryHelper(product,locationEntity,locationEntity.toString());
+		InventoryEntity inventory = createInventoryHelper(product, locationEntity, locationEntity.toString());
 
 		when(inventoryRepository.findById(1L)).thenReturn(Optional.of(inventory));
 		InventoryResponse response = inventoryService.getInventoryResponse(1L);
 
 		assertEquals("TestProduct", response.getProduct());
-		assertEquals(20,response.getQuantity());
+		assertEquals(20, response.getQuantity());
 
 	}
 
@@ -86,7 +86,7 @@ public class InventoryServiceTest {
 
 	@Test
 	public void createStock_whenAllRequirementsAreMet_returnsInventoryResponse() {
-		InventoryRequest request = new InventoryRequest(1L,20);
+		InventoryRequest request = new InventoryRequest(1L, 20);
 		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
 		UserEntity user = getUserByAuthenticatedUser(authenticatedUser);
 		ProductEntity product = createProductHelper(user);
@@ -94,7 +94,7 @@ public class InventoryServiceTest {
 		when(locationsRepository.count()).thenReturn(5L);
 		when(productService.getProductById(1L)).thenReturn(product);
 
-		inventoryService.createStock(authenticatedUser,request);
+		inventoryService.createStock(authenticatedUser, request);
 
 		verify(locationsRepository).save(any(LocationEntity.class));
 		verify(inventoryRepository).save(any(InventoryEntity.class));
@@ -103,35 +103,35 @@ public class InventoryServiceTest {
 
 	@Test
 	public void createStock_whenLocationsNotExist_throwsLocationsNotCreatedException() {
-		InventoryRequest request = new InventoryRequest(1L,20);
+		InventoryRequest request = new InventoryRequest(1L, 20);
 		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
 
 		assertThrows(LocationsNotCreatedException.class,
-				() ->inventoryService.createStock(authenticatedUser,request)
+				() -> inventoryService.createStock(authenticatedUser, request)
 		);
 		verify(locationsRepository, never()).save(any(LocationEntity.class));
 		verify(inventoryRepository, never()).save(any(InventoryEntity.class));
 
 	}
 
-	private ProductEntity createProductHelper(UserEntity user){
-		return new ProductEntity(user,PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
+	private ProductEntity createProductHelper(UserEntity user) {
+		return new ProductEntity(user, PRODUCT_NAME, PRODUCT_VALUE, PRODUCT_WEIGHT);
 	}
 
 	private LocationEntity createLocationHelper(ProductEntity product) {
-		return new LocationEntity(product, LocationType.BLOCK,20,true);
+		return new LocationEntity(product, LocationType.BLOCK, 20, true);
 	}
 
 	private InventoryEntity createInventoryHelper(ProductEntity product, LocationEntity locationEntity, String location) {
 		return new InventoryEntity(product, locationEntity, 20, location);
 	}
 
-	private AuthenticatedUser createAuthenticatedAdminHelper(){
+	private AuthenticatedUser createAuthenticatedAdminHelper() {
 
 		return new AuthenticatedUser(99L, "Admin@gmail.com", Role.ADMIN);
 	}
 
-	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser){
+	private UserEntity getUserByAuthenticatedUser(AuthenticatedUser authenticatedUser) {
 		return userService.getUserByAuthenticatedUser(authenticatedUser);
 	}
 

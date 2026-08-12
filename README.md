@@ -6,7 +6,7 @@ and role-based access control.
 
 ## Features
 
-1. Product creation, update, and validation
+1. Product creation, update, and deletion(only unused products can be deleted - no inventory, no orders)
 2. Order creation and cancellation
 3. Inventory creation for stock creation and overview
 4. Location management for product storage
@@ -16,8 +16,9 @@ and role-based access control.
 8. Custom domain exceptions (e.g. `DuplicateProductException`, `OrderNotFoundException`)
 9. PostgreSQL database integration using JPA/Hibernate
 10. JWT authentication with role-based authorization (`USER`, `CLERK`, `ADMIN`)
-11. Unit and integration tests
-12. Docker / Docker Compose support
+11. User creation and management
+12. Unit and integration tests
+13. Docker / Docker Compose support
 
 ## Tech Stack
 
@@ -71,10 +72,14 @@ The application uses PostgreSQL with:
 
 ### Main Relationships
 
-- `OrderEntity -> ProductEntity` (`ManyToOne`)
-- `LocationEntity -> ProductEntity` (`ManyToOne`)
+- `ProductEntity -> UserEntity` (`ManyToOne`)
 - `InventoryEntity -> LocationEntity` (`OneToOne`)
 - `InventoryEntity -> ProductEntity` (`ManyToOne`)
+- `InventoryEntity -> UserEntity` (`ManyToOne`)
+- `LocationEntity -> ProductEntity` (`ManyToOne`)
+- `LocationEntity -> UserEntity` (`ManyToOne`)
+- `OrderEntity -> ProductEntity` (`ManyToOne`)
+- `OrderEntity -> UserEntity` (`ManyToOne`)
 
 ## Configuration
 
@@ -104,15 +109,15 @@ DB_PASSWORD=warehouse
 JWT_SECRET=replace-with-a-long-secret
 JWT_EXPIRATION_MS=3600000
 
-- ADMIN_EMAIL=admin@mail.com
-- ADMIN_PASSWORD=change-me-now
+ADMIN_EMAIL=admin@mail.com
+ADMIN_PASSWORD=change-me-now
 ```
 
 **Running locally**
 
 Make sure PostgreSQL is running and that a database named warehouse exists.
 
-Create a .env file based on .env.example, then run:
+Create a .env file based on env.example, load the variables into your environment, then run:
 
 ```
 ./mvnw spring-boot:run

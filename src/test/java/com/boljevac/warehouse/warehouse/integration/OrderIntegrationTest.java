@@ -201,17 +201,6 @@ public class OrderIntegrationTest {
 						.value("You don't own order with id " + orderId));
 	}
 
-//	@Test
-//	public void cancelOrder_whenOrderStatusIsNotOrderPlaced_returns400() throws Exception {
-//		doThrow(new OrderCancelOrDeleteNotPossibleException(1L)).when(orderService).cancelOrder(1L);
-//		mockMvc
-//				.perform(patch("/api/warehouse/orders/1/cancel"))
-//				.andExpect(status().isBadRequest());
-//
-//		verify(orderService).cancelOrder(1L);
-//	}
-//
-
 	//Clerk Authenticator
 
 	private RequestPostProcessor clerkAuth(Long clerkId) {

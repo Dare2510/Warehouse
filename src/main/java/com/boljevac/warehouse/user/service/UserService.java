@@ -14,6 +14,7 @@ import com.boljevac.warehouse.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,7 +32,7 @@ public class UserService {
 	//Customer Methods
 
 	public UserResponse registerUserByCustomer(UserRequest userRequest) {
-		//For differentiation between customer and management request
+		// For differentiation between customer and management request
 		boolean adminCreation = false;
 
 		if (emailExists(userRequest)) {
@@ -39,18 +40,21 @@ public class UserService {
 			throw new UserDoubleCreationException(userRequest.getEmail());
 		}
 
-		String hashedPassword = passwordEncoder.encode(userRequest.getPassword());
+		try {
+			String hashedPassword = passwordEncoder.encode(userRequest.getPassword());
+			UserEntity user = new UserEntity();
+			updateUserEntity(user, userRequest, hashedPassword);
 
-		UserEntity user = new UserEntity();
-		updateUserEntity(user, userRequest, hashedPassword);
+			// Customer cannot choose role
+			user.setRole(Role.USER);
+			saveUser(user);
 
-		//Customer cannot choose role
-		user.setRole(Role.USER);
+			return responseMapper(user, adminCreation);
 
-		saveUser(user);
-
-		return responseMapper(user, adminCreation);
-
+		} catch (DataIntegrityViolationException e) {
+			log.info("User with email {} already exists (Race Condition)", userRequest.getEmail());
+			throw new UserDoubleCreationException(userRequest.getEmail());
+		}
 	}
 
 	public void updateUserByCustomer(AuthenticatedUser authenticatedUser, UserRequest userRequest) {
@@ -93,17 +97,22 @@ public class UserService {
 			throw new UserDoubleCreationException(userRequest.getEmail());
 		}
 
-		String hashedPassword = passwordEncoder.encode(userRequest.getPassword());
+		try {
 
+		String hashedPassword = passwordEncoder.encode(userRequest.getPassword());
 		UserEntity newManagementUser = new UserEntity();
 		updateUserEntity(newManagementUser, userRequest, hashedPassword);
 
 		//Admin can freely choose role
 		newManagementUser.setRole(role);
-
 		saveUser(newManagementUser);
 
 		return responseMapper(newManagementUser, adminCreation);
+
+		} catch (DataIntegrityViolationException e) {
+			log.info("User with email {} already exists (Race Condition)", userRequest.getEmail());
+			throw new UserDoubleCreationException(userRequest.getEmail());
+		}
 	}
 
 	public void updateUserByManagement(Long userId, UserRequest userRequest, Role role) {
@@ -160,7 +169,7 @@ public class UserService {
 	}
 
 	private void saveUser(UserEntity user) {
-		userRepository.save(user);
+		userRepository.saveAndFlush(user);
 		log.info("User with role {} and id {} has been registered successfully", user.getRole(), user.getId());
 	}
 

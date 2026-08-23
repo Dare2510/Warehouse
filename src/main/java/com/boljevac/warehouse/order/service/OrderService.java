@@ -71,7 +71,7 @@ public class OrderService {
 	public OrderResponse createOrder(AuthenticatedUser authenticatedUser, OrderRequest orderRequest) {
 
 		ProductEntity orderedItem = productService.getProductById(orderRequest.getProductId());
-		List<InventoryEntity> inventories = inventoryRepository.getAllByProductEntity(orderedItem);
+		List<InventoryEntity> inventories = inventoryRepository.findAllByProductEntityOrderByIdAsc(orderedItem);
 		UserEntity createdBy = userService.getUserByAuthenticatedUser(authenticatedUser);
 
 		int totalAvailableQuantity = inventories.stream().mapToInt(InventoryEntity::getQuantity).sum();

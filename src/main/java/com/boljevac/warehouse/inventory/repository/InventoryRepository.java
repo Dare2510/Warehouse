@@ -14,7 +14,9 @@ import java.util.List;
 public interface InventoryRepository extends JpaRepository<InventoryEntity, Long> {
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	List<InventoryEntity> getAllByProductEntity(ProductEntity productEntity);
+	List<InventoryEntity> findAllByProductEntityOrderByIdAsc(ProductEntity productEntity);
+
+	List<InventoryEntity> findAllByProductEntity(ProductEntity productEntity);
 
 	boolean existsByProductEntity(ProductEntity productEntity);
 }

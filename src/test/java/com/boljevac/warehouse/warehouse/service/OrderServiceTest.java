@@ -90,7 +90,7 @@ public class OrderServiceTest {
 		InventoryEntity inventory = createInventoryHelper(product, location, location.toString());
 
 		when(productService.getProductById(1L)).thenReturn(product);
-		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventory));
+		when(inventoryRepository.findAllByProductEntityOrderByIdAsc(product)).thenReturn(List.of(inventory));
 
 		assertThrows(OrderExceedsStockException.class,
 				() -> orderService.createOrder(authenticatedUser, new OrderRequest(1L, 30))
@@ -151,7 +151,7 @@ public class OrderServiceTest {
 		inventory.setQuantity(20);
 
 		when(productService.getProductById(1L)).thenReturn(product);
-		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventory));
+		when(inventoryRepository.findAllByProductEntityOrderByIdAsc(product)).thenReturn(List.of(inventory));
 
 		assertThrows(OrderExceedsStockException.class,
 				() -> orderService.createOrder(authenticatedUser, orderRequest));
@@ -177,7 +177,7 @@ public class OrderServiceTest {
 		OrderEntity order = new OrderEntity(product, request.getQuantity());
 
 		when(productService.getProductById(1L)).thenReturn(product);
-		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventory));
+		when(inventoryRepository.findAllByProductEntityOrderByIdAsc(product)).thenReturn(List.of(inventory));
 
 		orderService.createOrder(authenticatedUser, request);
 
@@ -206,7 +206,7 @@ public class OrderServiceTest {
 		OrderEntity order = new OrderEntity(product, request.getQuantity());
 
 		when(productService.getProductById(1L)).thenReturn(product);
-		when(inventoryRepository.getAllByProductEntity(product)).thenReturn(List.of(inventoryA, inventoryB));
+		when(inventoryRepository.findAllByProductEntityOrderByIdAsc(product)).thenReturn(List.of(inventoryA, inventoryB));
 
 		orderService.createOrder(authenticatedUser, request);
 

@@ -44,7 +44,8 @@ public class UserConcurrencyIntegrationTest {
 
 	@AfterEach
 	public void tearDown() {
-		userRepository.deleteAll();
+		userRepository.findByEmail(EMAIL)
+				.ifPresent(user -> userRepository.delete(user));
 	}
 
 	@Test
@@ -87,6 +88,7 @@ public class UserConcurrencyIntegrationTest {
 						.count();
 
 		assertEquals(1, successCount);
+		assertEquals(1, userRepository.countByEmail(EMAIL));
 
 
 	}
@@ -131,6 +133,7 @@ public class UserConcurrencyIntegrationTest {
 						.count();
 
 		assertEquals(1, successCount);
+		assertEquals(1, userRepository.countByEmail(EMAIL));
 
 
 	}

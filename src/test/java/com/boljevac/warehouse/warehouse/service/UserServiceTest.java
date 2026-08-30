@@ -74,7 +74,7 @@ public class UserServiceTest {
 		when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(PASSWORD)).thenReturn(HASHED_PASSWORD);
 
-		when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> {
+		when(userRepository.saveAndFlush(any(UserEntity.class))).thenAnswer(invocation -> {
 			UserEntity user = invocation.getArgument(0);
 			user.setId(USER_ID);
 			return user;
@@ -88,7 +88,7 @@ public class UserServiceTest {
 
 		verify(userRepository).findByEmail(EMAIL);
 		verify(passwordEncoder).encode(PASSWORD);
-		verify(userRepository).save(any(UserEntity.class));
+		verify(userRepository).saveAndFlush(any(UserEntity.class));
 	}
 
 	@Test
@@ -112,17 +112,20 @@ public class UserServiceTest {
 	public void updateUserByCustomer_updateIsValid_updatesUser() {
 		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
 		UserEntity existingUser = new UserEntity();
+		existingUser.setId(USER_ID);
 		UserRequest updatedValues = userRequestUpdatedUser();
 
 		existingUser.setPassword(PASSWORD);
 		when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existingUser));
 		when(passwordEncoder.matches(PASSWORD, existingUser.getPassword())).thenReturn(true);
+		when(userRepository.existsByEmailAndIdNot(UPDATED_EMAIL, USER_ID)).thenReturn(false);
 
 		userService.updateUserByCustomer(authenticatedUser, updatedValues);
 
-		verify(userRepository).save(existingUser);
+		verify(userRepository).saveAndFlush(existingUser);
 		verify(userRepository).findById(USER_ID);
 		verify(passwordEncoder).matches(PASSWORD, existingUser.getPassword());
+		verify(userRepository).existsByEmailAndIdNot(UPDATED_EMAIL, USER_ID);
 
 		assertEquals(UPDATED_NAME, existingUser.getName());
 		assertEquals(UPDATED_USERNAME, existingUser.getUsername());
@@ -159,7 +162,7 @@ public class UserServiceTest {
 		when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(PASSWORD)).thenReturn(PASSWORD);
 
-		when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> {
+		when(userRepository.saveAndFlush(any(UserEntity.class))).thenAnswer(invocation -> {
 			UserEntity user = invocation.getArgument(0);
 			user.setId(USER_ID);
 			return user;
@@ -173,7 +176,7 @@ public class UserServiceTest {
 
 		verify(userRepository).findByEmail(EMAIL);
 		verify(passwordEncoder).encode(PASSWORD);
-		verify(userRepository).save(any(UserEntity.class));
+		verify(userRepository).saveAndFlush(any(UserEntity.class));
 
 	}
 
@@ -183,6 +186,8 @@ public class UserServiceTest {
 		UserRequest updatedValues = userRequestUpdatedUser();
 
 		when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existingUser));
+		when(userRepository.existsByEmailAndIdNot(UPDATED_EMAIL, USER_ID)).thenReturn(false);
+
 		userService.updateUserByManagement(USER_ID, updatedValues, ADMIN_ROLE);
 
 		assertEquals(ADMIN_ROLE, existingUser.getRole());
@@ -192,7 +197,8 @@ public class UserServiceTest {
 		assertEquals(UPDATED_SURNAME, existingUser.getSurname());
 
 		verify(userRepository).findById(USER_ID);
-		verify(userRepository).save(existingUser);
+		verify(userRepository).saveAndFlush(existingUser);
+		verify(userRepository).existsByEmailAndIdNot(UPDATED_EMAIL, USER_ID);
 
 	}
 

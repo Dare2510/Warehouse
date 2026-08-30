@@ -8,6 +8,7 @@ import com.boljevac.warehouse.user.dto.UserResponse;
 import com.boljevac.warehouse.user.entity.Role;
 import com.boljevac.warehouse.user.entity.UserEntity;
 import com.boljevac.warehouse.user.exception.UserDoubleCreationException;
+import com.boljevac.warehouse.user.exception.UserEmailAlreadyInUseException;
 import com.boljevac.warehouse.user.exception.UserIncorrectCredentialsException;
 import com.boljevac.warehouse.user.exception.UserNotFoundException;
 import com.boljevac.warehouse.user.repository.UserRepository;
@@ -60,6 +61,13 @@ public class UserService {
 	public void updateUserByCustomer(AuthenticatedUser authenticatedUser, UserRequest userRequest) {
 		UserEntity toUpdate = getUserByAuthenticatedUser(authenticatedUser);
 
+		boolean emailInUse = userRepository.existsByEmailAndIdNot(userRequest.getEmail(), toUpdate.getId());
+
+		if(emailInUse) {
+			log.info("User with email {} already exists", userRequest.getEmail());
+			throw new UserEmailAlreadyInUseException(userRequest.getEmail());
+		}
+
 		String passwordInput = userRequest.getPassword();
 
 		boolean passwordMatches = passwordEncoder.matches(passwordInput, toUpdate.getPassword());
@@ -70,7 +78,14 @@ public class UserService {
 		}
 		updateUserEntity(toUpdate, userRequest);
 
-		userRepository.save(toUpdate);
+		try{
+			userRepository.saveAndFlush(toUpdate);
+
+		} catch (DataIntegrityViolationException e) {
+			log.info("User with id {} tried to update his email address with already existing mail address (Race Condition)", toUpdate.getId());
+			throw new UserEmailAlreadyInUseException(userRequest.getEmail());
+		}
+
 		log.info("User with email {} updated", userRequest.getEmail());
 	}
 
@@ -117,12 +132,25 @@ public class UserService {
 
 	public void updateUserByManagement(Long userId, UserRequest userRequest, Role role) {
 		UserEntity toUpdate = getUserById(userId);
-
-		updateUserEntity(toUpdate, userRequest);
 		toUpdate.setRole(role);
 
-		userRepository.save(toUpdate);
-		log.info("User with email {} updated", toUpdate.getEmail());
+		boolean emailInUse = userRepository.existsByEmailAndIdNot(userRequest.getEmail(), userId);
+
+		if(emailInUse) {
+			log.info("Email {} is already in use", userRequest.getEmail());
+			throw new UserEmailAlreadyInUseException(userRequest.getEmail());
+		}
+
+		updateUserEntity(toUpdate, userRequest);
+		try {
+			userRepository.saveAndFlush(toUpdate);
+		}  catch (DataIntegrityViolationException e) {
+
+			log.info("User with id {} tried to update his email address with already existing mail address (Race Condition)", toUpdate.getId());
+			throw new UserEmailAlreadyInUseException(userRequest.getEmail());
+		}
+
+		log.info("User with email {} updated", userRequest.getEmail());
 	}
 
 	//Helper Methods

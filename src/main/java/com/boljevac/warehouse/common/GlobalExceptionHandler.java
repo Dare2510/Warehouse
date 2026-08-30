@@ -12,6 +12,7 @@ import com.boljevac.warehouse.product.exception.EmptyProductRepositoryException;
 import com.boljevac.warehouse.product.exception.ProductDuplicateCreationException;
 import com.boljevac.warehouse.product.exception.ProductNotFoundException;
 import com.boljevac.warehouse.user.exception.UserDoubleCreationException;
+import com.boljevac.warehouse.user.exception.UserEmailAlreadyInUseException;
 import com.boljevac.warehouse.user.exception.UserIncorrectCredentialsException;
 import com.boljevac.warehouse.user.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -188,6 +189,12 @@ public class GlobalExceptionHandler {
 	                                                                       HttpServletRequest request) {
 
 		return errorResponseBuilder(ex, request, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(UserEmailAlreadyInUseException.class)
+	public ResponseEntity<ErrorResponse> handleUserEmailAlreadyInUserException(UserEmailAlreadyInUseException ex,
+	                                                                           HttpServletRequest request) {
+		return errorResponseBuilder(ex, request, HttpStatus.CONFLICT);
 	}
 
 	//Helper Method

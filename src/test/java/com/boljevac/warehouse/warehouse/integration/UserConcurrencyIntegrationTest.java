@@ -1,8 +1,11 @@
 package com.boljevac.warehouse.warehouse.integration;
 
+import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.dto.UserRequest;
+import com.boljevac.warehouse.user.dto.UserResponse;
 import com.boljevac.warehouse.user.entity.Role;
 import com.boljevac.warehouse.user.exception.UserDoubleCreationException;
+import com.boljevac.warehouse.user.exception.UserEmailAlreadyInUseException;
 import com.boljevac.warehouse.user.repository.UserRepository;
 import com.boljevac.warehouse.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +33,8 @@ public class UserConcurrencyIntegrationTest {
 	private static final String USERNAME = "tester";
 	private static final String NAME = "testName";
 	private static final String SURNAME = "testSurname";
+
+	private static final String UPDATED_EMAIL = "updatedTestUser@mail.com";
 
 	@Container
 	@ServiceConnection
@@ -138,6 +143,72 @@ public class UserConcurrencyIntegrationTest {
 
 	}
 
+	@Test
+	public void concurrentUserCreationAndUpdate_whenEmailIsUsed_throwsUserEmailAlreadyInUseExceptionORUserDoubleCreationException() throws Exception {
+		UserRequest requestForRegisterThread = new UserRequest(UPDATED_EMAIL,PASSWORD,USERNAME,NAME,SURNAME);
+
+		UserRequest requestForUpdateThreadCreateUser = new UserRequest(EMAIL,PASSWORD,USERNAME,NAME,SURNAME);
+		UserRequest requestForUpdateThreadToUpdateUser = new UserRequest(UPDATED_EMAIL,PASSWORD,USERNAME,NAME,SURNAME);
+
+		UserResponse registerResponseForUpdate = userService.registerUserByCustomer(requestForUpdateThreadCreateUser);
+
+
+		ExecutorService executors = Executors.newFixedThreadPool(2);
+
+		CountDownLatch ready = new CountDownLatch(2);
+
+		CountDownLatch start =  new CountDownLatch(1);
+
+		Callable<Boolean> updateTask = () -> {
+			try {
+				ready.countDown();
+
+				start.await();
+
+				userService.updateUserByCustomer(authenticatedUser(registerResponseForUpdate.getUserId()), requestForUpdateThreadToUpdateUser);
+
+				return true;
+			} catch (UserEmailAlreadyInUseException e) {
+				return false;
+			}
+		};
+
+		Callable<Boolean> registerTask = () -> {
+			try {
+				ready.countDown();
+
+				start.await();
+
+				userService.registerUserByCustomer(requestForRegisterThread);
+
+				return true;
+			} catch (UserDoubleCreationException e) {
+				return false;
+			}
+		};
+
+		Future<Boolean> userRegistered = executors.submit(registerTask);
+		Future<Boolean> userUpdated = executors.submit(updateTask);
+
+		ready.await();
+
+		start.countDown();
+
+		boolean registerSuccess = userRegistered.get();
+		boolean updateSuccess = userUpdated.get();
+
+		executors.shutdown();
+
+		long successSum =
+				Stream.of(registerSuccess, updateSuccess)
+						.filter(Boolean::booleanValue)
+						.count();
+
+		assertEquals(1, successSum);
+		assertEquals(1,userRepository.countByEmail(UPDATED_EMAIL));
+
+	}
+
 	private void createUserByUser() {
 		UserRequest userRequest = new UserRequest(EMAIL, PASSWORD, USERNAME, NAME, SURNAME);
 		userService.registerUserByCustomer(userRequest);
@@ -146,6 +217,10 @@ public class UserConcurrencyIntegrationTest {
 	private void createUserByManagement() {
 		UserRequest userRequest = new UserRequest(EMAIL, PASSWORD, USERNAME, NAME, SURNAME);
 		userService.registerManagement(userRequest, Role.USER);
+	}
+
+	private AuthenticatedUser authenticatedUser(Long userId) {
+		return new AuthenticatedUser(userId,EMAIL,Role.USER);
 	}
 
 

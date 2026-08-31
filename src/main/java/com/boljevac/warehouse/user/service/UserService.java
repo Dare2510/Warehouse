@@ -1,7 +1,5 @@
 package com.boljevac.warehouse.user.service;
 
-
-import com.boljevac.warehouse.order.repository.OrderRepository;
 import com.boljevac.warehouse.security.principal.AuthenticatedUser;
 import com.boljevac.warehouse.user.dto.UserRequest;
 import com.boljevac.warehouse.user.dto.UserResponse;
@@ -12,6 +10,7 @@ import com.boljevac.warehouse.user.exception.UserEmailAlreadyInUseException;
 import com.boljevac.warehouse.user.exception.UserIncorrectCredentialsException;
 import com.boljevac.warehouse.user.exception.UserNotFoundException;
 import com.boljevac.warehouse.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserService {
 	private final UserRepository userRepository;
-	private final OrderRepository orderRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final ModelMapper modelMapper;
 
@@ -58,12 +56,13 @@ public class UserService {
 		}
 	}
 
+	@Transactional
 	public void updateUserByCustomer(AuthenticatedUser authenticatedUser, UserRequest userRequest) {
 		UserEntity toUpdate = getUserByAuthenticatedUser(authenticatedUser);
 
 		boolean emailInUse = userRepository.existsByEmailAndIdNot(userRequest.getEmail(), toUpdate.getId());
 
-		if(emailInUse) {
+		if (emailInUse) {
 			log.info("User with email {} already exists", userRequest.getEmail());
 			throw new UserEmailAlreadyInUseException(userRequest.getEmail());
 		}
@@ -78,7 +77,7 @@ public class UserService {
 		}
 		updateUserEntity(toUpdate, userRequest);
 
-		try{
+		try {
 			userRepository.saveAndFlush(toUpdate);
 
 		} catch (DataIntegrityViolationException e) {
@@ -114,29 +113,29 @@ public class UserService {
 
 		try {
 
-		String hashedPassword = passwordEncoder.encode(userRequest.getPassword());
-		UserEntity newManagementUser = new UserEntity();
-		updateUserEntity(newManagementUser, userRequest, hashedPassword);
+			String hashedPassword = passwordEncoder.encode(userRequest.getPassword());
+			UserEntity newManagementUser = new UserEntity();
+			updateUserEntity(newManagementUser, userRequest, hashedPassword);
 
-		//Admin can freely choose role
-		newManagementUser.setRole(role);
-		saveUser(newManagementUser);
+			//Admin can freely choose role
+			newManagementUser.setRole(role);
+			saveUser(newManagementUser);
 
-		return responseMapper(newManagementUser, adminCreation);
+			return responseMapper(newManagementUser, adminCreation);
 
 		} catch (DataIntegrityViolationException e) {
 			log.info("User with email {} already exists (Race Condition)", userRequest.getEmail());
 			throw new UserDoubleCreationException(userRequest.getEmail());
 		}
 	}
-
+	@Transactional
 	public void updateUserByManagement(Long userId, UserRequest userRequest, Role role) {
 		UserEntity toUpdate = getUserById(userId);
 		toUpdate.setRole(role);
 
 		boolean emailInUse = userRepository.existsByEmailAndIdNot(userRequest.getEmail(), userId);
 
-		if(emailInUse) {
+		if (emailInUse) {
 			log.info("Email {} is already in use", userRequest.getEmail());
 			throw new UserEmailAlreadyInUseException(userRequest.getEmail());
 		}
@@ -144,7 +143,7 @@ public class UserService {
 		updateUserEntity(toUpdate, userRequest);
 		try {
 			userRepository.saveAndFlush(toUpdate);
-		}  catch (DataIntegrityViolationException e) {
+		} catch (DataIntegrityViolationException e) {
 
 			log.info("User with id {} tried to update his email address with already existing mail address (Race Condition)", toUpdate.getId());
 			throw new UserEmailAlreadyInUseException(userRequest.getEmail());

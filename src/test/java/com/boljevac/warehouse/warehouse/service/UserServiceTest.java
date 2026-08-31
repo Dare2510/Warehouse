@@ -7,6 +7,7 @@ import com.boljevac.warehouse.user.dto.UserResponse;
 import com.boljevac.warehouse.user.entity.Role;
 import com.boljevac.warehouse.user.entity.UserEntity;
 import com.boljevac.warehouse.user.exception.UserDoubleCreationException;
+import com.boljevac.warehouse.user.exception.UserEmailAlreadyInUseException;
 import com.boljevac.warehouse.user.exception.UserIncorrectCredentialsException;
 import com.boljevac.warehouse.user.exception.UserNotFoundException;
 import com.boljevac.warehouse.user.repository.UserRepository;
@@ -23,7 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,9 +34,6 @@ public class UserServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
-
-	@Mock
-	private OrderRepository orderRepository;
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
@@ -62,7 +60,7 @@ public class UserServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-		userService = new UserService(userRepository, orderRepository, passwordEncoder, modelMapper);
+		userService = new UserService(userRepository, passwordEncoder, modelMapper);
 	}
 
 	//Customer Methods Tests
@@ -131,6 +129,32 @@ public class UserServiceTest {
 		assertEquals(UPDATED_USERNAME, existingUser.getUsername());
 		assertEquals(UPDATED_EMAIL, existingUser.getEmail());
 		assertEquals(UPDATED_SURNAME, existingUser.getSurname());
+
+	}
+
+	@Test
+	public void updateUserByCustomer_whenUpdateEmailIsUsed_throwsUserEmailAlreadyUsedException() {
+		AuthenticatedUser authenticatedUser = createAuthenticatedAdminHelper();
+		UserEntity existingUser = new UserEntity();
+		existingUser.setId(USER_ID);
+		UserRequest updatedValues = userRequestUpdatedUser();
+
+		when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existingUser));
+		when(userRepository.existsByEmailAndIdNot(UPDATED_EMAIL, USER_ID)).thenReturn(true);
+
+		assertThatThrownBy(() -> userService.updateUserByCustomer(authenticatedUser, updatedValues))
+				.isInstanceOf(UserEmailAlreadyInUseException.class)
+				.hasMessage("Email already in use: " + UPDATED_EMAIL);
+
+		verify(userRepository,never()).saveAndFlush(existingUser);
+		verify(userRepository).findById(USER_ID);
+		verify(passwordEncoder, never()).matches(PASSWORD, existingUser.getPassword());
+		verify(userRepository, times(1)).existsByEmailAndIdNot(UPDATED_EMAIL, USER_ID);
+
+		assertNotEquals(UPDATED_NAME, existingUser.getName());
+		assertNotEquals(UPDATED_USERNAME, existingUser.getUsername());
+		assertNotEquals(UPDATED_EMAIL, existingUser.getEmail());
+		assertNotEquals(UPDATED_SURNAME, existingUser.getSurname());
 
 	}
 

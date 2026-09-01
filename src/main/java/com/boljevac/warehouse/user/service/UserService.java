@@ -60,13 +60,6 @@ public class UserService {
 	public void updateUserByCustomer(AuthenticatedUser authenticatedUser, UserRequest userRequest) {
 		UserEntity toUpdate = getUserByAuthenticatedUser(authenticatedUser);
 
-		boolean emailInUse = userRepository.existsByEmailAndIdNot(userRequest.getEmail(), toUpdate.getId());
-
-		if (emailInUse) {
-			log.info("User with email {} already exists", userRequest.getEmail());
-			throw new UserEmailAlreadyInUseException(userRequest.getEmail());
-		}
-
 		String passwordInput = userRequest.getPassword();
 
 		boolean passwordMatches = passwordEncoder.matches(passwordInput, toUpdate.getPassword());
@@ -74,6 +67,13 @@ public class UserService {
 		if (!passwordMatches) {
 			log.info("Wrong password input for user with id {}", toUpdate.getId());
 			throw new UserIncorrectCredentialsException();
+		}
+
+		boolean emailInUse = userRepository.existsByEmailAndIdNot(userRequest.getEmail(), toUpdate.getId());
+
+		if (emailInUse) {
+			log.info("User with email {} already exists", userRequest.getEmail());
+			throw new UserEmailAlreadyInUseException(userRequest.getEmail());
 		}
 		updateUserEntity(toUpdate, userRequest);
 

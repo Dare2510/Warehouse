@@ -139,6 +139,7 @@ public class UserServiceTest {
 		existingUser.setId(USER_ID);
 		UserRequest updatedValues = userRequestUpdatedUser();
 
+		when(passwordEncoder.matches(PASSWORD, existingUser.getPassword())).thenReturn(true);
 		when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existingUser));
 		when(userRepository.existsByEmailAndIdNot(UPDATED_EMAIL, USER_ID)).thenReturn(true);
 
@@ -148,7 +149,7 @@ public class UserServiceTest {
 
 		verify(userRepository,never()).saveAndFlush(existingUser);
 		verify(userRepository).findById(USER_ID);
-		verify(passwordEncoder, never()).matches(PASSWORD, existingUser.getPassword());
+		verify(passwordEncoder, times(1)).matches(PASSWORD, existingUser.getPassword());
 		verify(userRepository, times(1)).existsByEmailAndIdNot(UPDATED_EMAIL, USER_ID);
 
 		assertNotEquals(UPDATED_NAME, existingUser.getName());

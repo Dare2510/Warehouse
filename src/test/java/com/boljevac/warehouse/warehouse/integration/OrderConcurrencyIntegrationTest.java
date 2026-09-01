@@ -142,36 +142,42 @@ public class OrderConcurrencyIntegrationTest {
 			}
 		};
 
-		Future<Boolean> a = executor.submit(task);
-		Future<Boolean> b = executor.submit(task);
+		try {
 
-		ready.await();
+			Future<Boolean> a = executor.submit(task);
+			Future<Boolean> b = executor.submit(task);
 
-		start.countDown();
+			ready.await();
 
-		boolean aSucceeded = a.get();
-		boolean bSucceeded = b.get();
+			start.countDown();
 
-		executor.shutdown();
+			boolean aSucceeded = a.get();
+			boolean bSucceeded = b.get();
 
-		//Sum of successful orders
-		long successCount =
-				Stream.of(aSucceeded, bSucceeded)
-						.filter(Boolean::booleanValue)
-						.count();
+			//Sum of successful orders
+			long successCount =
+					Stream.of(aSucceeded, bSucceeded)
+							.filter(Boolean::booleanValue)
+							.count();
 
-		assertEquals(1, successCount);
+			assertEquals(1, successCount);
 
-		int remaining =
-				inventoryRepository
-						.findAllByProductEntity(product)
-						.stream()
-						.mapToInt(InventoryEntity::getQuantity)
-						.sum();
+			int remaining =
+					inventoryRepository
+							.findAllByProductEntity(product)
+							.stream()
+							.mapToInt(InventoryEntity::getQuantity)
+							.sum();
 
-		assertEquals(1, remaining);
+			assertEquals(1, remaining);
 
-		assertEquals(1, orderRepository.count());
+			assertEquals(1, orderRepository.count());
+		} finally {
+
+			executor.shutdown();
+		}
+
+
 	}
 
 	@Test
@@ -214,41 +220,48 @@ public class OrderConcurrencyIntegrationTest {
 			}
 		};
 
-		Future<Boolean> a = executor.submit(task);
-		Future<Boolean> b = executor.submit(task);
-		Future<Boolean> c = executor.submit(task);
-		Future<Boolean> d = executor.submit(task);
-		Future<Boolean> e = executor.submit(task);
+		try {
 
-		ready.await();
-		start.countDown();
+			Future<Boolean> a = executor.submit(task);
+			Future<Boolean> b = executor.submit(task);
+			Future<Boolean> c = executor.submit(task);
+			Future<Boolean> d = executor.submit(task);
+			Future<Boolean> e = executor.submit(task);
 
-		boolean aSucceeded = a.get();
-		boolean bSucceeded = b.get();
-		boolean cSucceeded = c.get();
-		boolean dSucceeded = d.get();
-		boolean eSucceeded = e.get();
+			ready.await();
+			start.countDown();
 
-		executor.shutdown();
+			boolean aSucceeded = a.get();
+			boolean bSucceeded = b.get();
+			boolean cSucceeded = c.get();
+			boolean dSucceeded = d.get();
+			boolean eSucceeded = e.get();
 
-		//Sum of successful orders
-		long successCount =
-				Stream.of(aSucceeded, bSucceeded, cSucceeded, dSucceeded, eSucceeded)
-						.filter(Boolean::booleanValue)
-						.count();
+			//Sum of successful orders
+			long successCount =
+					Stream.of(aSucceeded, bSucceeded, cSucceeded, dSucceeded, eSucceeded)
+							.filter(Boolean::booleanValue)
+							.count();
 
-		assertEquals(5, successCount);
+			assertEquals(5, successCount);
 
-		int remaining =
-				inventoryRepository
-						.findAllByProductEntity(product)
-						.stream()
-						.mapToInt(InventoryEntity::getQuantity)
-						.sum();
+			int remaining =
+					inventoryRepository
+							.findAllByProductEntity(product)
+							.stream()
+							.mapToInt(InventoryEntity::getQuantity)
+							.sum();
 
-		assertEquals(0, remaining);
+			assertEquals(0, remaining);
 
-		assertEquals(5, orderRepository.count());
+			assertEquals(5, orderRepository.count());
+
+		} finally {
+
+			executor.shutdown();
+		}
+
+
 
 	}
 

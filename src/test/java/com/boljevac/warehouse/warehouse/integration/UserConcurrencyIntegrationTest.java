@@ -51,6 +51,9 @@ public class UserConcurrencyIntegrationTest {
 	public void tearDown() {
 		userRepository.findByEmail(EMAIL)
 				.ifPresent(user -> userRepository.delete(user));
+
+		userRepository.findByEmail(UPDATED_EMAIL)
+				.ifPresent(user -> userRepository.delete(user));
 	}
 
 	@Test
@@ -75,27 +78,29 @@ public class UserConcurrencyIntegrationTest {
 			}
 		};
 
-		Future<Boolean> a = executor.submit(task);
-		Future<Boolean> b = executor.submit(task);
+		try {
 
-		ready.await();
+			Future<Boolean> a = executor.submit(task);
+			Future<Boolean> b = executor.submit(task);
 
-		start.countDown();
+			ready.await();
 
-		boolean aSucceeded = a.get();
-		boolean bSucceeded = b.get();
+			start.countDown();
 
-		executor.shutdown();
+			boolean aSucceeded = a.get();
+			boolean bSucceeded = b.get();
 
-		long successCount =
-				Stream.of(aSucceeded, bSucceeded)
-						.filter(Boolean::booleanValue)
-						.count();
+			long successCount =
+					Stream.of(aSucceeded, bSucceeded)
+							.filter(Boolean::booleanValue)
+							.count();
 
-		assertEquals(1, successCount);
-		assertEquals(1, userRepository.countByEmail(EMAIL));
+			assertEquals(1, successCount);
+			assertEquals(1, userRepository.countByEmail(EMAIL));
+		} finally {
 
-
+			executor.shutdown();
+		}
 	}
 
 	@Test
@@ -120,25 +125,31 @@ public class UserConcurrencyIntegrationTest {
 			}
 		};
 
-		Future<Boolean> a = executor.submit(task);
-		Future<Boolean> b = executor.submit(task);
+		try {
 
-		ready.await();
+			Future<Boolean> a = executor.submit(task);
+			Future<Boolean> b = executor.submit(task);
 
-		start.countDown();
+			ready.await();
 
-		boolean aSucceeded = a.get();
-		boolean bSucceeded = b.get();
+			start.countDown();
 
-		executor.shutdown();
+			boolean aSucceeded = a.get();
+			boolean bSucceeded = b.get();
 
-		long successCount =
-				Stream.of(aSucceeded, bSucceeded)
-						.filter(Boolean::booleanValue)
-						.count();
+			long successCount =
+					Stream.of(aSucceeded, bSucceeded)
+							.filter(Boolean::booleanValue)
+							.count();
 
-		assertEquals(1, successCount);
-		assertEquals(1, userRepository.countByEmail(EMAIL));
+			assertEquals(1, successCount);
+			assertEquals(1, userRepository.countByEmail(EMAIL));
+		} finally {
+
+			executor.shutdown();
+		}
+
+
 
 
 	}
@@ -160,6 +171,7 @@ public class UserConcurrencyIntegrationTest {
 		CountDownLatch start =  new CountDownLatch(1);
 
 		Callable<Boolean> updateTask = () -> {
+
 			try {
 				ready.countDown();
 
@@ -174,6 +186,7 @@ public class UserConcurrencyIntegrationTest {
 		};
 
 		Callable<Boolean> registerTask = () -> {
+
 			try {
 				ready.countDown();
 
@@ -187,26 +200,30 @@ public class UserConcurrencyIntegrationTest {
 			}
 		};
 
-		Future<Boolean> userRegistered = executors.submit(registerTask);
-		Future<Boolean> userUpdated = executors.submit(updateTask);
+		try {
 
-		ready.await();
+			Future<Boolean> userRegistered = executors.submit(registerTask);
+			Future<Boolean> userUpdated = executors.submit(updateTask);
 
-		start.countDown();
+			ready.await();
 
-		boolean registerSuccess = userRegistered.get();
-		boolean updateSuccess = userUpdated.get();
+			start.countDown();
 
-		executors.shutdown();
+			boolean registerSuccess = userRegistered.get();
+			boolean updateSuccess = userUpdated.get();
 
-		long successSum =
-				Stream.of(registerSuccess, updateSuccess)
-						.filter(Boolean::booleanValue)
-						.count();
+			long successSum =
+					Stream.of(registerSuccess, updateSuccess)
+							.filter(Boolean::booleanValue)
+							.count();
 
-		assertEquals(1, successSum);
-		assertEquals(1,userRepository.countByEmail(UPDATED_EMAIL));
+			assertEquals(1, successSum);
+			assertEquals(1,userRepository.countByEmail(UPDATED_EMAIL));
 
+		} finally {
+
+			executors.shutdown();
+		}
 	}
 
 	private void createUserByUser() {

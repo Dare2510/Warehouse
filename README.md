@@ -149,10 +149,12 @@ The application connects to PostgreSQL internally via:
 
 The project includes:
 
-* controller tests using MockMvc
-* service layer tests
-* security flow tests
-* validation tests
+- Unit tests with JUnit and Mockito
+- Integration tests with MockMvc
+- PostgreSQL integration tests using Testcontainers
+- Concurrency tests for pessimistic locking and race conditions
+
+  _Concurrent order creation is tested against PostgreSQL to verify that inventory cannot be oversold._
 
 **Run tests with:**
 

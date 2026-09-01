@@ -87,6 +87,7 @@ The application uses the following environment variables:
 
 ```
 - DB_HOST
+- DB_PORT
 - DB_NAME
 - DB_USERNAME
 - DB_PASSWORD
@@ -101,7 +102,8 @@ The application uses the following environment variables:
 ### Example `.env`
 
 ```env
-DB_HOST=postgres
+DB_HOST=localhost
+DB_PORT=54433
 DB_NAME=warehouse
 DB_USERNAME=warehouse
 DB_PASSWORD=warehouse
@@ -112,6 +114,9 @@ JWT_EXPIRATION_MS=3600000
 ADMIN_EMAIL=admin@mail.com
 ADMIN_PASSWORD=change-me-now
 ```
+
+When running the full application with Docker Compose, `DB_HOST` and `DB_PORT` are overridden
+for the application container to use `postgres:5432`.
 
 **Running locally**
 

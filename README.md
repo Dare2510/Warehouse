@@ -120,7 +120,7 @@ for the application container to use `postgres:5432`.
 
 **Running locally**
 
-Make sure PostgreSQL is running and that a database named warehouse exists.
+Make sure PostgreSQL is running and a database named warehouse exists.
 
 Create a .env file based on env.example, load the variables into your environment, then run:
 
